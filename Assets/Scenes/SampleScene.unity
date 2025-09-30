@@ -262,12 +262,12 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 330585543}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.29883623, y: 0.64085644, z: -0.29883623, w: 0.64085644}
-  m_LocalPosition: {x: -3, y: 6, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalRotation: {x: 0.66446304, y: -0.66446304, z: -0.2418448, w: 0.2418448}
+  m_LocalPosition: {x: 0.026032703, y: -0.0407, z: 0.043500002}
+  m_LocalScale: {x: 0.009999998, y: 0.009999998, z: 0.009999999}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 1117251243}
+  m_Father: {fileID: 1206814597}
   m_LocalEulerAnglesHint: {x: 50, y: 90, z: 0}
 --- !u!114 &330585547
 MonoBehaviour:
@@ -597,9 +597,9 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: c6b3ed008a9efed43ba30085929b334b, type: 3}
---- !u!4 &1117251243 stripped
+--- !u!4 &1206814597 stripped
 Transform:
-  m_CorrespondingSourceObject: {fileID: 602917584094054043, guid: d914c500708f0e945bf76b9875fd0711, type: 3}
+  m_CorrespondingSourceObject: {fileID: 5901731772657868563, guid: d914c500708f0e945bf76b9875fd0711, type: 3}
   m_PrefabInstance: {fileID: 1815813553}
   m_PrefabAsset: {fileID: 0}
 --- !u!1001 &1784389737
@@ -673,11 +673,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 602917584094054043, guid: d914c500708f0e945bf76b9875fd0711, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 4.99
+      value: 0.495
       objectReference: {fileID: 0}
     - target: {fileID: 602917584094054043, guid: d914c500708f0e945bf76b9875fd0711, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 0.023989677
+      value: 3.971
       objectReference: {fileID: 0}
     - target: {fileID: 602917584094054043, guid: d914c500708f0e945bf76b9875fd0711, type: 3}
       propertyPath: m_LocalRotation.w
@@ -722,7 +722,7 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects:
-    - targetCorrespondingSourceObject: {fileID: 602917584094054043, guid: d914c500708f0e945bf76b9875fd0711, type: 3}
+    - targetCorrespondingSourceObject: {fileID: 5901731772657868563, guid: d914c500708f0e945bf76b9875fd0711, type: 3}
       insertIndex: -1
       addedObject: {fileID: 330585546}
     m_AddedComponents: []

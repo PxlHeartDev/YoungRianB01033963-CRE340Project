@@ -2,7 +2,9 @@ using UnityEngine;
 
 public class Car : MonoBehaviour
 {
-    public Rigidbody rb;
+    [SerializeField] private Rigidbody rb;
+    [SerializeField] private Wheel[] wheels;
+
     public float gasStrength = 1.0f;
 
 
@@ -20,13 +22,10 @@ void Start()
 
     void Gas()
     {
-        if (!IsGrounded())
+        foreach (Wheel wheel in wheels)
         {
-            return;
+            wheel.ApplyGas();
         }
-        Vector3 acceleration;
-        acceleration = transform.right * gasStrength;
-        rb.AddForce(acceleration);
     }
 
     void Brake()
