@@ -2,45 +2,61 @@ using UnityEngine;
 
 public class Car : MonoBehaviour
 {
-    [SerializeField] private Rigidbody rb;
-    [SerializeField] private Wheel[] wheels;
+    [SerializeField] protected Rigidbody rb;
+    [SerializeField] protected Wheel[] wheels;
 
     public float gasStrength = 1.0f;
 
+    private float steerDegrees = 90.0f;
+
 
 // Start is called once before the first execution of Update after the MonoBehaviour is created
-void Start()
+    void Start()
     {
         
     }
 
     // Update is called once per frame
-    void Update()
+    void FixedUpdate()
     {
-        Gas();
+
     }
 
-    void Gas()
+    protected void Gas()
     {
         foreach (Wheel wheel in wheels)
         {
-            wheel.ApplyGas();
+            wheel.ApplyGas(gasStrength);
         }
     }
 
-    void Brake()
+    protected void Brake()
     {
 
     }
 
-    void SteerLeft()
+    protected void SteerLeft()
     {
-
+        foreach (Wheel wheel in wheels)
+        {
+            wheel.Steer(-steerDegrees);
+        }
     }
 
-    void SteerRight()
+    protected void SteerRight()
     {
+        foreach (Wheel wheel in wheels)
+        {
+            wheel.Steer(steerDegrees);
+        }
+    }
 
+    protected void SteerNone()
+    {
+        foreach (Wheel wheel in wheels)
+        {
+            wheel.Steer(0.0f);
+        }
     }
 
     private bool IsGrounded()

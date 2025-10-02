@@ -1,39 +1,85 @@
+using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 public class Wheel : MonoBehaviour
 {
-    [SerializeField] private Rigidbody rb;
+    // Expose the car rigid
     [SerializeField] private Rigidbody rbBody;
-    public float gasStrength = 1.0f;
+    [SerializeField] private GameObject mesh;
 
+    public bool left = false;
+    public bool front = false;
 
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
+    // Temp, for colour debug
+    private Material meshMaterial;
+
     void Start()
     {
-        
+        meshMaterial = mesh.GetComponent<MeshRenderer>().material;
     }
 
-    // Update is called once per frame
     void Update()
     {
 
     }
 
-    private bool IsGrounded()
+
+    private void FixedUpdate()
     {
-        return Physics.Raycast(transform.position, -transform.forward, 0.5f);
+        Vector3 suspensionForce = transform.up * CalculateSuspension();
+        Vector3 antiSlipForce = transform.right * CalculateAntiSlip();
+
+        ApplyWheelForce(suspensionForce);
+        ApplyWheelForce(antiSlipForce);
     }
 
-    public void ApplyGas()
+    public void ApplyGas(float gasStrength)
     {
         if (!IsGrounded())
         {
+            meshMaterial.color = new Color(1, 0, 0);
             return;
         }
-        Debug.Log("Driving");
-        Vector3 acceleration;
-        acceleration = -rbBody.transform.right * gasStrength;
-        rbBody.AddForceAtPosition(acceleration, transform.position);
+
+        //mesh.transform.Rotate(new Vector3(0, Vector3.Dot(rbBody.linearVelocity, transform.right), 0));
+        meshMaterial.color = new Color(0, 1, 0);
+
+        ApplyWheelForce(CalculateAcceleration(gasStrength));
+    }
+    
+    // <0.0 is left, >0.0 is right
+    public void Steer(float amount)
+    {
+        if(front)
+        {
+            transform.localEulerAngles = new Vector3(transform.rotation.x, amount, transform.rotation.z);
+        }
+    }
+
+    private bool IsGrounded()
+    {
+        return Physics.Raycast(transform.position + transform.up * 0.1f, -rbBody.transform.up, 0.2f);
+    }
+
+    private void ApplyWheelForce(Vector3 force)
+    {
+        rbBody.AddForceAtPosition(force, transform.position + transform.up);
+    }
+
+    private float SideMult()
+    {
+        return left ? 1.0f : -1.0f;
+    }
+
+    private Vector3 CalculateAcceleration(float gasStrength)
+    {
+        Vector3 acceleration = transform.right * gasStrength;
+        if(!front)
+        {
+            acceleration *= 0.5f;
+        }
+        return acceleration;
     }
 
     private float CalculateSuspension()
