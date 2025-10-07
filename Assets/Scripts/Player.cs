@@ -8,6 +8,7 @@ public class Player : Car
     private InputAction m_leftAction;
     private InputAction m_rightAction;
     private InputAction m_gasAction;
+    private InputAction m_reverseAction;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
@@ -15,6 +16,7 @@ public class Player : Car
         m_leftAction = InputSystem.actions.FindAction("Left");
         m_rightAction = InputSystem.actions.FindAction("Right");
         m_gasAction = InputSystem.actions.FindAction("Gas");
+        m_reverseAction = InputSystem.actions.FindAction("Brake");
 
         actions.FindActionMap("Player").Enable();
     }
@@ -38,6 +40,11 @@ public class Player : Car
         if (m_gasAction.IsPressed())
         {
             Gas();
+        }
+
+        if (m_reverseAction.IsPressed())
+        {
+            Reverse();
         }
     }
 }

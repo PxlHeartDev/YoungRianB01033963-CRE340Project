@@ -10,7 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1329127443481081521}
   - component: {fileID: 1126555434363626703}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Wheel
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -47,6 +47,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   rbBody: {fileID: 0}
   mesh: {fileID: 6809076950625519129}
+  suspensionStrength: 150
+  suspensionDampening: 15
+  suspensionRestOffset: 0.35
   left: 0
   front: 0
 --- !u!1001 &5962724919737891656
@@ -101,6 +104,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Wheel
       objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: ca635f5e871ee1c4ea8b6519c41f35df, type: 3}
+      propertyPath: m_Layer
+      value: 6
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -136,7 +143,7 @@ MeshCollider:
   m_LayerOverridePriority: 0
   m_IsTrigger: 0
   m_ProvidesContacts: 0
-  m_Enabled: 1
+  m_Enabled: 0
   serializedVersion: 5
   m_Convex: 1
   m_CookingOptions: 30
