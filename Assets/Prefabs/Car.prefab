@@ -47,9 +47,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   rb: {fileID: 1126575552982460038}
-  gasStrength: 50
   wheelPrefab: {fileID: 348517383835530497, guid: cfc5da07ff5b3af4d93f8e18b1622f75, type: 3}
-  wheelDistance: {x: 1.9, y: 0.4}
+  wheelDistance: {x: 1.85, y: 0.95}
+  gasStrength: 40
 --- !u!54 &1126575552982460038
 Rigidbody:
   m_ObjectHideFlags: 0
