@@ -3,27 +3,38 @@ using UnityEngine;
 
 public class Car : MonoBehaviour
 {
+    // Editor things
     [SerializeField] protected Rigidbody rb;
     [SerializeField] private GameObject wheelPrefab;
     [SerializeField] private Vector2 wheelDistance = new Vector2(2, 2);
 
+    // Enables debug gizmos
     public bool debug = false;
 
-    Wheel[] wheels = new Wheel[4];
+    // Stores references to the wheels
+    private Wheel[] wheels = new Wheel[4];
 
+    // Forward acceleration strength
     public float gasStrength = 40.0f;
+
+    // Coefficient for how strong reversing is relative to gasStrength
+    public float reversePercentage = 0.75f;
+
+    // Controls the wheel spin
     private float rpm = 0.0f;
 
     void Awake()
     {
+        // Generate the wheels
         for (int i = 0; i < 4; i++)
         {
+            // Create the objects and assign some values
             wheels[i] = new Wheel();
             wheels[i].rbCar = rb;
             wheels[i].wheelTransform = new GameObject();
-            wheels[i].wheelTransform.transform.position = transform.position;
             wheels[i].debug = debug;
 
+            // Set the initial transforms
             switch (i) {
                 case (0):
                     wheels[0].wheelTransform.transform.position = transform.position + transform.right * wheelDistance.x + transform.forward * wheelDistance.y;//front right
@@ -38,60 +49,75 @@ public class Car : MonoBehaviour
                     wheels[3].wheelTransform.transform.position = transform.position + transform.right * -wheelDistance.x + transform.forward * -wheelDistance.y;//back left
                     break;
             }
-            wheels[i].restPosition = wheels[i].wheelTransform.transform.position;
 
+            // Set front wheels
             if (i == 0 || i == 2) wheels[i].front = true;
+
+            // Instantiate the visual mesh
             wheels[i].prefab = Instantiate(wheelPrefab, wheels[i].wheelTransform.transform.position, Quaternion.identity, transform);
             wheels[i].prefab.transform.eulerAngles = new Vector3(0.0f, 90.0f, 0.0f);
 
+            // Trigger the post-init function
             wheels[i].PostInitialize();
         }
     }
 
     void FixedUpdate()
     {
+        // Update the transforms every frame to keep them relative to the body's transform
         wheels[0].wheelTransform.transform.position = transform.position + transform.right * wheelDistance.x + transform.forward * wheelDistance.y; //front right
         wheels[1].wheelTransform.transform.position = transform.position + transform.right * -wheelDistance.x + transform.forward * wheelDistance.y; //front left
         wheels[2].wheelTransform.transform.position = transform.position + transform.right * wheelDistance.x + transform.forward * -wheelDistance.y; //back right
         wheels[3].wheelTransform.transform.position = transform.position + transform.right * -wheelDistance.x + transform.forward * -wheelDistance.y; //back left
 
-
+        // Dampen rpm
         rpm -= ((rpm * Mathf.PI) + -transform.InverseTransformDirection(rb.linearVelocity).z) * Time.deltaTime * 0.1f;
 
-        for (int i = 0; i < 4; i++)
+        // Update every wheel
+        foreach(Wheel wheel in wheels)
         {
-            wheels[i].wheelTransform.transform.rotation = transform.rotation;
+            // Sync the transforms' rotation
+            wheel.wheelTransform.transform.rotation = transform.rotation;
+            // Draw debug gizmos
             if (debug)
             {
-                Debug.DrawRay(wheels[i].wheelTransform.transform.position, wheels[i].wheelTransform.transform.forward, Color.blue);
-                Debug.DrawRay(wheels[i].wheelTransform.transform.position, wheels[i].wheelTransform.transform.right, Color.red);
-                Debug.DrawRay(wheels[i].wheelTransform.transform.position, wheels[i].wheelTransform.transform.up, Color.green);
+                Debug.DrawRay(wheel.wheelTransform.transform.position, wheel.wheelTransform.transform.forward, Color.blue);
+                Debug.DrawRay(wheel.wheelTransform.transform.position, wheel.wheelTransform.transform.right, Color.red);
+                Debug.DrawRay(wheel.wheelTransform.transform.position, wheel.wheelTransform.transform.up, Color.green);
             }
-            wheels[i].rpm = rpm;
-            wheels[i].Update();
+            // Sync spin
+            wheel.rpm = rpm;
+
+            // Call the update function on each wheel
+            wheel.Update();
         }
     }
 
+    // Accelerate the car
     protected void Gas()
     {
-        for (int i = 0; i < 4; i++)
+        foreach (Wheel wheel in wheels)
         {
             rpm += 1.0f * Time.deltaTime;
-            if (wheels[i].isOnGround) 
+            if (wheel.isOnGround) 
             {
-                wheels[i].ApplyGas(gasStrength);
+                wheel.ApplyGas(gasStrength);
             }
         }
     }
 
+    // Reverse the car
     protected void Reverse()
     {
         foreach (Wheel wheel in wheels)
         {
-            wheel.ApplyGas(-gasStrength * 0.75f);
+            wheel.ApplyGas(-gasStrength * reversePercentage);
         }
     }
+    
 
+    // Steer the car left/right as a percentage (and direction (-1 < r < 0 for left, 0 < r < 1 for right))
+    // of the max steer degrees (stored in the Wheel class)
     protected void Steer(float ratio)
     {
         foreach (Wheel wheel in wheels)
@@ -101,51 +127,69 @@ public class Car : MonoBehaviour
     }
 }
 
-
+// Wheel class for storing information and doing physics calculations with
 class Wheel
 {
+    // References
     public GameObject wheelTransform;
-    public Vector3 restPosition;
     public GameObject prefab;
-    public RaycastHit rayHit;
     public Rigidbody rbCar;
 
+    // Is one of the front wheels?
     public bool front;
 
+    // Enables debug gizmos
     public bool debug = false;
 
+    // Stores data on the physics raycast query
+    private RaycastHit rayHit;
+    
+    // Actual grip of the wheel
     private float wheelGrip = 0.0f;
+    
+    // Stores the y eulerAngle for the visual wheel rotation
+    private float defaultPrefabRotation = 0.0f;
 
+    // Wheel parameters
+    // Grip and acceleration
     private readonly float maxTraction = 240.0f;
     private readonly float frictionCoefficient = 1.2f;
     private readonly float frontGrip = 30.0f;
     private readonly float rearGrip = 10.0f;
-
+    // Steering
     private readonly float maxSteerDegrees = 45.0f;
+    // Suspension
     private readonly float maxSuspensionLength = 2.0f;
     private readonly float suspensionStrength = 200.0f;
     private readonly float suspensionDampening = 10.0f;
     private readonly float suspensionRestLength = 1.3f;
 
+    // Does the wheel touch the ground
     public bool isOnGround;
 
+    // Spin of the wheel
     public float rpm = 0.0f;
+    // Steer of the wheel
     private float currentSteer = 0.0f;
 
-    private float defaultPrefabRotation = 0.0f;
-
+    // Called by Car, assigns some things at the very start
     public void PostInitialize()
     {
         defaultPrefabRotation = prefab.transform.localEulerAngles.y;
         wheelGrip = front ? frontGrip : rearGrip;
     }
 
+    // Called by Car every physics frame
     public void Update()
     {
+        // Update the grounded state and hit query
         isOnGround = ShootRay();
 
+        // Rotate the transform according to the steer
         wheelTransform.transform.Rotate(new Vector3(0.0f, currentSteer, 0.0f));
 
+        // If grounded, do all the independent physics calculations
+        // (The ones that aren't acceleration)
         if (isOnGround)
         {
             ApplyWheelForce(CalculateSuspension());
@@ -153,88 +197,106 @@ class Wheel
             ApplyWheelForce(CalculateAntiSlip());
         }
 
-
-
         if (rayHit.collider != null)
         {
+            // Move the mesh visual to the point on the ground that the ray hit
             prefab.transform.position = rayHit.point;
         }
         else
         {
+            // Move the mesh visual to the max range of the suspension
             prefab.transform.position = Vector3.Lerp(prefab.transform.position, (wheelTransform.transform.position - rbCar.transform.up * 0.3f) - rbCar.transform.up * (maxSuspensionLength), 0.2f);
         }
 
-
+        // Spin the mesh visual
         prefab.transform.GetChild(0).Rotate(0, rpm, 0, Space.Self);
     }
 
+    // Accelerate the car from the position of the wheel
     public void ApplyGas(float gasStrength)
     {
+        // Front wheel drive, also only if grounded
         if (front && isOnGround)
         {
+            // Calculate the acceleration as a measure of the 
             Vector3 accelerationForce = Vector3.ClampMagnitude(gasStrength * wheelTransform.transform.right, maxTraction);
 
             ApplyWheelForce(accelerationForce);
         }
     }
 
+    // Steer the car
     public void Steer(float ratio)
     {
+        // Front wheel steering
         if (front)
         {
             float degrees = ratio * maxSteerDegrees;
             currentSteer = degrees;
             prefab.transform.eulerAngles = new Vector3(prefab.transform.eulerAngles.x, defaultPrefabRotation + degrees, prefab.transform.eulerAngles.z);
         }
-        else
-        { 
-            prefab.transform.rotation = prefab.transform.rotation; 
-        }
     }
 
+    // Suspension ray check
     public bool ShootRay()
     {
+        // Draw gizmos
         if (debug) {
             Debug.DrawRay(wheelTransform.transform.position - rbCar.transform.up * 0.3f, -rbCar.transform.up, Color.green);
             Debug.DrawRay(rayHit.point, rayHit.normal, Color.purple);
         }
+        // Do the physics query
         return Physics.Raycast(wheelTransform.transform.position - rbCar.transform.up * 0.3f, -rbCar.transform.up, out rayHit, maxSuspensionLength);
     }
 
+    // Apply a force to the car from the wheel position
     private void ApplyWheelForce(Vector3 force)
     {
         rbCar.AddForceAtPosition(force, wheelTransform.transform.position);
     }
 
+    // Wheel spring
     private Vector3 CalculateSuspension()
     {
+        // Get the unit vector that the suspension acts in
         Vector3 springAxis = wheelTransform.transform.up;
+        // Get the current velocity of the car at the point of the wheel
         Vector3 wheelWorldVelocity = rbCar.GetPointVelocity(wheelTransform.transform.position);
+        // Get how far the suspension is from its rest length
         float offset = suspensionRestLength - rayHit.distance;
 
-
+        // Get the dot product of the axis and the velocity
         float vel = Vector3.Dot(springAxis, wheelWorldVelocity);
+        // Calculate the suspension force
         float force = (offset * suspensionStrength) - (vel * suspensionDampening);
+        // Force in the suspension direction
         Vector3 suspension = wheelTransform.transform.up * force;
 
         return suspension;
     }
 
+    // Calculate how the wheel should slow the car via friction
     private Vector3 CalculateFriction()
     {
+        // Get the current velocity of the car at the point of the wheel
         Vector3 vel = rbCar.GetPointVelocity(wheelTransform.transform.position);
-
+        
+        // Negate the velocity by some coefficient of the velocity
         Vector3 friction = -vel * frictionCoefficient;
 
         return friction;
     }
 
+    // Reduce the perpendicular slippiness of the wheels
     private Vector3 CalculateAntiSlip()
     {
+        // Get the normalized dot product of the side axis and the velocity
         float steerVelDot = Vector3.Dot(wheelTransform.transform.forward, rbCar.GetPointVelocity(wheelTransform.transform.position).normalized);
-
+        
+        // Force to negate the sliding according to the grip
         float negationForce = -steerVelDot * wheelGrip;
 
+        // Antislip force in the correct direction
         Vector3 antiSlip = wheelTransform.transform.forward * negationForce;
 
         return antiSlip;
