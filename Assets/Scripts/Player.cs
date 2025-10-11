@@ -1,3 +1,4 @@
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -10,6 +11,8 @@ public class Player : Car
     private InputAction m_gasAction;
     private InputAction m_reverseAction;
 
+    private InputAction m_steerAction;
+
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
@@ -18,24 +21,15 @@ public class Player : Car
         m_gasAction = InputSystem.actions.FindAction("Gas");
         m_reverseAction = InputSystem.actions.FindAction("Brake");
 
+        m_steerAction = InputSystem.actions.FindAction("Move");
+
         actions.FindActionMap("Player").Enable();
     }
 
     // Update is called once per frame
     void Update()
     {
-        if (m_leftAction.WasPressedThisFrame())
-        {
-            SteerLeft();
-        }
-        else if (m_rightAction.WasPressedThisFrame())
-        {
-            SteerRight();
-        }
-        else if (m_leftAction.WasReleasedThisFrame() || m_rightAction.WasReleasedThisFrame())
-        {
-            SteerNone();
-        }
+        Steer(m_steerAction.ReadValue<Vector2>().x);
 
         if (m_gasAction.IsPressed())
         {

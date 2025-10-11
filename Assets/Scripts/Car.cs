@@ -12,7 +12,6 @@ public class Car : MonoBehaviour
     Wheel[] wheels = new Wheel[4];
 
     public float gasStrength = 40.0f;
-    private float steerDegrees = 30.0f;
     private float rpm = 0.0f;
 
     void Awake()
@@ -69,7 +68,7 @@ public class Car : MonoBehaviour
                 Debug.DrawRay(wheels[i].wheelTransform.transform.position, wheels[i].wheelTransform.transform.up, Color.green);
             }
             wheels[i].rpm = rpm;
-            wheels[i].Update(transform);
+            wheels[i].Update();
         }
     }
 
@@ -93,27 +92,11 @@ public class Car : MonoBehaviour
         }
     }
 
-    protected void SteerLeft()
+    protected void Steer(float ratio)
     {
         foreach (Wheel wheel in wheels)
         {
-            wheel.Steer(-steerDegrees);
-        }
-    }
-
-    protected void SteerRight()
-    {
-        foreach (Wheel wheel in wheels)
-        {
-            wheel.Steer(steerDegrees);
-        }
-    }
-
-    protected void SteerNone()
-    {
-        foreach (Wheel wheel in wheels)
-        {
-            wheel.Steer(0.0f);
+            wheel.Steer(ratio);
         }
     }
 }
@@ -131,14 +114,18 @@ class Wheel
 
     public bool debug = false;
 
-    private readonly float maxTraction = 240.0f;
-    private readonly float frictionCoefficient = 1.1f;
-    private readonly float wheelGrip = 20.0f;
+    private float wheelGrip = 0.0f;
 
-    private readonly float maxSuspensionLength = 2.2f;
+    private readonly float maxTraction = 240.0f;
+    private readonly float frictionCoefficient = 1.2f;
+    private readonly float frontGrip = 30.0f;
+    private readonly float rearGrip = 10.0f;
+
+    private readonly float maxSteerDegrees = 45.0f;
+    private readonly float maxSuspensionLength = 2.0f;
     private readonly float suspensionStrength = 200.0f;
-    private readonly float suspensionDampening = 20.0f;
-    private readonly float suspensionRestLength = 1.5f;
+    private readonly float suspensionDampening = 10.0f;
+    private readonly float suspensionRestLength = 1.3f;
 
     public bool isOnGround;
 
@@ -150,9 +137,10 @@ class Wheel
     public void PostInitialize()
     {
         defaultPrefabRotation = prefab.transform.localEulerAngles.y;
+        wheelGrip = front ? frontGrip : rearGrip;
     }
 
-    public void Update(Transform tf)
+    public void Update()
     {
         isOnGround = ShootRay();
 
@@ -190,10 +178,11 @@ class Wheel
         }
     }
 
-    public void Steer(float degrees)
+    public void Steer(float ratio)
     {
         if (front)
         {
+            float degrees = ratio * maxSteerDegrees;
             currentSteer = degrees;
             prefab.transform.eulerAngles = new Vector3(prefab.transform.eulerAngles.x, defaultPrefabRotation + degrees, prefab.transform.eulerAngles.z);
         }
@@ -226,23 +215,28 @@ class Wheel
 
         float vel = Vector3.Dot(springAxis, wheelWorldVelocity);
         float force = (offset * suspensionStrength) - (vel * suspensionDampening);
+        Vector3 suspension = wheelTransform.transform.up * force;
 
-        return wheelTransform.transform.up * force;
+        return suspension;
     }
 
     private Vector3 CalculateFriction()
     {
         Vector3 vel = rbCar.GetPointVelocity(wheelTransform.transform.position);
 
-        return -vel * frictionCoefficient;
+        Vector3 friction = -vel * frictionCoefficient;
+
+        return friction;
     }
 
     private Vector3 CalculateAntiSlip()
     {
-        float steerVelDot = Vector3.Dot(wheelTransform.transform.forward, rbCar.GetPointVelocity(wheelTransform.transform.position));
+        float steerVelDot = Vector3.Dot(wheelTransform.transform.forward, rbCar.GetPointVelocity(wheelTransform.transform.position).normalized);
 
         float negationForce = -steerVelDot * wheelGrip;
 
-        return wheelTransform.transform.forward * negationForce;
+        Vector3 antiSlip = wheelTransform.transform.forward * negationForce;
+
+        return antiSlip;
     }
 }
