@@ -2,15 +2,23 @@ using UnityEngine;
 
 public class Camera : MonoBehaviour
 {
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
+    public Player player;
+
     void Start()
+    {
+        EventManager.TookDamage += CarTookDamage;
+    }
+
+    void Update()
     {
         
     }
 
-    // Update is called once per frame
-    void Update()
+    private void CarTookDamage(int dmg, MonoBehaviour target, MonoBehaviour source)
     {
-        
+        if(target == player)
+        {
+            // Camera effects
+        }
     }
 }

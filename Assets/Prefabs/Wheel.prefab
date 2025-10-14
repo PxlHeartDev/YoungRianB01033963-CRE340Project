@@ -9,7 +9,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1329127443481081521}
-  - component: {fileID: 1126555434363626703}
   m_Layer: 6
   m_Name: Wheel
   m_TagString: Untagged
@@ -33,25 +32,6 @@ Transform:
   - {fileID: 6139923366911794339}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1126555434363626703
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 348517383835530497}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3410df46b8f77c8458fae118f25ed495, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  rbBody: {fileID: 0}
-  mesh: {fileID: 6809076950625519129}
-  suspensionStrength: 150
-  suspensionDampening: 15
-  suspensionRestOffset: 0.35
-  left: 0
-  front: 0
 --- !u!1001 &5962724919737891656
 PrefabInstance:
   m_ObjectHideFlags: 0

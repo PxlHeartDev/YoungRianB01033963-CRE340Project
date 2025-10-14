@@ -1,7 +1,7 @@
 using Unity.VisualScripting;
 using UnityEngine;
 
-public class Car : MonoBehaviour
+public class Car : MonoBehaviour, IDamageable
 {
     // Editor things
     [SerializeField] protected Rigidbody rb;
@@ -22,6 +22,10 @@ public class Car : MonoBehaviour
 
     // Controls the wheel spin
     private float rpm = 0.0f;
+
+    // Health
+    public int maxHealth { get; private set; } = 10;
+    public int health { get; private set; } = 10;
 
     void Awake()
     {
@@ -74,7 +78,7 @@ public class Car : MonoBehaviour
         rpm -= ((rpm * Mathf.PI) + -transform.InverseTransformDirection(rb.linearVelocity).z) * Time.deltaTime * 0.1f;
 
         // Update every wheel
-        foreach(Wheel wheel in wheels)
+        foreach (Wheel wheel in wheels)
         {
             // Sync the transforms' rotation
             wheel.wheelTransform.transform.rotation = transform.rotation;
@@ -89,7 +93,7 @@ public class Car : MonoBehaviour
             wheel.rpm = rpm;
 
             // Call the update function on each wheel
-            wheel.Update();
+            wheel.UpdatePhysics();
         }
     }
 
@@ -125,6 +129,35 @@ public class Car : MonoBehaviour
             wheel.Steer(ratio);
         }
     }
+
+    //
+    // IDamageable
+    //
+
+    // Instantly kill the car
+    public void Kill(MonoBehaviour source)
+    {
+        Damage(int.MaxValue, source);
+    }
+
+    public void Damage(int dmg, MonoBehaviour source)
+    {
+        EventManager.TookDamage?.Invoke(dmg, this, source);
+        health -= health;
+
+        if (health <= 0)
+        {
+            health = 0;
+            Died(source);
+        }
+    }
+
+    // Triggered when it actually dies
+    private void Died(MonoBehaviour source)
+    {
+        EventManager.Died?.Invoke(this, source);
+        Destroy(gameObject);
+    }
 }
 
 // Wheel class for storing information and doing physics calculations with
@@ -149,13 +182,15 @@ class Wheel
     
     // Stores the y eulerAngle for the visual wheel rotation
     private float defaultPrefabRotation = 0.0f;
-
+    
+    //
     // Wheel parameters
+    //
     // Grip and acceleration
     private readonly float maxTraction = 240.0f;
-    private readonly float frictionCoefficient = 1.2f;
-    private readonly float frontGrip = 30.0f;
-    private readonly float rearGrip = 10.0f;
+    private readonly float frictionCoefficient = 1.5f;
+    private readonly float frontGrip = 120.0f;
+    private readonly float rearGrip = 40.0f;
     // Steering
     private readonly float maxSteerDegrees = 45.0f;
     // Suspension
@@ -180,7 +215,7 @@ class Wheel
     }
 
     // Called by Car every physics frame
-    public void Update()
+    public void UpdatePhysics()
     {
         // Update the grounded state and hit query
         isOnGround = ShootRay();
@@ -233,7 +268,7 @@ class Wheel
         {
             float degrees = ratio * maxSteerDegrees;
             currentSteer = degrees;
-            prefab.transform.eulerAngles = new Vector3(prefab.transform.eulerAngles.x, defaultPrefabRotation + degrees, prefab.transform.eulerAngles.z);
+            prefab.transform.localEulerAngles = new Vector3(prefab.transform.localEulerAngles.x, degrees, prefab.transform.localEulerAngles.z);
         }
     }
 
