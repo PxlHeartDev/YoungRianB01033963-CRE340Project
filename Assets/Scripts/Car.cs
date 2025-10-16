@@ -375,7 +375,6 @@ class Wheel
 
         if (isDrifting)
         {
-            Debug.Log("Lines!");
             driftLinesVFX.SendEvent(VisualEffectAsset.PlayEventName);
             driftLinesVFX.transform.position = VFXPos;
         }
