@@ -4,7 +4,7 @@ using UnityEngine;
 public class Car : MonoBehaviour, IDamageable
 {
     // Editor things
-    [SerializeField] protected Rigidbody rb;
+    [SerializeField] public Rigidbody rb;
     [SerializeField] private GameObject wheelPrefab;
     [SerializeField] private Vector2 wheelDistance = new Vector2(2, 2);
 
@@ -189,10 +189,10 @@ class Wheel
     // Grip and acceleration
     private readonly float maxTraction = 240.0f;
     private readonly float frictionCoefficient = 1.5f;
-    private readonly float frontGrip = 120.0f;
+    private readonly float frontGrip = 80.0f;
     private readonly float rearGrip = 40.0f;
     // Steering
-    private readonly float maxSteerDegrees = 45.0f;
+    private readonly float maxSteerDegrees = 15.0f;
     // Suspension
     private readonly float maxSuspensionLength = 2.0f;
     private readonly float suspensionStrength = 200.0f;
