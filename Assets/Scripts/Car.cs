@@ -1,4 +1,4 @@
-using Unity.VisualScripting;
+using UnityEngine.VFX;
 using UnityEngine;
 
 public class Car : MonoBehaviour, IDamageable
@@ -6,6 +6,8 @@ public class Car : MonoBehaviour, IDamageable
     // Editor things
     [SerializeField] public Rigidbody rb;
     [SerializeField] private GameObject wheelPrefab;
+    [SerializeField] private VisualEffect wheelRubbleVFXPrefab;
+    [SerializeField] private VisualEffect driftLinesVFXPrefab;
     [SerializeField] private Vector2 wheelDistance = new Vector2(2, 2);
 
     // Enables debug gizmos
@@ -60,6 +62,9 @@ public class Car : MonoBehaviour, IDamageable
             // Instantiate the visual mesh
             wheels[i].prefab = Instantiate(wheelPrefab, wheels[i].wheelTransform.transform.position, Quaternion.identity, transform);
             wheels[i].prefab.transform.eulerAngles = new Vector3(0.0f, 90.0f, 0.0f);
+
+            wheels[i].wheelRubbleVFX = Instantiate(wheelRubbleVFXPrefab, wheels[i].prefab.transform);
+            wheels[i].driftLinesVFX = Instantiate(driftLinesVFXPrefab, wheels[i].prefab.transform);
 
             // Trigger the post-init function
             wheels[i].PostInitialize();
@@ -207,6 +212,14 @@ class Wheel
     // Steer of the wheel
     private float currentSteer = 0.0f;
 
+    //
+    // VFX
+    //
+    public VisualEffect wheelRubbleVFX;
+    public VisualEffect driftLinesVFX;
+
+    private bool isDrifting = false;
+
     // Called by Car, assigns some things at the very start
     public void PostInitialize()
     {
@@ -230,6 +243,12 @@ class Wheel
             ApplyWheelForce(CalculateSuspension());
             ApplyWheelForce(CalculateFriction());
             ApplyWheelForce(CalculateAntiSlip());
+            DoVFX();
+        }
+        else
+        {
+            wheelRubbleVFX.SendEvent(VisualEffectAsset.StopEventName);
+            driftLinesVFX.SendEvent(VisualEffectAsset.StopEventName);
         }
 
         if (rayHit.collider != null)
@@ -334,6 +353,35 @@ class Wheel
         // Antislip force in the correct direction
         Vector3 antiSlip = wheelTransform.transform.forward * negationForce;
 
-        return antiSlip;
+        if (antiSlip.magnitude > 10.0f)
+        {
+            isDrifting = true;
+        }
+        else
+        {
+            isDrifting = false;
+        }
+
+            return antiSlip;
+    }
+
+    private void DoVFX()
+    {
+        Vector3 VFXPos = rayHit.point + wheelTransform.transform.up * 0.05f;
+
+        wheelRubbleVFX.SendEvent(VisualEffectAsset.PlayEventName);
+        wheelRubbleVFX.transform.position = VFXPos;
+        wheelRubbleVFX.SetFloat("Speed", rbCar.linearVelocity.magnitude * 2.0f);
+
+        if (isDrifting)
+        {
+            Debug.Log("Lines!");
+            driftLinesVFX.SendEvent(VisualEffectAsset.PlayEventName);
+            driftLinesVFX.transform.position = VFXPos;
+        }
+        else
+        {
+            driftLinesVFX.SendEvent(VisualEffectAsset.StopEventName);
+        }
     }
 }

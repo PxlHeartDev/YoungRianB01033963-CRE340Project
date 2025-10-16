@@ -378,8 +378,9 @@ MonoBehaviour:
   player: {fileID: 1815813559}
   forwardTarget: {fileID: 2073318636}
   reverseTarget: {fileID: 201747086}
-  lerpSpeed: 0.2
+  lerpSpeed: 0.1
   reverseFlipEpsilon: 0.1
+  lockingLeniency: 0.45
 --- !u!1 &410087039
 GameObject:
   m_ObjectHideFlags: 0
@@ -961,6 +962,10 @@ PrefabInstance:
       propertyPath: m_Layer
       value: 2
       objectReference: {fileID: 0}
+    - target: {fileID: 8269324984182747387, guid: d914c500708f0e945bf76b9875fd0711, type: 3}
+      propertyPath: car
+      value: 
+      objectReference: {fileID: 1815813559}
     m_RemovedComponents:
     - {fileID: 7009588970424535942, guid: d914c500708f0e945bf76b9875fd0711, type: 3}
     - {fileID: 7561863897583782513, guid: d914c500708f0e945bf76b9875fd0711, type: 3}
@@ -996,6 +1001,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   rb: {fileID: 1252258349}
   wheelPrefab: {fileID: 348517383835530497, guid: cfc5da07ff5b3af4d93f8e18b1622f75, type: 3}
+  wheelRubbleVFXPrefab: {fileID: 7755334627738741327, guid: 6dcfd501ef5813b42984300a6993acfd, type: 3}
+  driftLinesVFXPrefab: {fileID: 3169216796927642001, guid: 592424800a040f94eab1b5cee6980810, type: 3}
   wheelDistance: {x: 1.85, y: 0.95}
   debug: 1
   gasStrength: 40

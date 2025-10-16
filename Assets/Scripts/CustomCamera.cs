@@ -38,8 +38,6 @@ public class CustomCamera : MonoBehaviour
 
         float downPointedness = Vector3.Dot(cameraTarget.transform.forward, -transformTracker.transform.up);
 
-        Debug.Log(downPointedness);
-
         // If the car front is not pointing straight down or up
         if (downPointedness < -lockingLeniency || downPointedness > lockingLeniency)
         {
