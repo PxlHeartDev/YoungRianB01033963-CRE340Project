@@ -2,6 +2,7 @@ using UnityEngine;
 
 public class GameManager : MonoBehaviour
 {
+    // Singleton
     private static GameManager _instance;
     public static GameManager Instance
     {
@@ -16,6 +17,10 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    public int score = 0;
+    public float time = 0.0f;
+
+
     void Awake()
     {
         _instance = this;
@@ -23,6 +28,6 @@ public class GameManager : MonoBehaviour
     
     void Update()
     {
-        
+        time += Time.deltaTime;
     }
 }

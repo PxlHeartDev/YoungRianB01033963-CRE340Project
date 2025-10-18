@@ -61,8 +61,8 @@ MonoBehaviour:
         m_SerializableType: System.Single, mscorlib, Version=4.0.0.0, Culture=neutral,
           PublicKeyToken=b77a5c561934e089
       m_SerializableObject: 1
-    min: -Infinity
-    max: Infinity
+    min: 1
+    max: 100
     enumValues: []
     descendantCount: 0
   m_ImportDependencies: []
@@ -86,10 +86,10 @@ MonoBehaviour:
   - title: Base Loop
     position:
       serializedVersion: 2
-      x: 524.7043
-      y: 133.79224
-      width: 476
-      height: 1469
+      x: 526
+      y: 134
+      width: 474
+      height: 1772
     contents:
     - model: {fileID: 114350483966674978}
       id: 0
@@ -106,8 +106,8 @@ MonoBehaviour:
     serializedVersion: 2
     x: 314
     y: 134
-    width: 687
-    height: 2302
+    width: 686
+    height: 2284
 --- !u!114 &114350483966674978
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -124,7 +124,7 @@ MonoBehaviour:
   m_Parent: {fileID: 114350483966674976}
   m_Children:
   - {fileID: 114350483966674980}
-  m_UIPosition: {x: 550.7043, y: 192.79224}
+  m_UIPosition: {x: 551, y: 193}
   m_UICollapsed: 0
   m_UISuperCollapsed: 0
   m_InputSlots: []
@@ -276,7 +276,7 @@ MonoBehaviour:
   - {fileID: 114350483966675028}
   - {fileID: 114350483966675038}
   - {fileID: 114350483966675048}
-  m_UIPosition: {x: 550.7043, y: 480.79224}
+  m_UIPosition: {x: 551, y: 476}
   m_UICollapsed: 0
   m_UISuperCollapsed: 0
   m_InputSlots:
@@ -320,7 +320,7 @@ MonoBehaviour:
       m_Type:
         m_SerializableType: UnityEditor.VFX.AABox, Unity.VisualEffectGraph.Editor,
           Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
-      m_SerializableObject: '{"center":{"x":0.0,"y":1.0,"z":1.0},"size":{"x":0.0,"y":0.0,"z":0.0}}'
+      m_SerializableObject: '{"center":{"x":0.0,"y":1.0,"z":1.0},"size":{"x":10.0,"y":30.0,"z":30.0}}'
     m_Space: 0
   m_Property:
     name: bounds
@@ -2659,7 +2659,7 @@ MonoBehaviour:
   m_Children:
   - {fileID: 114350483966675056}
   - {fileID: 114350483966675063}
-  m_UIPosition: {x: 550.7043, y: 1572.7922}
+  m_UIPosition: {x: 551, y: 1573}
   m_UICollapsed: 0
   m_UISuperCollapsed: 0
   m_InputSlots: []
@@ -3500,15 +3500,17 @@ MonoBehaviour:
   m_Category: 
   m_Min:
     m_Type:
-      m_SerializableType: 
-    m_SerializableObject: 
+      m_SerializableType: System.Single, mscorlib, Version=4.0.0.0, Culture=neutral,
+        PublicKeyToken=b77a5c561934e089
+    m_SerializableObject: 1
   m_Max:
     m_Type:
-      m_SerializableType: 
-    m_SerializableObject: 
+      m_SerializableType: System.Single, mscorlib, Version=4.0.0.0, Culture=neutral,
+        PublicKeyToken=b77a5c561934e089
+    m_SerializableObject: 100
   m_IsOutput: 0
   m_EnumValues: []
-  m_ValueFilter: 0
+  m_ValueFilter: 1
   m_Tooltip: 
   m_Nodes:
   - m_Id: 0

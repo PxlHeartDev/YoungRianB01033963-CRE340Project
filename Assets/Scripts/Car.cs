@@ -22,8 +22,11 @@ public class Car : MonoBehaviour, IDamageable
     // Coefficient for how strong reversing is relative to gasStrength
     public float reversePercentage = 0.75f;
 
-    // Controls the wheel spin
+    // Controls the visual wheel spin
     private float rpm = 0.0f;
+
+    // Tracker for how many wheels are grounded
+    public int groundedWheels = 0;
 
     // Health
     public int maxHealth { get; private set; } = 10;
@@ -37,7 +40,8 @@ public class Car : MonoBehaviour, IDamageable
             // Create the objects and assign some values
             wheels[i] = new Wheel();
             wheels[i].rbCar = rb;
-            wheels[i].wheelTransform = new GameObject();
+            wheels[i].wheelTransform = new GameObject($"Wheel {i}");
+            //wheels[i].wheelTransform.transform.SetParent(transform);
             wheels[i].debug = debug;
 
             // Set the initial transforms
@@ -60,7 +64,7 @@ public class Car : MonoBehaviour, IDamageable
             if (i == 0 || i == 2) wheels[i].front = true;
 
             // Instantiate the visual mesh
-            wheels[i].prefab = Instantiate(wheelPrefab, wheels[i].wheelTransform.transform.position, Quaternion.identity, transform);
+            wheels[i].prefab = Instantiate(wheelPrefab, wheels[i].wheelTransform.transform.position, Quaternion.identity, wheels[i].wheelTransform.transform);
             wheels[i].prefab.transform.eulerAngles = new Vector3(0.0f, 90.0f, 0.0f);
 
             wheels[i].wheelRubbleVFX = Instantiate(wheelRubbleVFXPrefab, wheels[i].prefab.transform);
@@ -82,6 +86,7 @@ public class Car : MonoBehaviour, IDamageable
         // Dampen rpm
         rpm -= ((rpm * Mathf.PI) + -transform.InverseTransformDirection(rb.linearVelocity).z) * Time.deltaTime * 0.1f;
 
+        groundedWheels = 0;
         // Update every wheel
         foreach (Wheel wheel in wheels)
         {
@@ -99,6 +104,9 @@ public class Car : MonoBehaviour, IDamageable
 
             // Call the update function on each wheel
             wheel.UpdatePhysics();
+
+            // Updated tracker
+            if (wheel.isOnGround) groundedWheels++;
         }
     }
 
@@ -142,7 +150,7 @@ public class Car : MonoBehaviour, IDamageable
     // Instantly kill the car
     public void Kill(MonoBehaviour source)
     {
-        Damage(int.MaxValue, source);
+        Damage(maxHealth, source);
     }
 
     public void Damage(int dmg, MonoBehaviour source)
@@ -181,12 +189,9 @@ class Wheel
 
     // Stores data on the physics raycast query
     private RaycastHit rayHit;
-    
+
     // Actual grip of the wheel
     private float wheelGrip = 0.0f;
-    
-    // Stores the y eulerAngle for the visual wheel rotation
-    private float defaultPrefabRotation = 0.0f;
     
     //
     // Wheel parameters
@@ -223,8 +228,10 @@ class Wheel
     // Called by Car, assigns some things at the very start
     public void PostInitialize()
     {
-        defaultPrefabRotation = prefab.transform.localEulerAngles.y;
+        // Set the actual grip
         wheelGrip = front ? frontGrip : rearGrip;
+        // Rotate the back wheels correctly
+        if (!front) prefab.transform.Rotate(new Vector3(0.0f, -90.0f, 0.0f));
     }
 
     // Called by Car every physics frame

@@ -2,6 +2,7 @@ using UnityEngine;
 
 public class EventManager : MonoBehaviour
 {
+    // Singleton
     private static EventManager _instance;
     public static EventManager Instance {
         get
