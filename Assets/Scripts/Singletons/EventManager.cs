@@ -16,11 +16,13 @@ public class EventManager : MonoBehaviour
         }
     }
 
-    public delegate void DamageEventHandler(int dmg, MonoBehaviour damageTarget, MonoBehaviour damageSource);
-    public delegate void DeathEventHandler(MonoBehaviour target, MonoBehaviour source);
+    public delegate void DamageEventHandler(int dmg, GameObject damageTarget, GameObject damageSource);
+    public delegate void DeathEventHandler(GameObject target, GameObject source);
+    public delegate void CollectEventHandler(ICollectable collected, GameObject source);
 
     public static DamageEventHandler TookDamage;
     public static DeathEventHandler Died;
+    public static CollectEventHandler Collected;
 
     void Awake()
     {

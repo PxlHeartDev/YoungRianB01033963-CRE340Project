@@ -1,5 +1,6 @@
 using UnityEngine.VFX;
 using UnityEngine;
+using UnityEditor;
 
 public class Car : MonoBehaviour, IDamageable
 {
@@ -148,14 +149,14 @@ public class Car : MonoBehaviour, IDamageable
     //
 
     // Instantly kill the car
-    public void Kill(MonoBehaviour source)
+    public void Kill(GameObject source)
     {
         Damage(maxHealth, source);
     }
 
-    public void Damage(int dmg, MonoBehaviour source)
+    public void Damage(int dmg, GameObject source)
     {
-        EventManager.TookDamage?.Invoke(dmg, this, source);
+        EventManager.TookDamage?.Invoke(dmg, gameObject, source);
         health -= health;
 
         if (health <= 0)
@@ -166,9 +167,9 @@ public class Car : MonoBehaviour, IDamageable
     }
 
     // Triggered when it actually dies
-    private void Died(MonoBehaviour source)
+    private void Died(GameObject source)
     {
-        EventManager.Died?.Invoke(this, source);
+        EventManager.Died?.Invoke(gameObject, source);
         Destroy(gameObject);
     }
 }
@@ -216,14 +217,14 @@ class Wheel
     public float rpm = 0.0f;
     // Steer of the wheel
     private float currentSteer = 0.0f;
+    // Is the car in a drift
+    private bool isDrifting = false;
 
     //
     // VFX
     //
     public VisualEffect wheelRubbleVFX;
     public VisualEffect driftLinesVFX;
-
-    private bool isDrifting = false;
 
     // Called by Car, assigns some things at the very start
     public void PostInitialize()

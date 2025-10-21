@@ -113,7 +113,7 @@ public class CustomCamera : MonoBehaviour
     }
 
     // Any car took damage
-    private void CarTookDamage(int dmg, MonoBehaviour target, MonoBehaviour source)
+    private void CarTookDamage(int dmg, GameObject target, GameObject source)
     {
         // The car the camera is attached to took damage
         if (target == player)
