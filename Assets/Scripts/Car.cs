@@ -70,6 +70,7 @@ public class Car : MonoBehaviour, IDamageable
 
             wheels[i].wheelRubbleVFX = Instantiate(wheelRubbleVFXPrefab, wheels[i].prefab.transform);
             wheels[i].driftLinesVFX = Instantiate(driftLinesVFXPrefab, wheels[i].prefab.transform);
+            wheels[i].driftLinesVFX.transform.position += (wheels[i].wheelTransform.transform.up * 0.1f);// + (wheels[i].wheelTransform.transform.forward * -0.3f);
 
             // Trigger the post-init function
             wheels[i].PostInitialize();
@@ -226,6 +227,18 @@ class Wheel
     public VisualEffect wheelRubbleVFX;
     public VisualEffect driftLinesVFX;
 
+    private void SetIsOnGround(bool _isOnGround)
+    {
+        isOnGround = _isOnGround;
+        driftLinesVFX.SetBool("ShouldRender", isOnGround && isDrifting);
+    }
+
+    private void SetIsDrifting(bool _isDrifting)
+    {
+        isDrifting = _isDrifting;
+        driftLinesVFX.SetBool("ShouldRender", isOnGround && isDrifting);
+    }
+
     // Called by Car, assigns some things at the very start
     public void PostInitialize()
     {
@@ -239,7 +252,7 @@ class Wheel
     public void UpdatePhysics()
     {
         // Update the grounded state and hit query
-        isOnGround = ShootRay();
+        ShootRay();
 
         // Rotate the transform according to the steer
         wheelTransform.transform.Rotate(new Vector3(0.0f, currentSteer, 0.0f));
@@ -255,8 +268,7 @@ class Wheel
         }
         else
         {
-            wheelRubbleVFX.SendEvent(VisualEffectAsset.StopEventName);
-            driftLinesVFX.SendEvent(VisualEffectAsset.StopEventName);
+            wheelRubbleVFX.SendEvent("OnStop");
         }
 
         if (rayHit.collider != null)
@@ -300,7 +312,7 @@ class Wheel
     }
 
     // Suspension ray check
-    public bool ShootRay()
+    public void ShootRay()
     {
         // Draw gizmos
         if (debug) {
@@ -308,7 +320,8 @@ class Wheel
             Debug.DrawRay(rayHit.point, rayHit.normal, Color.purple);
         }
         // Do the physics query
-        return Physics.Raycast(wheelTransform.transform.position - rbCar.transform.up * 0.3f, -rbCar.transform.up, out rayHit, maxSuspensionLength);
+        bool didHit = Physics.Raycast(wheelTransform.transform.position - rbCar.transform.up * 0.3f, -rbCar.transform.up, out rayHit, maxSuspensionLength);
+        SetIsOnGround(didHit);
     }
 
     // Apply a force to the car from the wheel position
@@ -352,6 +365,8 @@ class Wheel
     // Reduce the perpendicular slippiness of the wheels
     private Vector3 CalculateAntiSlip()
     {
+        if (rbCar.linearVelocity.sqrMagnitude <= 1.0f) return Vector3.zero;
+
         // Get the normalized dot product of the side axis and the velocity
         float steerVelDot = Vector3.Dot(wheelTransform.transform.forward, rbCar.GetPointVelocity(wheelTransform.transform.position).normalized);
         
@@ -361,34 +376,16 @@ class Wheel
         // Antislip force in the correct direction
         Vector3 antiSlip = wheelTransform.transform.forward * negationForce;
 
-        if (antiSlip.magnitude > 10.0f)
-        {
-            isDrifting = true;
-        }
-        else
-        {
-            isDrifting = false;
-        }
+        SetIsDrifting(antiSlip.magnitude > 20.0f);
 
-            return antiSlip;
+        return antiSlip;
     }
 
     private void DoVFX()
     {
-        Vector3 VFXPos = rayHit.point + wheelTransform.transform.up * 0.05f;
-
-        wheelRubbleVFX.SendEvent(VisualEffectAsset.PlayEventName);
-        wheelRubbleVFX.transform.position = VFXPos;
+        wheelRubbleVFX.SendEvent("OnPlay");
         wheelRubbleVFX.SetFloat("Speed", rbCar.linearVelocity.magnitude * 2.0f);
 
-        if (isDrifting)
-        {
-            driftLinesVFX.SendEvent(VisualEffectAsset.PlayEventName);
-            driftLinesVFX.transform.position = VFXPos;
-        }
-        else
-        {
-            driftLinesVFX.SendEvent(VisualEffectAsset.StopEventName);
-        }
+        driftLinesVFX.transform.rotation = Quaternion.identity;
     }
 }

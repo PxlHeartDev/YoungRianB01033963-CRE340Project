@@ -44,8 +44,8 @@ VisualEffect:
   m_Asset: {fileID: 8926484042661614526, guid: c356fce835961234db399c79d7fd3dd7, type: 3}
   m_InitialEventName: Start
   m_InitialEventNameOverriden: 0
-  m_StartSeed: 0
-  m_ResetSeedOnPlay: 1
+  m_StartSeed: 1503752562
+  m_ResetSeedOnPlay: 0
   m_AllowInstancing: 1
   m_ResourceVersion: 1
   m_PropertySheet:
