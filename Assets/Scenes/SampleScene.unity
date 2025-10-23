@@ -789,7 +789,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8640687275591118220, guid: 9eced075a5c00ab478647e86189ddba5, type: 3}
       propertyPath: m_LocalPosition.x
-      value: -36.3
+      value: -27.9
       objectReference: {fileID: 0}
     - target: {fileID: 8640687275591118220, guid: 9eced075a5c00ab478647e86189ddba5, type: 3}
       propertyPath: m_LocalPosition.y
@@ -797,7 +797,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8640687275591118220, guid: 9eced075a5c00ab478647e86189ddba5, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 72
+      value: 86.85
       objectReference: {fileID: 0}
     - target: {fileID: 8640687275591118220, guid: 9eced075a5c00ab478647e86189ddba5, type: 3}
       propertyPath: m_LocalRotation.w
@@ -1197,7 +1197,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1126575552982460038, guid: d914c500708f0e945bf76b9875fd0711, type: 3}
       propertyPath: m_ExcludeLayers.m_Bits
-      value: 64
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 1854059504575115976, guid: d914c500708f0e945bf76b9875fd0711, type: 3}
       propertyPath: gasStrength
@@ -1223,6 +1223,10 @@ PrefabInstance:
       propertyPath: m_Layer
       value: 2
       objectReference: {fileID: 0}
+    - target: {fileID: 6533871400960705961, guid: d914c500708f0e945bf76b9875fd0711, type: 3}
+      propertyPath: m_TagString
+      value: Player
+      objectReference: {fileID: 0}
     - target: {fileID: 6681966213476019436, guid: d914c500708f0e945bf76b9875fd0711, type: 3}
       propertyPath: m_ConstrainProportionsScale
       value: 1
@@ -1242,6 +1246,10 @@ PrefabInstance:
     - target: {fileID: 7593070965675555669, guid: d914c500708f0e945bf76b9875fd0711, type: 3}
       propertyPath: m_Layer
       value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 7593070965675555669, guid: d914c500708f0e945bf76b9875fd0711, type: 3}
+      propertyPath: m_TagString
+      value: Player
       objectReference: {fileID: 0}
     - target: {fileID: 8269324984182747387, guid: d914c500708f0e945bf76b9875fd0711, type: 3}
       propertyPath: car
@@ -1312,7 +1320,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 853699778777804717, guid: c6b3ed008a9efed43ba30085929b334b, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 91.19479
+      value: 55.77
       objectReference: {fileID: 0}
     - target: {fileID: 853699778777804717, guid: c6b3ed008a9efed43ba30085929b334b, type: 3}
       propertyPath: m_LocalRotation.w
