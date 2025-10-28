@@ -1,9 +1,9 @@
-using System.Collections;
 using UnityEngine;
+using UnityEngine.VFX;
 
 public class Coin : MonoBehaviour, ICollectable
 {
-    [SerializeField] private GameObject model;
+    [SerializeField] private CoinModel model;
     private Animator anim;
 
     public int scoreValue = 1;
@@ -24,7 +24,7 @@ public class Coin : MonoBehaviour, ICollectable
     public void Collect(GameObject source)
     {
         GetComponent<Collider>().enabled = false;
+        model.Collect();
         EventManager.Collected?.Invoke(this, source);
-        anim.SetTrigger("Collected");
     }
 }

@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 using UnityEngine.VFX;
 
@@ -6,14 +7,16 @@ public class CoinModel : MonoBehaviour
     [SerializeField] private Coin coin;
     [SerializeField] private VisualEffect sparkle;
 
-    private void AnimateEnd()
+    public void Collect()
     {
         GetComponent<MeshRenderer>().enabled = false;
         sparkle.SetBool("ShouldRender", true);
+        StartCoroutine(Delete());
     }
 
-    private void Delete()
+    IEnumerator Delete()
     {
+        yield return new WaitForSeconds(1.0f);
         Destroy(coin.gameObject);
     }
 }

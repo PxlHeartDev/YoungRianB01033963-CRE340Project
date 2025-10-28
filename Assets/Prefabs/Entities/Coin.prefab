@@ -69,7 +69,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4e574fe01cc6f824084e10ccfdf4d865, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  model: {fileID: 8289319734060033625}
+  model: {fileID: 7899901945760985551}
+  collectVFX: {fileID: 0}
   scoreValue: 1
 --- !u!1001 &9207888373841500936
 PrefabInstance:

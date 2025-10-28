@@ -27,10 +27,18 @@ public class CustomCamera : MonoBehaviour
         // Set the music source to this camera's audio source
         AudioManager.Instance.SetMusicSource(GetComponent<AudioSource>());
 
-        // Connect the damage event
-        EventManager.TookDamage += CarTookDamage;
         transformTracker = new GameObject();
         cameraTarget = forwardTarget;
+    }
+
+    void OnEnable()
+    {
+        EventManager.TookDamage += CarTookDamage;
+    }
+
+    void OnDisable()
+    {
+        EventManager.TookDamage -= CarTookDamage;
     }
 
     void FixedUpdate()

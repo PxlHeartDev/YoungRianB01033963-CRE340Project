@@ -24,12 +24,21 @@ public class GameManager : MonoBehaviour
     void Awake()
     {
         _instance = this;
-        EventManager.Collected += ItemCollected;
     }
     
     void Update()
     {
         time += Time.deltaTime;
+    }
+
+    private void OnEnable()
+    {
+        EventManager.Collected += ItemCollected;
+    }
+
+    private void OnDisable()
+    {
+        EventManager.Collected -= ItemCollected;
     }
 
     private void ItemCollected(ICollectable item, GameObject source)
