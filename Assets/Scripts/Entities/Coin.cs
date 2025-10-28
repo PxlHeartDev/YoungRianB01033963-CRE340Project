@@ -17,7 +17,9 @@ public class Coin : MonoBehaviour, ICollectable
     {
         if (other.gameObject.tag == "Player")
         {
-            Collect(other.gameObject);
+            Car car = other.transform.parent.gameObject.GetComponent<Car>();
+
+            Collect(car.gameObject);
         }
     }
 

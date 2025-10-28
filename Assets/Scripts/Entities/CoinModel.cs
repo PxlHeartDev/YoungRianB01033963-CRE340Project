@@ -16,7 +16,9 @@ public class CoinModel : MonoBehaviour
 
     IEnumerator Delete()
     {
-        yield return new WaitForSeconds(1.0f);
+        yield return new WaitForSeconds(0.1f);
+        sparkle.SetBool("ShouldRender", false);
+        yield return new WaitForSeconds(0.9f);
         Destroy(coin.gameObject);
     }
 }

@@ -9,7 +9,7 @@ public class Car : MonoBehaviour, IDamageable
     [SerializeField] private GameObject wheelPrefab;
     [SerializeField] private VisualEffect wheelRubbleVFXPrefab;
     [SerializeField] private VisualEffect driftLinesVFXPrefab;
-    [SerializeField] private Vector2 wheelDistance = new Vector2(2, 2);
+    [SerializeField] private Vector2 wheelDistance = new Vector2(1.85f, 0.95f);
 
     // Enables debug gizmos
     public bool debug = false;
@@ -158,7 +158,9 @@ public class Car : MonoBehaviour, IDamageable
     public void Damage(int dmg, GameObject source)
     {
         EventManager.TookDamage?.Invoke(dmg, gameObject, source);
-        health -= health;
+        health -= dmg;
+
+        //Debug.Log("Took " + dmg + " damage from " + source.ToString() + ", now at " + health);
 
         if (health <= 0)
         {
@@ -170,8 +172,13 @@ public class Car : MonoBehaviour, IDamageable
     // Triggered when it actually dies
     private void Died(GameObject source)
     {
+        Debug.Log("Ouchi, I die");
         EventManager.Died?.Invoke(gameObject, source);
         Destroy(gameObject);
+        foreach(Wheel wheel in wheels)
+        {
+            Destroy(wheel.wheelTransform);
+        }
     }
 }
 

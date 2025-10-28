@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 
 public class CustomCamera : MonoBehaviour
@@ -12,16 +13,23 @@ public class CustomCamera : MonoBehaviour
     [SerializeField] private float reverseFlipEpsilon = 0.1f;
     [SerializeField] private float lockingLeniency = 0.8f;
 
-    // Actual target transform
+    // Reference to actual target transform
     private GameObject cameraTarget;
+
+    private Vector3 savedPos;
+    private Quaternion savedRot;
 
     // If the camera is currently reversed
     private bool flipped;
 
     // Matches only the y rotation of the cameraTarget
     private GameObject transformTracker;
-    
 
+    // Camera shake stuff
+    private float shakeStrength;
+    private float shakeDuration;
+    private float shakeTimeElapsed;
+    
     void Start()
     {
         // Set the music source to this camera's audio source
@@ -43,11 +51,19 @@ public class CustomCamera : MonoBehaviour
 
     void FixedUpdate()
     {
+        if (player == null)
+        {
+            transform.SetPositionAndRotation(savedPos, savedRot);
+            return;
+        }
+
         AdjustTargetsToFallSpeed();
 
         MoveCamera();
 
         LockZRot();
+
+        if (shakeTimeElapsed < shakeDuration) DoCameraShake();
 
         // If the car is very slow, default to forward
         // Use squared speed to compare because it's cheaper
@@ -78,6 +94,9 @@ public class CustomCamera : MonoBehaviour
             flipped = !flipped;
             cameraTarget = flipped ? reverseTarget : forwardTarget;
         }
+
+        savedPos = cameraTarget.transform.position;
+        savedRot = cameraTarget.transform.rotation;
     }
 
     // Rotate the targets slightly down towards the car to account for fall speed
@@ -124,19 +143,38 @@ public class CustomCamera : MonoBehaviour
     private void CarTookDamage(int dmg, GameObject target, GameObject source)
     {
         // The car the camera is attached to took damage
-        if (target == player)
+        if (target == player.gameObject)
         {
             AudioManager.Instance.PlayerTookDamage();
 
-            // Camera effects
+            CameraShake(0.1f, 0.5f);
         }
         else
         {
             float distanceToDamagedCar = Vector3.Distance(target.transform.position, source.transform.position);
             if (distanceToDamagedCar < 100.0f)
             {
-                // Less major camera effect
+
+                CameraShake(0.05f, 0.3f);
             }
         }
+    }
+
+    private void CameraShake(float strength, float duration)
+    {
+        shakeTimeElapsed = 0.0f;
+        shakeStrength = strength;
+        shakeDuration = duration;
+    }
+
+    private void DoCameraShake()
+    {
+        float x = Random.Range(-1.0f, 1.0f) * shakeStrength;
+        float y = Random.Range(-1.0f, 1.0f) * shakeStrength;
+        float z = Random.Range(-1.0f, 1.0f) * shakeStrength;
+
+        transform.position += new Vector3(x, y, z);
+
+        shakeTimeElapsed += Time.deltaTime;
     }
 }
