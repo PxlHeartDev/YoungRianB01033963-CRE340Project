@@ -10,6 +10,9 @@ public class Player : Car
     private InputAction m_gasAction;
     private InputAction m_reverseAction;
     private InputAction m_steerAction;
+    private InputAction m_jumpAction;
+
+    private bool jumpHeld;
 
     void Start()
     {
@@ -17,6 +20,7 @@ public class Player : Car
         m_gasAction = InputSystem.actions.FindAction("Gas");
         m_reverseAction = InputSystem.actions.FindAction("Brake");
         m_steerAction = InputSystem.actions.FindAction("Move");
+        m_jumpAction = InputSystem.actions.FindAction("Jump");
 
         // Enable the action map
         actions.FindActionMap("Player").Enable();
@@ -38,5 +42,17 @@ public class Player : Car
         {
             Reverse();
         }
+
+        if (m_jumpAction.IsPressed())
+        {
+            jumpHeld = true;
+            JumpHold();
+        }
+        else if (!m_jumpAction.IsPressed() && jumpHeld)
+        {
+            jumpHeld = false;
+            JumpRelease();
+        }
+
     }
 }

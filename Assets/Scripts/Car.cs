@@ -1,6 +1,6 @@
 using UnityEngine.VFX;
 using UnityEngine;
-using UnityEditor;
+using System.Collections;
 
 public class Car : MonoBehaviour, IDamageable
 {
@@ -27,7 +27,7 @@ public class Car : MonoBehaviour, IDamageable
     private float rpm = 0.0f;
 
     // Tracker for how many wheels are grounded
-    public int groundedWheels = 0;
+    public int groundedWheels { get; private set; } = 0;
 
     // Health
     public int maxHealth { get; private set; } = 10;
@@ -128,6 +128,12 @@ public class Car : MonoBehaviour, IDamageable
     // Reverse the car
     protected void Reverse()
     {
+        if (groundedWheels == 0)
+        {
+            rb.angularVelocity = rb.angularVelocity *= 0.99f;
+            return;
+        }
+
         foreach (Wheel wheel in wheels)
         {
             wheel.ApplyGas(-gasStrength * reversePercentage);
@@ -142,6 +148,22 @@ public class Car : MonoBehaviour, IDamageable
         foreach (Wheel wheel in wheels)
         {
             wheel.Steer(ratio);
+        }
+    }
+
+    protected void JumpHold()
+    {
+        foreach (Wheel wheel in wheels)
+        {
+            wheel.JumpHold();
+        }
+    }
+
+    protected void JumpRelease()
+    {
+        foreach (Wheel wheel in wheels)
+        {
+            StartCoroutine(wheel.JumpRelease());
         }
     }
 
@@ -213,10 +235,11 @@ class Wheel
     // Steering
     private readonly float maxSteerDegrees = 15.0f;
     // Suspension
-    private readonly float maxSuspensionLength = 2.0f;
-    private readonly float suspensionStrength = 200.0f;
+    private readonly float maxSuspensionLength = 2.5f;
+    private readonly float suspensionStrength = 230.0f;
     private readonly float suspensionDampening = 10.0f;
-    private readonly float suspensionRestLength = 1.3f;
+    private readonly float suspensionRestLength = 1.8f;
+    private float suspensionLengthAddition = 0.0f;
 
     // Does the wheel touch the ground
     public bool isOnGround;
@@ -318,6 +341,20 @@ class Wheel
         }
     }
 
+    public void JumpHold()
+    {
+        suspensionLengthAddition = -0.2f;
+    }
+
+    public IEnumerator JumpRelease()
+    {
+        rbCar.angularDamping = 2.0f;
+        suspensionLengthAddition = 1.0f;
+        yield return new WaitForSeconds(0.2f);
+        rbCar.angularDamping = 0.2f;
+        suspensionLengthAddition = 0.0f;
+    }
+
     // Suspension ray check
     public void ShootRay()
     {
@@ -345,7 +382,7 @@ class Wheel
         // Get the current velocity of the car at the point of the wheel
         Vector3 wheelWorldVelocity = rbCar.GetPointVelocity(wheelTransform.transform.position);
         // Get how far the suspension is from its rest length
-        float offset = suspensionRestLength - rayHit.distance;
+        float offset = suspensionRestLength + suspensionLengthAddition - rayHit.distance;
 
         // Get the dot product of the axis and the velocity
         float vel = Vector3.Dot(springAxis, wheelWorldVelocity);
@@ -394,5 +431,6 @@ class Wheel
         wheelRubbleVFX.SetFloat("Speed", rbCar.linearVelocity.magnitude * 2.0f);
 
         driftLinesVFX.transform.rotation = Quaternion.identity;
+        driftLinesVFX.SetVector3("CollisionNormal", rayHit.normal);
     }
 }

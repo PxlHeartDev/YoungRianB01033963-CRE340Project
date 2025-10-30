@@ -1,5 +1,6 @@
 using System.Collections;
 using UnityEngine;
+using static UnityEngine.Rendering.DebugUI.Table;
 
 public class CustomCamera : MonoBehaviour
 {
@@ -51,6 +52,8 @@ public class CustomCamera : MonoBehaviour
 
     void FixedUpdate()
     {
+        // If the player has died, set the camera to the last remembered transform
+        // This fixes the edge-case of the camera being placed wrong if the player dies mid-shake
         if (player == null)
         {
             transform.SetPositionAndRotation(savedPos, savedRot);
@@ -61,7 +64,7 @@ public class CustomCamera : MonoBehaviour
 
         MoveCamera();
 
-        LockZRot();
+        LockRot();
 
         if (shakeTimeElapsed < shakeDuration) DoCameraShake();
 
@@ -123,20 +126,27 @@ public class CustomCamera : MonoBehaviour
         transform.SetPositionAndRotation(Vector3.Lerp(transform.position, cameraTarget.transform.position, lerpSpeed), Quaternion.Lerp(transform.rotation, cameraTarget.transform.rotation, lerpSpeed));
     }
 
-    // Lock the Z rotation of the camera
-    private void LockZRot()
+    // Lock the X and Z rotation of the camera
+    private void LockRot()
     {
         // How well the camera's forward vector maps to down
         float downPointedness = Vector3.Dot(cameraTarget.transform.forward, -transformTracker.transform.up);
 
+        Vector3 rot = transform.eulerAngles;
+
         // Don't lock rolling if the car is pointing almost straight down (as it stutters)
-        if (downPointedness < lockingLeniency)
-        {
-            // Set z rotation to 0 (so there is no rolling)
-            Vector3 rot = transform.eulerAngles;
-            rot.z = 0.0f;
-            transform.eulerAngles = rot;
-        }
+        if (downPointedness < lockingLeniency) rot.z = 0.0f; // Set z rotation to 0 (so there is no rolling)
+
+        if (rot.x >= 60.0f && rot.x <= 70.0f) rot.x = 60.0f;
+        if (rot.x > 70.0f && rot.x <= 80.0f) rot.x = 80.0f;
+
+        if (rot.x >= 270.0f && rot.x <= 280.0f) rot.x = 270.0f;
+        if (rot.x > 280.0f && rot.x <= 290.0f) rot.x = 290.0f;
+
+        Debug.Log(transform.eulerAngles.x.ToString() + " / " + rot.x.ToString());
+
+        transform.eulerAngles = rot;
+
     }
 
     // Any car took damage
