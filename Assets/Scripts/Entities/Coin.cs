@@ -1,30 +1,35 @@
 using UnityEngine;
-using UnityEngine.VFX;
 
 public class Coin : MonoBehaviour, ICollectable
 {
     [SerializeField] private CoinModel model;
-    private Animator anim;
+    [SerializeField] private AudioClip collectSFX;
 
     public int scoreValue = 1;
 
-    void Awake()
-    {
-        anim = model.GetComponent<Animator>();
-    }
-
     void OnTriggerEnter(Collider other)
     {
-        if (other.gameObject.tag == "Player")
+        // If the player hit the coin
+        if (other.CompareTag("Player"))
         {
             Car car = other.transform.parent.gameObject.GetComponent<Car>();
 
             Collect(car.gameObject);
+
+            car.Damage(1, gameObject);
         }
     }
 
     public void Collect(GameObject source)
     {
+        // Calculate pitch
+        float pitch = 1.0f + 0.05f * GameManager.Instance.sequentialCoins;
+        pitch = Mathf.Clamp(pitch, 1.0f, 2.0f);
+
+        // Play sound
+        AudioManager.Instance?.PlaySFXAtPoint(collectSFX, transform.position, 0.3f, pitch);
+        
+        // Do collection logic
         GetComponent<Collider>().enabled = false;
         model.Collect();
         EventManager.Collected?.Invoke(this, source);

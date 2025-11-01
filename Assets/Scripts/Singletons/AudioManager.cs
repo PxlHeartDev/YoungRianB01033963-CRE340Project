@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.Audio;
 
@@ -19,39 +20,61 @@ public class AudioManager : MonoBehaviour
         }
     }
 
-    // Event for when the music changes
-    public delegate void MusicEventHandler(string newMusicName);
-
-    public event MusicEventHandler MusicChanged;
-
     // The mixer to use
     [SerializeField] private AudioMixer mixer;
+
+    //
+    // Music
+    //
+
+    // Event for when the music changes
+    public delegate void MusicEventHandler(string newMusicName);
+    public event MusicEventHandler MusicChanged;
 
     // The AudioSource that music plays from
     private AudioSource musicSource;
 
     // The string name of the current music
     private string currentMusic;
+    private AudioClip currentMusicClip;
 
     // Dictionary containing all music resources
-    private Dictionary<string, AudioResource> musicDict;
-    
+    private Dictionary<string, AudioClip> musicDict;
+
+    // Songs
+    [SerializeField] private AudioClip testMusic;
+    [SerializeField] private AudioClip introMusic;
+
+    //
+    // SFX
+    //
+
+    private AudioSource coinSource;
+
+    #region Overhead
+
     void Awake()
     {
         // Populate the dictionary
         musicDict = new()
         {
-            {"Test", GetAudio("Music/TestMusic")},
+            {"Test", testMusic},
+            {"Intro", introMusic },
         };
 
         _instance = this;
+
+        DontDestroyOnLoad(this);
+
+        GameObject coinSourceObject = new GameObject();
+        coinSource = coinSourceObject.AddComponent<AudioSource>();
+
+        coinSourceObject.transform.parent = transform;
     }
 
-    // Get an AudioResource by path
-    private AudioResource GetAudio(string path)
-    {
-        return Resources.Load(path) as AudioResource;
-    }
+    #endregion
+
+    #region Music
 
     // Set the source of the music
     public void SetMusicSource(AudioSource audioSource)
@@ -63,16 +86,41 @@ public class AudioManager : MonoBehaviour
     // Play new music or continue paused music
     public void PlayMusic(string newMusicName = "")
     {
+        // Don't do anything and just continue playing if the new music is the same as the current one
         if (newMusicName == "" || currentMusic == newMusicName)
         {
             musicSource.Play();
             return;
         }
+        // Get the AudioClip
+        AudioClip musicClip = musicDict[newMusicName];
+
+        // Update tracker
         currentMusic = newMusicName;
+
+        // Play using the other function
+        PlayMusic(musicClip, true);
+    }
+    
+    // Play a generic AudioClip as music
+    private void PlayMusic(AudioClip newMusicClip, bool fromString = false)
+    {
+        // Don't do anything and just continue playing if the new music is the same as the current one
+        if (currentMusicClip == newMusicClip)
+        {
+            musicSource.Play();
+            return;
+        }
+
+        // Update tracker
+        currentMusicClip = newMusicClip;
+
+        // If it was a generic AudioClip, set the currentMusic to an empty string
+        if (!fromString) currentMusic = "";
 
         // Stop the music, set the new music, and then play it
         musicSource.Stop();
-        musicSource.resource = musicDict[currentMusic];
+        musicSource.resource = newMusicClip;
         musicSource.Play();
     }
 
@@ -81,6 +129,19 @@ public class AudioManager : MonoBehaviour
     {
         musicSource.Pause();
     }
+
+    #endregion
+
+    #region SFX
+    public void PlaySFXAtPoint(AudioClip clip, Vector3 position, float volume = 1.0f, float pitch = 1.0f)
+    {
+        coinSource.transform.position = position;
+        coinSource.pitch = pitch;
+        coinSource.PlayOneShot(clip, volume);
+    }
+    #endregion
+
+    #region Effects
 
     // Set the frequency threshold of the low pass filter
     public void SetLowPass(float freq = 22000.0f)
@@ -105,5 +166,5 @@ public class AudioManager : MonoBehaviour
             yield return new WaitForSeconds(0.2f);
         }
     }
-
+    #endregion
 }

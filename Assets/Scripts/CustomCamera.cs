@@ -1,6 +1,7 @@
-using System.Collections;
+using Unity.VisualScripting;
 using UnityEngine;
-using static UnityEngine.Rendering.DebugUI.Table;
+using UnityEngine.Rendering;
+using UnityEngine.Rendering.Universal;
 
 public class CustomCamera : MonoBehaviour
 {
@@ -13,6 +14,11 @@ public class CustomCamera : MonoBehaviour
     [SerializeField] private float lerpSpeed = 0.1f;
     [SerializeField] private float reverseFlipEpsilon = 0.1f;
     [SerializeField] private float lockingLeniency = 0.8f;
+
+    // Post-proc
+    public Volume globalVolume;
+    public Volume damageVignetteVolume;
+    
 
     // Reference to actual target transform
     private GameObject cameraTarget;
@@ -67,6 +73,8 @@ public class CustomCamera : MonoBehaviour
         LockRot();
 
         if (shakeTimeElapsed < shakeDuration) DoCameraShake();
+
+        DoVignetteFade();
 
         // If the car is very slow, default to forward
         // Use squared speed to compare because it's cheaper
@@ -143,11 +151,11 @@ public class CustomCamera : MonoBehaviour
         if (rot.x >= 270.0f && rot.x <= 280.0f) rot.x = 270.0f;
         if (rot.x > 280.0f && rot.x <= 290.0f) rot.x = 290.0f;
 
-        Debug.Log(transform.eulerAngles.x.ToString() + " / " + rot.x.ToString());
-
         transform.eulerAngles = rot;
 
     }
+
+    #region Events and Effects
 
     // Any car took damage
     private void CarTookDamage(int dmg, GameObject target, GameObject source)
@@ -158,6 +166,11 @@ public class CustomCamera : MonoBehaviour
             AudioManager.Instance.PlayerTookDamage();
 
             CameraShake(0.1f, 0.5f);
+
+            float maxHP = target.GetComponent<Car>().maxHealth;
+
+            damageVignetteVolume.weight = Mathf.Clamp01(2.0f * dmg/maxHP);
+            globalVolume.weight = 0.0f;
         }
         else
         {
@@ -187,4 +200,12 @@ public class CustomCamera : MonoBehaviour
 
         shakeTimeElapsed += Time.deltaTime;
     }
+
+    private void DoVignetteFade()
+    {
+        damageVignetteVolume.weight = Mathf.Lerp(damageVignetteVolume.weight, 0.0f, 0.01f);
+        globalVolume.weight = Mathf.Lerp(globalVolume.weight, 1.0f, 0.01f);
+    }
+
+    #endregion
 }

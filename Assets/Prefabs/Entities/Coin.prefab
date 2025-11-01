@@ -70,7 +70,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   model: {fileID: 7899901945760985551}
-  collectVFX: {fileID: 0}
+  collectSFX: {fileID: 8300000, guid: 8156152ebfb0be4429fc3b802438270d, type: 3}
   scoreValue: 1
 --- !u!1001 &9207888373841500936
 PrefabInstance:

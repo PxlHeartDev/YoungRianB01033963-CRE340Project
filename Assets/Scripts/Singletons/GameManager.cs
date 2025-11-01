@@ -20,15 +20,20 @@ public class GameManager : MonoBehaviour
     public int score = 0;
     public float time = 0.0f;
 
+    public int sequentialCoins = 0;
+    private float sequentialCoinCooldown = 0.0f; 
+
 
     void Awake()
     {
         _instance = this;
+        DontDestroyOnLoad(this);
     }
     
     void Update()
     {
         time += Time.deltaTime;
+        SequentialCoinLogic();
     }
 
     private void OnEnable()
@@ -48,10 +53,26 @@ public class GameManager : MonoBehaviour
             Coin coin = item as Coin;
             score += coin.scoreValue;
             Debug.Log("Collected a coin worth " + coin.scoreValue + " / New score: " + score);
+
+            sequentialCoins++;
+            sequentialCoinCooldown = 1.0f;
         }
         //else if (item is Powerup)
         //{
 
         //}
+    }
+
+    private void SequentialCoinLogic()
+    {
+        if (sequentialCoinCooldown > 0.0f)
+        {
+            sequentialCoinCooldown -= Time.deltaTime;
+            Debug.Log(sequentialCoinCooldown);
+        }
+        else
+        {
+            sequentialCoins = 0;
+        }
     }
 }
