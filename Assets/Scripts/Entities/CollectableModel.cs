@@ -2,23 +2,23 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.VFX;
 
-public class CoinModel : MonoBehaviour
+public class CollectableModel : MonoBehaviour
 {
-    [SerializeField] private Coin coin;
-    [SerializeField] private VisualEffect sparkle;
+    [SerializeField] private GameObject collectable;
+    public VisualEffect VFX;
 
     public void Collect()
     {
         GetComponent<MeshRenderer>().enabled = false;
-        sparkle.SetBool("ShouldRender", true);
+        VFX.SetBool("ShouldRender", true);
         StartCoroutine(Delete());
     }
 
     IEnumerator Delete()
     {
         yield return new WaitForSeconds(0.1f);
-        sparkle.SetBool("ShouldRender", false);
+        VFX.SetBool("ShouldRender", false);
         yield return new WaitForSeconds(0.9f);
-        Destroy(coin.gameObject);
+        Destroy(collectable);
     }
 }

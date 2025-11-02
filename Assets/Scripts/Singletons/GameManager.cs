@@ -48,7 +48,7 @@ public class GameManager : MonoBehaviour
 
     private void ItemCollected(ICollectable item, GameObject source)
     {
-        if(item is Coin)
+        if (item is Coin)
         {
             Coin coin = item as Coin;
             score += coin.scoreValue;
@@ -57,22 +57,18 @@ public class GameManager : MonoBehaviour
             sequentialCoins++;
             sequentialCoinCooldown = 1.0f;
         }
-        //else if (item is Powerup)
-        //{
-
-        //}
+        else if (item is Powerup)
+        {
+            Powerup powerup = item as Powerup;
+            // Other powerup logic
+        }
     }
 
     private void SequentialCoinLogic()
     {
         if (sequentialCoinCooldown > 0.0f)
-        {
             sequentialCoinCooldown -= Time.deltaTime;
-            Debug.Log(sequentialCoinCooldown);
-        }
         else
-        {
             sequentialCoins = 0;
-        }
     }
 }

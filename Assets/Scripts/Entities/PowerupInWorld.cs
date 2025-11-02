@@ -2,7 +2,8 @@ using UnityEngine;
 
 public class PowerupInWorld : MonoBehaviour, ICollectable
 {
-    private Mesh mesh;
+    [SerializeField] private CollectableModel model;
+    [SerializeField] private AudioClip collectSFX;
 
     public Powerup powerup;
 
@@ -12,14 +13,25 @@ public class PowerupInWorld : MonoBehaviour, ICollectable
         
     }
 
-    void OnCollisionEnter(Collision collision)
+    void OnTriggerEnter(Collider other)
     {
-        Collect(collision.collider.gameObject);
+        // If the player hit the coin
+        if (other.CompareTag("Player"))
+        {
+            Car car = other.transform.parent.gameObject.GetComponent<Car>();
+
+            Collect(car.gameObject);
+        }
     }
 
     public void Collect(GameObject source)
     {
+        // Play sound
+        AudioManager.Instance?.PlaySFXAtPoint(collectSFX, transform.position, 0.3f);
+
+        // Do collection logic
+        GetComponent<Collider>().enabled = false;
+        model.Collect();
         EventManager.Collected?.Invoke(this, source);
-        Destroy(this);
     }
 }

@@ -204,8 +204,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a9ef7308ed09efc448ccf5319043657e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  coin: {fileID: 1343148232648434071}
-  sparkle: {fileID: 3265720893957147179}
+  collectable: {fileID: 8890155871065909796}
+  VFX: {fileID: 3265720893957147179}
 --- !u!2083052967 &3265720893957147179
 VisualEffect:
   m_ObjectHideFlags: 0
