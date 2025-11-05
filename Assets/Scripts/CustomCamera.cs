@@ -66,11 +66,11 @@ public class CustomCamera : MonoBehaviour
             return;
         }
 
-        AdjustTargetsToFallSpeed();
+        //AdjustTargetsToFallSpeed();
 
         MoveCamera();
 
-        LockRot();
+        //LockRot();
 
         if (shakeTimeElapsed < shakeDuration) DoCameraShake();
 
@@ -86,11 +86,19 @@ public class CustomCamera : MonoBehaviour
             return;
         }
 
-        float upsideDownness = Vector3.Dot(cameraTarget.transform.up, transformTracker.transform.up);
+        //float upsideDownness = Vector3.Dot(cameraTarget.transform.up, transformTracker.transform.up);
 
-        // If the car is flipped upside-down, don't do anything
-        if (upsideDownness < lockingLeniency)
+        //// If the car is flipped upside-down, don't do anything
+        //if (upsideDownness < lockingLeniency)
+        //{
+        //    return;
+        //}
+
+        // If falling, don't do anything
+        if (player.groundedWheels == 0)
         {
+            flipped = false;
+            cameraTarget = forwardTarget;
             return;
         }
 

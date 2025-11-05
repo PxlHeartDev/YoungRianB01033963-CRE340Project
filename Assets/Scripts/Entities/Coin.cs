@@ -9,6 +9,7 @@ public class Coin : MonoBehaviour, ICollectable
 
     void Awake()
     {
+        model.VFX.SetInt("ParticleCount", 16);
         model.VFX.SetVector3("Offset", new Vector3(0.0f, 2.0f, 0.0f));
     }
 

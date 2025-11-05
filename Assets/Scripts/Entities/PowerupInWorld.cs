@@ -7,12 +7,6 @@ public class PowerupInWorld : MonoBehaviour, ICollectable
 
     public Powerup powerup;
 
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
-
     void OnTriggerEnter(Collider other)
     {
         // If the player hit the coin
