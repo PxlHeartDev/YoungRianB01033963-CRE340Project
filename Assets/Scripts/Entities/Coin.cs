@@ -26,16 +26,20 @@ public class Coin : MonoBehaviour, ICollectable
 
     public void Collect(GameObject source)
     {
-        // Calculate pitch
-        float pitch = 1.0f + 0.05f * GameManager.Instance.sequentialCoins;
-        pitch = Mathf.Clamp(pitch, 1.0f, 2.0f);
+        if (source == null) return;
 
-        // Play sound
-        AudioManager.Instance?.PlaySFXAtPoint(collectSFX, transform.position, 0.3f, pitch);
-        
-        // Do collection logic
-        GetComponent<Collider>().enabled = false;
-        model.Collect();
-        EventManager.Collected?.Invoke(this, source);
+        Car car = source.GetComponent<Car>();
+        if (car.CompareTag("Player"))
+        {
+            Player player = car as Player;
+
+            // Play sound
+            AudioManager.Instance?.PlaySFXAtPoint(AudioManager.Source.Collectable, collectSFX, transform.position, 0.3f, player.GetCoinPitch());
+
+            // Do collection logic
+            GetComponent<Collider>().enabled = false;
+            model.Collect();
+            EventManager.Collected?.Invoke(this, source);
+        }
     }
 }

@@ -20,9 +20,6 @@ public class GameManager : MonoBehaviour
     public int score = 0;
     public float time = 0.0f;
 
-    public int sequentialCoins = 0;
-    private float sequentialCoinCooldown = 0.0f; 
-
 
     void Awake()
     {
@@ -33,7 +30,6 @@ public class GameManager : MonoBehaviour
     void Update()
     {
         time += Time.deltaTime;
-        SequentialCoinLogic();
     }
 
     private void OnEnable()
@@ -48,27 +44,22 @@ public class GameManager : MonoBehaviour
 
     private void ItemCollected(ICollectable item, GameObject source)
     {
+        if (source == null) return;
+
+        Car car = source.GetComponent<Car>();
+
+        car.ItemCollected(item);
+
         if (item is Coin)
         {
             Coin coin = item as Coin;
             score += coin.scoreValue;
-            Debug.Log("Collected a coin worth " + coin.scoreValue + " / New score: " + score);
-
-            sequentialCoins++;
-            sequentialCoinCooldown = 1.0f;
+            Debug.Log("Collected a coin worth " + coin.scoreValue + " / New score: " + score + " / Combo: " + (car as Player).sequentialCoins);
         }
         else if (item is Powerup)
         {
             Powerup powerup = item as Powerup;
             // Other powerup logic
         }
-    }
-
-    private void SequentialCoinLogic()
-    {
-        if (sequentialCoinCooldown > 0.0f)
-            sequentialCoinCooldown -= Time.deltaTime;
-        else
-            sequentialCoins = 0;
     }
 }

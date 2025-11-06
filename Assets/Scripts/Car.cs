@@ -112,6 +112,8 @@ public class Car : MonoBehaviour, IDamageable
         }
     }
 
+    #region Movement
+
     // Accelerate the car
     protected void Gas()
     {
@@ -151,6 +153,7 @@ public class Car : MonoBehaviour, IDamageable
         }
     }
 
+    // Jump stuff
     protected void JumpHold()
     {
         foreach (Wheel wheel in wheels)
@@ -165,6 +168,13 @@ public class Car : MonoBehaviour, IDamageable
         {
             StartCoroutine(wheel.JumpRelease());
         }
+    }
+
+    #endregion
+
+    public virtual void ItemCollected(ICollectable item)
+    {
+
     }
 
     //

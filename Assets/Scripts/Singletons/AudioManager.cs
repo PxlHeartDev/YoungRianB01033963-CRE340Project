@@ -28,8 +28,7 @@ public class AudioManager : MonoBehaviour
     //
 
     // Event for when the music changes
-    public delegate void MusicEventHandler(string newMusicName);
-    public event MusicEventHandler MusicChanged;
+    public static System.Action<string> MusicChanged;
 
     // The AudioSource that music plays from
     private AudioSource musicSource;
@@ -49,25 +48,50 @@ public class AudioManager : MonoBehaviour
     // SFX
     //
 
-    private AudioSource coinSource;
+    public enum Source
+    {
+        Collectable,
+        Combo,
+    }
+    private Dictionary<Source, AudioSource> sourceDict;
+
+    private AudioSource collectableSource;
+    private AudioSource comboSource;
 
     #region Overhead
 
     void Awake()
     {
-        // Populate the dictionary
+        _instance = this;
+
+        DontDestroyOnLoad(this);
+
+        collectableSource = new GameObject().AddComponent<AudioSource>();
+        comboSource = new GameObject().AddComponent<AudioSource>();
+
+        // Populate the dictionaries
+        sourceDict = new()
+        {
+            { Source.Collectable, collectableSource },
+            { Source.Combo, comboSource },
+        };
+
         musicDict = new()
         {
             {"Test", testMusic},
             {"Intro", introMusic },
         };
 
-        _instance = this;
 
-        DontDestroyOnLoad(this);
+
+        foreach (AudioSource source in sourceDict.Values)
+        {
+            source.transform.parent = transform;
+        }
+
 
         GameObject coinSourceObject = new GameObject();
-        coinSource = coinSourceObject.AddComponent<AudioSource>();
+        collectableSource = coinSourceObject.AddComponent<AudioSource>();
 
         coinSourceObject.transform.parent = transform;
     }
@@ -97,6 +121,8 @@ public class AudioManager : MonoBehaviour
 
         // Update tracker
         currentMusic = newMusicName;
+
+        MusicChanged?.Invoke(newMusicName);
 
         // Play using the other function
         PlayMusic(musicClip, true);
@@ -133,11 +159,23 @@ public class AudioManager : MonoBehaviour
     #endregion
 
     #region SFX
-    public void PlaySFXAtPoint(AudioClip clip, Vector3 position, float volume = 1.0f, float pitch = 1.0f)
+    public void PlaySFXAtPoint(Source sourceToUse, AudioClip clip, Vector3 position, float volume = 1.0f, float pitch = 1.0f)
     {
-        coinSource.transform.position = position;
-        coinSource.pitch = pitch;
-        coinSource.PlayOneShot(clip, volume);
+        AudioSource source = sourceDict[sourceToUse];
+
+        source.transform.parent = transform;
+        source.transform.position = position;
+        source.pitch = pitch;
+        source.PlayOneShot(clip, volume);
+    }
+
+    public void PlaySFXNonPositional(Source sourceToUse, AudioClip clip, float volume = 1.0f, float pitch = 1.0f)
+    {
+        AudioSource source = sourceDict[sourceToUse];
+
+        source.transform.parent = Camera.main.transform;
+        source.pitch = pitch;
+        source.PlayOneShot(clip, volume);
     }
     #endregion
 
