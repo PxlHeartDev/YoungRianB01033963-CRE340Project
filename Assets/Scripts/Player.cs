@@ -13,7 +13,7 @@ public class Player : Car
     private InputAction m_jumpAction;
 
     // Whether the jump action is currently being held
-    private bool jumpHeld;
+    private bool jumpHeld = false;
 
     public int sequentialCoins = 0;
     private float sequentialCoinCooldown = 0.0f;

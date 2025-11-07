@@ -122,7 +122,7 @@ public class Car : MonoBehaviour, IDamageable
             rpm += 1.0f * Time.deltaTime;
             if (wheel.isOnGround) 
             {
-                wheel.ApplyGas(gasStrength);
+                wheel.ApplyGas(gasStrength * GameManager.standardDelta);
             }
         }
     }
@@ -138,7 +138,7 @@ public class Car : MonoBehaviour, IDamageable
 
         foreach (Wheel wheel in wheels)
         {
-            wheel.ApplyGas(-gasStrength * reversePercentage);
+            wheel.ApplyGas(-gasStrength * reversePercentage * GameManager.standardDelta);
         }
     }
     

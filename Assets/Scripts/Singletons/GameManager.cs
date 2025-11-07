@@ -17,6 +17,8 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    public static float standardDelta = 0.0f;
+
     public int score = 0;
     public float time = 0.0f;
 
@@ -25,10 +27,14 @@ public class GameManager : MonoBehaviour
     {
         _instance = this;
         DontDestroyOnLoad(this);
+
+        //Application.targetFrameRate = 60;
     }
     
     void Update()
     {
+        standardDelta = Time.deltaTime * 120.0f;
+        Debug.Log(1.0f/Time.smoothDeltaTime);
         time += Time.deltaTime;
     }
 

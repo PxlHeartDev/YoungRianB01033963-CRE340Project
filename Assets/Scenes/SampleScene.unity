@@ -10223,6 +10223,7 @@ MonoBehaviour:
   gasStrength: 40
   reversePercentage: 0.75
   actions: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}
+  sequentialCoins: 0
 --- !u!1001 &1836367589
 PrefabInstance:
   m_ObjectHideFlags: 0
