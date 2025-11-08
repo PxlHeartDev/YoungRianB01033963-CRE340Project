@@ -34,7 +34,7 @@ public class GameManager : MonoBehaviour
     void Update()
     {
         standardDelta = Time.deltaTime * 120.0f;
-        Debug.Log(1.0f/Time.smoothDeltaTime);
+        //Debug.Log(1.0f/Time.smoothDeltaTime);
         time += Time.deltaTime;
     }
 

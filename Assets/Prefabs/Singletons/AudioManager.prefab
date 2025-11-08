@@ -45,3 +45,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   mixer: {fileID: 24100000, guid: 51aa59a14a0138840a596dd9e4ab40c7, type: 2}
+  testMusic: {fileID: 8300000, guid: 7f1158a648a66494396da3fce7855e6d, type: 3}
+  mainMenuMusic: {fileID: 8300000, guid: 76b3fd156f352834bbef8d36f18bb227, type: 3}
+  mainMenuMusicLoop: {fileID: 8300000, guid: 18d88e2aaa5e6c344bc3e8820878fc39, type: 3}

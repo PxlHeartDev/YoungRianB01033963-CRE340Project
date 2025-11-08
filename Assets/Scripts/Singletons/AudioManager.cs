@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Audio;
 
@@ -27,22 +28,28 @@ public class AudioManager : MonoBehaviour
     // Music
     //
 
+    private double goalTime = 0.0;
+    private int musicToggle = 0;
+
     // Event for when the music changes
     public static System.Action<string> MusicChanged;
 
     // The AudioSource that music plays from
-    private AudioSource musicSource;
+    private AudioSource[] musicSources;
 
-    // The string name of the current music
-    private string currentMusic;
-    private AudioClip currentMusicClip;
+    // The current music
+    private Music currentMusic;
+
+    private AudioClip currentClip;
+    private AudioClip loopClip;
 
     // Dictionary containing all music resources
-    private Dictionary<string, AudioClip> musicDict;
+    private Dictionary<string, Music> musicDict;
 
     // Songs
     [SerializeField] private AudioClip testMusic;
-    [SerializeField] private AudioClip introMusic;
+    [SerializeField] private AudioClip mainMenuMusic;
+    [SerializeField] private AudioClip mainMenuMusicLoop;
 
     //
     // SFX
@@ -78,8 +85,8 @@ public class AudioManager : MonoBehaviour
 
         musicDict = new()
         {
-            {"Test", testMusic},
-            {"Intro", introMusic },
+            {"Test", new Music("Test", testMusic)},
+            {"MainMenu", new Music("Main Menu", mainMenuMusic, mainMenuMusicLoop) },
         };
 
 
@@ -89,71 +96,70 @@ public class AudioManager : MonoBehaviour
             source.transform.parent = transform;
         }
 
-
         GameObject coinSourceObject = new GameObject();
         collectableSource = coinSourceObject.AddComponent<AudioSource>();
 
         coinSourceObject.transform.parent = transform;
     }
 
+    void Start()
+    {
+        musicSources = Camera.main.GetComponents<AudioSource>();
+
+        currentMusic = new Music("none", testMusic);
+        PlayMusic("MainMenu");
+    }
+
+    private void Update()
+    {
+        Debug.Log(AudioSettings.dspTime - goalTime);
+        if(AudioSettings.dspTime > goalTime - 1.0f)
+        {
+            PlayScheduledMusic();
+        }
+    }
+
     #endregion
 
     #region Music
 
-    // Set the source of the music
-    public void SetMusicSource(AudioSource audioSource)
-    {
-        musicSource = audioSource;
-
-    }
+    // Music system is currently suitable for songs with an intro, no outro
+    // Currently has a weird bug where the looped section plays slightly before its meant to after the first loop. TODO
 
     // Play new music or continue paused music
-    public void PlayMusic(string newMusicName = "")
+    public void PlayMusic(string newMusicName)
     {
-        // Don't do anything and just continue playing if the new music is the same as the current one
-        if (newMusicName == "" || currentMusic == newMusicName)
-        {
-            musicSource.Play();
-            return;
-        }
-        // Get the AudioClip
-        AudioClip musicClip = musicDict[newMusicName];
+        // Get the music
+        Music newMusic = musicDict[newMusicName];
 
-        // Update tracker
-        currentMusic = newMusicName;
-
+        // Broadcast event
         MusicChanged?.Invoke(newMusicName);
 
-        // Play using the other function
-        PlayMusic(musicClip, true);
+        // Set the music
+        currentMusic = newMusic;
+        currentClip = newMusic.clip;
+        goalTime = AudioSettings.dspTime + 0.01;
+        PlayScheduledMusic();
+        goalTime = AudioSettings.dspTime + currentClip.length;
+        currentClip = newMusic.loopClip;
     }
     
-    // Play a generic AudioClip as music
-    private void PlayMusic(AudioClip newMusicClip, bool fromString = false)
+    // Play the next music clip
+    private void PlayScheduledMusic()
     {
-        // Don't do anything and just continue playing if the new music is the same as the current one
-        if (currentMusicClip == newMusicClip)
-        {
-            musicSource.Play();
-            return;
-        }
+        // Play the music
+        musicSources[musicToggle].clip = currentClip;
+        musicSources[musicToggle].PlayScheduled(goalTime);
 
-        // Update tracker
-        currentMusicClip = newMusicClip;
+        goalTime = goalTime + (double)(currentClip.samples / currentClip.frequency);
 
-        // If it was a generic AudioClip, set the currentMusic to an empty string
-        if (!fromString) currentMusic = "";
-
-        // Stop the music, set the new music, and then play it
-        musicSource.Stop();
-        musicSource.resource = newMusicClip;
-        musicSource.Play();
+        musicToggle = 1 - musicToggle;
     }
 
     // Pause the music
     public void PauseMusic()
     {
-        musicSource.Pause();
+        musicSources[1 - musicToggle].Pause();
     }
 
     #endregion
@@ -205,4 +211,25 @@ public class AudioManager : MonoBehaviour
         }
     }
     #endregion
+}
+
+public class Music
+{
+    public string name { get; private set; }
+    public AudioClip clip { get; private set; }
+    public AudioClip loopClip { get; private set; }
+
+
+    public Music(string _name, AudioClip _clip)
+    {
+        name = _name;
+        clip = _clip;
+    }
+
+    public Music(string _name, AudioClip _clip, AudioClip _loopClip)
+    {
+        name = _name;
+        clip = _clip;
+        loopClip = _loopClip;
+    } 
 }

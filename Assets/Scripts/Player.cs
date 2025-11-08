@@ -127,6 +127,6 @@ public class Player : Car
         else if (sequentialCoins <= 40) comboSFX = Resources.Load("SFX/Combo/Combo2") as AudioClip;
         else comboSFX = Resources.Load("SFX/Combo/Combo3") as AudioClip;
 
-        AudioManager.Instance.PlaySFXNonPositional(AudioManager.Source.Combo, comboSFX, 0.1f);
+        AudioManager.Instance.PlaySFXNonPositional(AudioManager.Source.Combo, comboSFX, 1.0f);
     }
 }

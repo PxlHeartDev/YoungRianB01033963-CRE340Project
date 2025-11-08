@@ -34,7 +34,7 @@ public class Coin : MonoBehaviour, ICollectable
             Player player = car as Player;
 
             // Play sound
-            AudioManager.Instance?.PlaySFXAtPoint(AudioManager.Source.Collectable, collectSFX, transform.position, 0.3f, player.GetCoinPitch());
+            AudioManager.Instance?.PlaySFXAtPoint(AudioManager.Source.Collectable, collectSFX, transform.position, 1.0f, player.GetCoinPitch());
 
             // Do collection logic
             GetComponent<Collider>().enabled = false;

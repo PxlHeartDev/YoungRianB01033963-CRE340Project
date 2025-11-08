@@ -34,12 +34,9 @@ public class CustomCamera : MonoBehaviour
     private float shakeStrength;
     private float shakeDuration;
     private float shakeTimeElapsed;
-    
+
     void Start()
     {
-        // Set the music source to this camera's audio source
-        AudioManager.Instance.SetMusicSource(GetComponent<AudioSource>());
-
         transformTracker = new GameObject();
         cameraTarget = forwardTarget;
     }
