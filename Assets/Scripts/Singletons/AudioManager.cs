@@ -48,6 +48,8 @@ public class AudioManager : MonoBehaviour
     [SerializeField] private AudioClip testMusic;
     [SerializeField] private AudioClip mainMenuMusic;
     [SerializeField] private AudioClip mainMenuMusicLoop;
+    [SerializeField] private AudioClip game1Music;
+    [SerializeField] private AudioClip game1MusicLoop;
 
     //
     // SFX
@@ -85,6 +87,7 @@ public class AudioManager : MonoBehaviour
         {
             {"Test", new Music("Test", testMusic)},
             {"MainMenu", new Music("Main Menu", mainMenuMusic, mainMenuMusicLoop) },
+            {"Game1", new Music("Game1", game1Music, game1MusicLoop) },
         };
 
 
@@ -105,7 +108,7 @@ public class AudioManager : MonoBehaviour
         musicSources = Camera.main.GetComponents<AudioSource>();
 
         currentMusic = new Music("none", testMusic);
-        PlayMusic("MainMenu");
+        PlayMusic("Game1");
     }
 
     private void Update()

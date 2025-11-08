@@ -12066,6 +12066,14 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: -8759185006463227781, guid: 57bfb33367086a9438699b7e064812cc, type: 3}
+      propertyPath: game1Music
+      value: 
+      objectReference: {fileID: 8300000, guid: 6061c7f92acd01d499ce09ce58cc403f, type: 3}
+    - target: {fileID: -8759185006463227781, guid: 57bfb33367086a9438699b7e064812cc, type: 3}
+      propertyPath: game1MusicLoop
+      value: 
+      objectReference: {fileID: 8300000, guid: 79a36bf41ff0b4e4fb1e4c797009cceb, type: 3}
     - target: {fileID: 5605923462944663747, guid: 57bfb33367086a9438699b7e064812cc, type: 3}
       propertyPath: m_Name
       value: AudioManager
