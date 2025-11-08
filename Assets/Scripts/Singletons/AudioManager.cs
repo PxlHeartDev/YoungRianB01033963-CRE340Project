@@ -1,6 +1,4 @@
 using System.Collections.Generic;
-using System.Linq;
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Audio;
 
@@ -112,8 +110,7 @@ public class AudioManager : MonoBehaviour
 
     private void Update()
     {
-        Debug.Log(AudioSettings.dspTime - goalTime);
-        if(AudioSettings.dspTime > goalTime - 1.0f)
+        if(goalTime > 0.0 && AudioSettings.dspTime > goalTime - 1.0f)
         {
             PlayScheduledMusic();
         }
@@ -132,21 +129,35 @@ public class AudioManager : MonoBehaviour
         // Get the music
         Music newMusic = musicDict[newMusicName];
 
-        // Broadcast event
-        MusicChanged?.Invoke(newMusicName);
+        // Reset looping
+        musicSources[0].loop = false;
+        musicSources[1].loop = false;
 
         // Set the music
         currentMusic = newMusic;
         currentClip = newMusic.clip;
         goalTime = AudioSettings.dspTime + 0.01;
         PlayScheduledMusic();
-        goalTime = AudioSettings.dspTime + currentClip.length;
-        currentClip = newMusic.loopClip;
+        if (newMusic.loopClip != null)
+        {
+            goalTime = AudioSettings.dspTime + currentClip.length;
+            currentClip = newMusic.loopClip;
+        }
+
+        // Broadcast event
+        MusicChanged?.Invoke(newMusicName);
     }
     
     // Play the next music clip
     private void PlayScheduledMusic()
     {
+        // If this is the looping clip then set looping state appropriately
+        if (currentMusic.loopClip == musicSources[1 - musicToggle].clip)
+        {
+            goalTime = -1.0; 
+            musicSources[1 - musicToggle].loop = true;
+            return;
+        }
         // Play the music
         musicSources[musicToggle].clip = currentClip;
         musicSources[musicToggle].PlayScheduled(goalTime);
