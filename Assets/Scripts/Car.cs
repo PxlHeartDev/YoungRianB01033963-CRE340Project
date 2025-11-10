@@ -33,6 +33,13 @@ public class Car : MonoBehaviour, IDamageable
     public int maxHealth { get; private set; } = 10;
     public int health { get; private set; } = 10;
 
+    // Drifting
+
+    private int driftingWheels = 0;
+    private bool isDrifting = false;
+    // Time spent in continuous drift
+    private float driftTime = 0.0f;
+
     void Awake()
     {
         // Generate the wheels
@@ -89,6 +96,7 @@ public class Car : MonoBehaviour, IDamageable
         rpm -= ((rpm * Mathf.PI) + -transform.InverseTransformDirection(rb.linearVelocity).z) * Time.deltaTime * 0.1f;
 
         groundedWheels = 0;
+        driftingWheels = 0;
         // Update every wheel
         foreach (Wheel wheel in wheels)
         {
@@ -107,9 +115,16 @@ public class Car : MonoBehaviour, IDamageable
             // Call the update function on each wheel
             wheel.UpdatePhysics();
 
-            // Updated tracker
+            // Update tracker
             if (wheel.isOnGround) groundedWheels++;
+            if (wheel.isDrifting) driftingWheels++;
         }
+
+        isDrifting = driftingWheels >= 2;
+        if (isDrifting) driftTime += Time.fixedDeltaTime;
+        else driftTime = 0.0f;
+
+        foreach(Wheel wheel in wheels) wheel.steerMult = 1.0f - Mathf.Clamp(driftTime / 10.0f, 0.0f, 0.5f);
     }
 
     #region Movement
@@ -244,6 +259,7 @@ class Wheel
     private readonly float rearGrip = 40.0f;
     // Steering
     private readonly float maxSteerDegrees = 15.0f;
+    public float steerMult = 1.0f;
     // Suspension
     private readonly float maxSuspensionLength = 2.5f;
     private readonly float suspensionStrength = 230.0f;
@@ -259,7 +275,7 @@ class Wheel
     // Steer of the wheel
     private float currentSteer = 0.0f;
     // Is the car in a drift
-    private bool isDrifting = false;
+    public bool isDrifting = false;
 
     //
     // VFX
@@ -345,7 +361,7 @@ class Wheel
         // Front wheel steering
         if (front)
         {
-            float degrees = ratio * maxSteerDegrees;
+            float degrees = ratio * maxSteerDegrees * steerMult;
             currentSteer = degrees;
             prefab.transform.localEulerAngles = new Vector3(prefab.transform.localEulerAngles.x, degrees, prefab.transform.localEulerAngles.z);
         }
@@ -430,7 +446,7 @@ class Wheel
         // Antislip force in the correct direction
         Vector3 antiSlip = wheelTransform.transform.forward * negationForce;
 
-        SetIsDrifting(antiSlip.magnitude > 20.0f);
+        SetIsDrifting(rbCar.linearVelocity.sqrMagnitude > 100.0f && antiSlip.magnitude > 20.0f);
 
         return antiSlip;
     }

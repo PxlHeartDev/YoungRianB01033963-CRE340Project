@@ -108,7 +108,7 @@ public class AudioManager : MonoBehaviour
         musicSources = Camera.main.GetComponents<AudioSource>();
 
         currentMusic = new Music("none", testMusic);
-        PlayMusic("Game1");
+        PlayMusic("MainMenu");
     }
 
     private void Update()
