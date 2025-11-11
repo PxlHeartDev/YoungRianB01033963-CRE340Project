@@ -41,6 +41,8 @@ public class AudioManager : MonoBehaviour
     private AudioClip currentClip;
     private AudioClip loopClip;
 
+    public string startSong = "MainMenu";
+
     // Dictionary containing all music resources
     private Dictionary<string, Music> musicDict;
 
@@ -108,7 +110,7 @@ public class AudioManager : MonoBehaviour
         musicSources = Camera.main.GetComponents<AudioSource>();
 
         currentMusic = new Music("none", testMusic);
-        PlayMusic("Game1");
+        PlayMusic(startSong);
     }
 
     private void Update()

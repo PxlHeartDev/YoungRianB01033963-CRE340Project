@@ -29,17 +29,23 @@ public class TrackGenerator : MonoBehaviour
                 Vector3[] points = piece.GetPointsInSegment(i);
                 Vector3[] vertexPoints = BezHelper.GeneratePoints(points[0], points[1], points[2], points[3], precision);
 
+                Debug.DrawLine(points[0], points[1], Color.red);
+                Debug.DrawLine(points[2], points[3], Color.red);
+
                 for (int j = 0; j < precision; j++)
                 {
-                    Debug.DrawLine(vertexPoints[i], vertexPoints[i + 1]);
+                    Debug.DrawLine(vertexPoints[j], vertexPoints[j + 1]);
                 }
+            }
 
-                Debug.DrawRay(points[0], Vector3.up, Color.green);
-                Debug.DrawRay(points[1], Vector3.up, Color.green);
-                Debug.DrawRay(points[2], Vector3.up, Color.green);
-                Debug.DrawRay(points[3], Vector3.up, Color.green);
+            foreach (Temp temp in piece.temps)
+            {
+                Debug.DrawRay(temp.pos, temp.forward, Color.blue);
+                Debug.DrawRay(temp.pos, temp.side, Color.red);
+                Debug.DrawRay(temp.pos, temp.up, Color.green);
             }
         }
+        
     }
     public void CreateInitialPiece()
     {
@@ -101,6 +107,8 @@ public class TrackPiece
     public float curveWidth = 1.0f;
     public int precision = 30;
 
+    public List<Temp> temps = new();
+
 
     public TrackPiece(Vector3 centre, float _scale)
     {
@@ -108,9 +116,9 @@ public class TrackPiece
         points = new List<Vector3>
         {
             centre + Vector3.left * scale,
-            centre + (Vector3.left + Vector3.forward) * 0.5f * scale,
-            centre + (Vector3.right + Vector3.back) * 0.5f * scale,
-            centre + Vector3.right * scale,
+            centre + (Vector3.left + Vector3.forward) * 0.5f * scale + Vector3.up,
+            centre + (Vector3.right + Vector3.back) * 0.5f * scale + Vector3.up * 2.0f,
+            centre + Vector3.right * scale + Vector3.up * 4.0f,
         };
     }
 
@@ -143,7 +151,6 @@ public class TrackPiece
     }
 
     #endregion
-
 
     #region Autoset Control Points
     void AutoSetAffectedControlPoints(int updatedAnchorIndex)
@@ -237,34 +244,51 @@ public class TrackPiece
     public List<GameObject> GenerateMesh()
     {
         List<GameObject> cubes = new();
-        for (int i = 0; i < NumSegments; i++)
+        for (int segmentIndex = 0; segmentIndex < NumSegments; segmentIndex++)
         {
-            Vector3[] segmentPoints = GetPointsInSegment(i);
-            List<Vector3> meshPoints = BezHelper.GeneratePoints(segmentPoints[0], segmentPoints[1], segmentPoints[2], segmentPoints[3], precision).ToList();
+            Vector3[] segmentPoints = GetPointsInSegment(segmentIndex);
 
-            for (int pointIndex = 0; pointIndex < meshPoints.Count; pointIndex++)
+            // Get the 4 points making the segment
+            Vector3 a = segmentPoints[0];
+            Vector3 b = segmentPoints[1];
+            Vector3 c = segmentPoints[2];
+            Vector3 d = segmentPoints[3];
+
+            // Combine the two intermediate control points
+            Vector3 bcMidpoint = (b + c) * 0.5f;
+
+            // Calculate the normal of the formed plane
+            Vector3 upDir = (bcMidpoint - a);
+            upDir = Vector3.Cross(upDir, d - a);
+            upDir.Normalize();
+
+            // Get the points that make up the part of the curve
+            List<Vector3> curvePoints = BezHelper.GeneratePoints(segmentPoints[0], segmentPoints[1], segmentPoints[2], segmentPoints[3], precision).ToList();
+
+            // Track previous forward vector
+            Vector3 previousForwardDir = Vector3.zero;
+
+            // For every point
+            for (int pointIndex = 0; pointIndex < curvePoints.Count; pointIndex++)
             {
-                Debug.Log(meshPoints[pointIndex]);
-                GameObject cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
+                // Set the forward direction
+                Vector3 forwardDir;
+                if (pointIndex < curvePoints.Count - 1) forwardDir = (curvePoints[pointIndex + 1] - curvePoints[pointIndex]).normalized;
+                else forwardDir = previousForwardDir;
 
-                Vector3 point = meshPoints[pointIndex];
+                // Calculate the side direction
+                Vector3 sideDir = (upDir - curvePoints[pointIndex]);
+                sideDir = Vector3.Cross(sideDir, forwardDir - curvePoints[pointIndex]);
+                sideDir.Normalize();
 
-                Quaternion rot = cube.transform.rotation;
-                Vector3 cubeScale = Vector3.one;
+                temps.Add(new Temp(curvePoints[pointIndex], upDir, forwardDir, sideDir));
 
-                if (pointIndex != meshPoints.Count - 1)
+                if (pointIndex == 0 && segmentIndex == 0)
                 {
-                    Vector3 nextPoint = meshPoints[pointIndex + 1];
-
-                    cubeScale.x = Vector3.Distance(point, nextPoint) * 0.98f;
-                    cubeScale.z = curveWidth * scale;
-
-                    //rot.SetLookRotation(nextPoint);
+                    // Close caps
                 }
 
-                cube.transform.SetPositionAndRotation(point, rot);
-                cube.transform.localScale = cubeScale;
-                cubes.Add(cube);
+                previousForwardDir = forwardDir;
             }
         }
 
@@ -272,5 +296,20 @@ public class TrackPiece
     }
 
     #endregion
+}
 
+public class Temp
+{
+    public Vector3 pos;
+    public Vector3 up;
+    public Vector3 forward;
+    public Vector3 side;
+
+    public Temp(Vector3 pos, Vector3 up, Vector3 forward, Vector3 side)
+    {
+        this.pos = pos;
+        this.up = up;
+        this.forward = forward;
+        this.side = side;
+    }
 }

@@ -103,18 +103,13 @@ public class Car : MonoBehaviour, IDamageable
             // Sync the transforms' rotation
             wheel.wheelTransform.transform.rotation = transform.rotation;
             // Draw debug gizmos
-            if (debug)
-            {
-                Debug.DrawRay(wheel.wheelTransform.transform.position, wheel.wheelTransform.transform.forward, Color.blue);
-                Debug.DrawRay(wheel.wheelTransform.transform.position, wheel.wheelTransform.transform.right, Color.red);
-                Debug.DrawRay(wheel.wheelTransform.transform.position, wheel.wheelTransform.transform.up, Color.green);
-            }
+            if (debug) TransformGizmos.DrawTransformGizmo(wheel.wheelTransform.transform);
             // Sync spin
             wheel.rpm = rpm;
 
             // Call the update function on each wheel
             wheel.UpdatePhysics();
-
+            
             // Update tracker
             if (wheel.isOnGround) groundedWheels++;
             if (wheel.isDrifting) driftingWheels++;
