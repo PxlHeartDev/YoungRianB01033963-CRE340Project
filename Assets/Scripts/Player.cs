@@ -129,4 +129,9 @@ public class Player : Car
 
         AudioManager.Instance.PlaySFXNonPositional(AudioManager.Source.Combo, comboSFX, 1.0f);
     }
+
+    public bool IsReversing()
+    {
+        return m_reverseAction.IsPressed();
+    }
 }

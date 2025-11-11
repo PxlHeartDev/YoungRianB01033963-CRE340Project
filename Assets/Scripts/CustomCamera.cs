@@ -10,8 +10,6 @@ public class CustomCamera : MonoBehaviour
 
     // Parameters
     [SerializeField] private float lerpSpeed = 0.1f;
-    [SerializeField] private float reverseFlipEpsilon = 0.1f;
-    [SerializeField] private float lockingLeniency = 0.8f;
 
     // Post-proc
     public Volume globalVolume;
@@ -35,6 +33,9 @@ public class CustomCamera : MonoBehaviour
     private float shakeDuration;
     private float shakeTimeElapsed;
 
+    //
+    private float rememberedZ = 0.0f;
+
     void Start()
     {
         transformTracker = new GameObject();
@@ -53,7 +54,7 @@ public class CustomCamera : MonoBehaviour
 
     void FixedUpdate()
     {
-        // If the player has died, set the camera to the last remembered transform
+        // If the player has died, set the camera to the last remembered transform and skip the rest of the logic
         // This fixes the edge-case of the camera being placed wrong if the player dies mid-shake
         if (player == null)
         {
@@ -61,70 +62,36 @@ public class CustomCamera : MonoBehaviour
             return;
         }
 
-        //AdjustTargetsToFallSpeed();
-
         MoveCamera();
-
-        //LockRot();
 
         if (shakeTimeElapsed < shakeDuration) DoCameraShake();
 
         DoVignetteFade();
 
-        // If the car is very slow, default to forward
-        // Use squared speed to compare because it's cheaper
-        float sqrSpeed = player.rb.linearVelocity.sqrMagnitude;
-        if (sqrSpeed < 64.0f) // speed < 8.0f
-        {
-            flipped = false;
-            cameraTarget = forwardTarget;
-            return;
-        }
-
-        //float upsideDownness = Vector3.Dot(cameraTarget.transform.up, transformTracker.transform.up);
-
-        //// If the car is flipped upside-down, don't do anything
-        //if (upsideDownness < lockingLeniency)
-        //{
-        //    return;
-        //}
-
-        // If falling, don't do anything
+        // If airbourne,
         if (player.groundedWheels == 0)
         {
-            flipped = false;
-            cameraTarget = forwardTarget;
-            return;
+            // Don't do flipping logic, keep it as is
+
+            // Check the player isn't falling with high speed
+            if (player.rb.linearVelocity.y > -30)
+            {
+                // Lock cam
+                LockRot();
+            }
         }
-
-        // Get the dot product of the current velocity of the car and the camera direction
-        Vector3 movement = player.rb.linearVelocity;
-        Vector3 cameraDir = transformTracker.transform.forward;
-        float dot = Vector3.Dot(movement, cameraDir);
-
-        // Switch the camera if needed
-        if (dot < -reverseFlipEpsilon)
+        else
         {
-            flipped = !flipped;
+            // Switch the camera if needed
+            flipped = player.IsReversing();
             cameraTarget = flipped ? reverseTarget : forwardTarget;
+
+            // Update tracker
+            rememberedZ = transform.eulerAngles.z;
         }
 
         savedPos = cameraTarget.transform.position;
         savedRot = cameraTarget.transform.rotation;
-    }
-
-    // Rotate the targets slightly down towards the car to account for fall speed
-    private void AdjustTargetsToFallSpeed()
-    {
-        float fallSpeed = player.rb.linearVelocity.y;
-
-        Vector3 fRot = forwardTarget.transform.localEulerAngles;
-        fRot.y = -113.0f - Mathf.Lerp(0.0f, 20.0f, fallSpeed / 500.0f);
-        forwardTarget.transform.localEulerAngles = fRot;
-
-        Vector3 rRot = reverseTarget.transform.localEulerAngles;
-        rRot.y = -246.0f + Mathf.Lerp(0.0f, 20.0f, fallSpeed / 500.0f);
-        reverseTarget.transform.localEulerAngles = rRot;
     }
 
     // Actually move the camera towards the target
@@ -137,25 +104,13 @@ public class CustomCamera : MonoBehaviour
         transform.SetPositionAndRotation(Vector3.Lerp(transform.position, cameraTarget.transform.position, lerpSpeed), Quaternion.Lerp(transform.rotation, cameraTarget.transform.rotation, lerpSpeed));
     }
 
-    // Lock the X and Z rotation of the camera
+    // Lock the Z rotation of the camera
     private void LockRot()
     {
-        // How well the camera's forward vector maps to down
-        float downPointedness = Vector3.Dot(cameraTarget.transform.forward, -transformTracker.transform.up);
-
         Vector3 rot = transform.eulerAngles;
+        rot.z = rememberedZ; // Set z rotation to the remembered value (so there is no rolling)
 
-        // Don't lock rolling if the car is pointing almost straight down (as it stutters)
-        if (downPointedness < lockingLeniency) rot.z = 0.0f; // Set z rotation to 0 (so there is no rolling)
-
-        if (rot.x >= 60.0f && rot.x <= 70.0f) rot.x = 60.0f;
-        if (rot.x > 70.0f && rot.x <= 80.0f) rot.x = 80.0f;
-
-        if (rot.x >= 270.0f && rot.x <= 280.0f) rot.x = 270.0f;
-        if (rot.x > 280.0f && rot.x <= 290.0f) rot.x = 290.0f;
-
-        transform.eulerAngles = rot;
-
+        transform.rotation = Quaternion.Euler(rot.x, rot.y, rot.z);
     }
 
     #region Events and Effects
