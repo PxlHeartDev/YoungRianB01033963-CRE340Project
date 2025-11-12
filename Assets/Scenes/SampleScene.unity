@@ -1188,7 +1188,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 201747087}
-  - component: {fileID: 201747088}
   m_Layer: 0
   m_Name: CamTarget1 (1)
   m_TagString: Untagged
@@ -1211,19 +1210,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 1206814597}
   m_LocalEulerAnglesHint: {x: -0.003, y: -246.373, z: -270.001}
---- !u!114 &201747088
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 201747086}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7331ac58edb527c44bbdafbb46f402bc, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  active: 1
 --- !u!1001 &206055117
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -7453,7 +7439,7 @@ Transform:
   m_GameObject: {fileID: 1219495807}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 63.53, y: 0.3, z: 104.22}
+  m_LocalPosition: {x: 414, y: 0.3, z: 186.9}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -12927,7 +12913,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 2073318637}
-  - component: {fileID: 2073318638}
   m_Layer: 0
   m_Name: CamTarget1
   m_TagString: Untagged
@@ -12950,19 +12935,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 1206814597}
   m_LocalEulerAnglesHint: {x: 0, y: -113.627, z: -90}
---- !u!114 &2073318638
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2073318636}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7331ac58edb527c44bbdafbb46f402bc, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  active: 1
 --- !u!1001 &2086187075
 PrefabInstance:
   m_ObjectHideFlags: 0

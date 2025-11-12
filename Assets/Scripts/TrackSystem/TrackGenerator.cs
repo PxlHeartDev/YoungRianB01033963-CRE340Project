@@ -52,7 +52,7 @@ public class TrackGenerator : MonoBehaviour
         pieces.Add(new TrackPiece(transform.position, trackScale));
         pieces[0].curveWidth = defaultTrackWidth;
         pieces[0].precision = precision;
-        pieces[0].AddSegment(Vector3.right * 5.0f + Vector3.forward * 2.5f);
+        pieces[0].AddSegment(Vector3.right * 6.0f + Vector3.forward * 2.5f);
         pieces[0].AddSegment(Vector3.right * 10.0f + Vector3.forward * -2.5f);
 
         List<GameObject> cubes = pieces[0].GenerateMesh();
@@ -259,7 +259,7 @@ public class TrackPiece
 
             // Calculate the normal of the formed plane
             Vector3 upDir = (bcMidpoint - a);
-            upDir = Vector3.Cross(upDir, d - a);
+            upDir = Vector3.Cross(upDir, d - bcMidpoint);
             upDir.Normalize();
 
             // Get the points that make up the part of the curve
@@ -277,8 +277,7 @@ public class TrackPiece
                 else forwardDir = previousForwardDir;
 
                 // Calculate the side direction
-                Vector3 sideDir = (upDir - curvePoints[pointIndex]);
-                sideDir = Vector3.Cross(sideDir, forwardDir - curvePoints[pointIndex]);
+                Vector3 sideDir = Vector3.Cross(upDir, forwardDir);
                 sideDir.Normalize();
 
                 temps.Add(new Temp(curvePoints[pointIndex], upDir, forwardDir, sideDir));
