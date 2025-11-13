@@ -16,6 +16,9 @@ public class TrackGenerator : MonoBehaviour
     // Mesh parameters
     public float defaultTrackWidth = 0.5f;
     public float defaultTrackHeight = 0.1f;
+    public float defaultBarrierWidth = 2.0f;
+    public float defaultBarrierHeight = 10.0f;
+    public bool doBarriers = true;
 
     private List<GameObject> meshChildren = new();
 
@@ -70,18 +73,33 @@ public class TrackGenerator : MonoBehaviour
     }
     public void CreateInitialPiece()
     {
-        float mult = 0.5f;
-
         pieces.Add(new TrackPiece(transform.position, trackScale));
         pieces[0].trackWidth = defaultTrackWidth;
         pieces[0].trackHeight = defaultTrackHeight;
         pieces[0].precision = precision;
+        pieces[0].barrierWidth = defaultBarrierWidth;
+        pieces[0].barrierHeight = defaultBarrierHeight;
+        pieces[0].doBarriers = doBarriers;
+        for (int i = 0; i < 10; i++)
+        {
+            pieces[0].AddSegment(new Vector3(Random.Range(-2.0f, 2.0f), Random.Range(-2.0f, 2.0f), Random.Range(1.0f, 2.0f)), Vector3.up);
+        }
+
+        pieces[0].AddSegment(new Vector3(0.1f, 0.3f, 0.6f), new Vector3(0, 1, -1));
+        pieces[0].AddSegment(new Vector3(0.1f, 0.6f, 0.3f), Vector3.back);
+        pieces[0].AddSegment(new Vector3(0.1f, 0.6f, -0.3f), new Vector3(0, -1, -1));
+        pieces[0].AddSegment(new Vector3(0.1f, 0.3f, -0.6f), Vector3.down);
+        pieces[0].AddSegment(new Vector3(0.1f, -0.3f, -0.6f), new Vector3(0, -1, 1));
+        pieces[0].AddSegment(new Vector3(0.1f, -0.6f, -0.3f), Vector3.forward);
+        pieces[0].AddSegment(new Vector3(0.1f, -0.6f, 0.3f), new Vector3(0, 1, 1));
+        pieces[0].AddSegment(new Vector3(0.1f, -0.3f, 0.6f), Vector3.up);
+
         pieces[0].AddSegment(new Vector3(0.1f, 0, 1), Vector3.up);
-        pieces[0].AddSegment(new Vector3(0.1f, 0, 1), Vector3.up);
-        pieces[0].AddSegment(new Vector3(1, 0, 1), Vector3.up);
-        pieces[0].AddSegment(new Vector3(1, 0, 0), Vector3.up);
-        pieces[0].AddSegment(new Vector3(1, 0, -1), Vector3.up);
-        pieces[0].AddSegment(new Vector3(10, 0, -10), Vector3.up);
+
+        for (int i = 0; i < 10; i++)
+        {
+            pieces[0].AddSegment(new Vector3(Random.Range(-2.0f, 2.0f), Random.Range(-2.0f, 2.0f), Random.Range(1.0f, 2.0f)), Vector3.up);
+        }
 
         List<Mesh> meshes = pieces[0].GenerateMesh();
 
@@ -144,6 +162,8 @@ public class TrackPiece
     public float barrierWidth = 2.0f;
     public float barrierHeight = 10.0f;
     public int precision = 10;
+
+    public bool doBarriers = true;
 
     public List<Temp> temps = new();
 
@@ -343,12 +363,18 @@ public class TrackPiece
                     sideDir = Vector3.Cross(upDir, forwardDir);
                     sideDir.Normalize();
 
+                    upDir = Vector3.Cross(forwardDir, sideDir).normalized;
+
                     // Debug list
                     temps.Add(new Temp(point, upDir, forwardDir, sideDir));
 
                     roadBuilder.BuildVerts(point, upDir, sideDir, Vector2.zero, true);
-                    rightBarrier.BuildVerts(point, upDir, sideDir, new Vector2(trackWidth/2 - barrierWidth/2, trackHeight), false);
-                    leftBarrier.BuildVerts(point, upDir, sideDir, new Vector2(-trackWidth/2 + barrierWidth/2, trackHeight), false);
+
+                    if (doBarriers)
+                    {
+                        rightBarrier.BuildVerts(point, upDir, sideDir, new Vector2(trackWidth / 2 - barrierWidth / 2, trackHeight), false);
+                        leftBarrier.BuildVerts(point, upDir, sideDir, new Vector2(-trackWidth / 2 + barrierWidth / 2, trackHeight), false);
+                    }
                 }
 
                 // Reduce the counter to avoid repeated tris
@@ -368,15 +394,19 @@ public class TrackPiece
             currentPoints += curvePoints.Count;
         }
 
-        rightBarrier.faceNormals = roadBuilder.faceNormals;
-        rightBarrier.tris = roadBuilder.tris;
-        leftBarrier.faceNormals = roadBuilder.faceNormals;
-        leftBarrier.tris = roadBuilder.tris;
-
         List<Mesh> allMeshes = new();
         allMeshes.AddRange(roadBuilder.FinishMesh());
-        allMeshes.AddRange(rightBarrier.FinishMesh());
-        allMeshes.AddRange(leftBarrier.FinishMesh());
+
+        if (doBarriers)
+        {
+            rightBarrier.faceNormals = roadBuilder.faceNormals;
+            rightBarrier.tris = roadBuilder.tris;
+            leftBarrier.faceNormals = roadBuilder.faceNormals;
+            leftBarrier.tris = roadBuilder.tris;
+
+            allMeshes.AddRange(rightBarrier.FinishMesh());
+            allMeshes.AddRange(leftBarrier.FinishMesh());
+        }
 
         return allMeshes;
     }
