@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using NUnit.Framework.Constraints;
 using UnityEngine;
 
 public class TrackGenerator : MonoBehaviour
@@ -16,13 +17,13 @@ public class TrackGenerator : MonoBehaviour
     public float defaultTrackWidth = 0.5f;
     public float defaultTrackHeight = 0.1f;
 
-    private GameObject[] meshChildren = new GameObject[4];
+    private List<GameObject> meshChildren = new();
 
     public Material roadMaterial;
 
     private void Awake()
     {
-        for (int i = 0; i < meshChildren.Length; i++)
+        for (int i = 0; i < meshChildren.Count; i++)
         {
             meshChildren[i] = new GameObject();
             meshChildren[i].transform.parent = transform;
@@ -69,24 +70,28 @@ public class TrackGenerator : MonoBehaviour
     }
     public void CreateInitialPiece()
     {
+        float mult = 0.5f;
+
         pieces.Add(new TrackPiece(transform.position, trackScale));
         pieces[0].trackWidth = defaultTrackWidth;
         pieces[0].trackHeight = defaultTrackHeight;
         pieces[0].precision = precision;
-        pieces[0].AddSegment(new Vector3(0.1f, 0.5f, 0.5f), Vector3.back);
-        pieces[0].AddSegment(new Vector3(0.1f, 0.5f, -0.5f), Vector3.down);
-        pieces[0].AddSegment(new Vector3(0.1f, -0.5f, -0.5f), Vector3.forward);
-        pieces[0].AddSegment(new Vector3(0.1f, -0.5f, 0.5f), Vector3.up);
+        pieces[0].AddSegment(new Vector3(0.1f, 0, 1), Vector3.up);
         pieces[0].AddSegment(new Vector3(0.1f, 0, 1), Vector3.up);
         pieces[0].AddSegment(new Vector3(1, 0, 1), Vector3.up);
         pieces[0].AddSegment(new Vector3(1, 0, 0), Vector3.up);
         pieces[0].AddSegment(new Vector3(1, 0, -1), Vector3.up);
         pieces[0].AddSegment(new Vector3(10, 0, -10), Vector3.up);
 
-        Mesh[] meshes = pieces[0].GenerateMesh();
+        List<Mesh> meshes = pieces[0].GenerateMesh();
 
-        for (int i = 0; i < meshChildren.Length; i++)
+        for (int i = 0; i < meshes.Count; i++)
         {
+            meshChildren.Add(new GameObject());
+            meshChildren[i].transform.parent = transform;
+            meshChildren[i].AddComponent<MeshRenderer>().material = roadMaterial;
+            meshChildren[i].AddComponent<MeshFilter>();
+            meshChildren[i].AddComponent<MeshCollider>();
             meshChildren[i].GetComponent<MeshFilter>().sharedMesh = meshes[i];
             meshChildren[i].AddComponent<MeshCollider>().sharedMesh = meshes[i];
         }
@@ -136,6 +141,8 @@ public class TrackPiece
     public float scale = 50.0f;
     public float trackWidth = 1.0f;
     public float trackHeight = 1.0f;
+    public float barrierWidth = 2.0f;
+    public float barrierHeight = 10.0f;
     public int precision = 10;
 
     public List<Temp> temps = new();
@@ -285,22 +292,8 @@ public class TrackPiece
     #region MeshGeneration
 
     // Generate the mesh of the track piece
-    public Mesh[] GenerateMesh()
+    public List<Mesh> GenerateMesh()
     {
-        // Left, Top, Right, Bottom
-        Mesh[] meshes = new Mesh[4];
-        List<int>[] tris = new List<int>[4];
-        List<Vector3>[] verts = new List<Vector3>[4];
-        List<Vector3>[] faceNormals = new List<Vector3>[4];
-
-        for (int i = 0 ; i < 4; i++)
-        {
-            meshes[i] = new Mesh();
-            tris[i] = new List<int>();
-            verts[i] = new List<Vector3>();
-            faceNormals[i] = new List<Vector3>();
-        }
-
         // Precalculate the list of precisions
         List<int> precisions = new() { };
         for (int segmentIndex = 0; segmentIndex < NumSegments; segmentIndex ++)
@@ -308,6 +301,9 @@ public class TrackPiece
 
         int currentPoints = 0;
 
+        MeshBuilder roadBuilder = new MeshBuilder(trackWidth, trackHeight);
+        MeshBuilder rightBarrier = new MeshBuilder(barrierWidth, barrierHeight);
+        MeshBuilder leftBarrier = new MeshBuilder(barrierWidth, barrierHeight);
 
         for (int segmentIndex = 0; segmentIndex < NumSegments; segmentIndex++)
         {
@@ -350,40 +346,9 @@ public class TrackPiece
                     // Debug list
                     temps.Add(new Temp(point, upDir, forwardDir, sideDir));
 
-
-                    List<Vector3> quad = new()
-                    {
-                        (point - sideDir * trackWidth/2.0f),
-                        (point + sideDir * trackWidth/2.0f),
-                        (point - sideDir * trackWidth/2.0f + upDir * trackHeight),
-                        (point + sideDir * trackWidth/2.0f + upDir * trackHeight),
-                    };
-
-                    // Left verts
-                    verts[0].Add(quad[0]);
-                    verts[0].Add(quad[2]);
-                    // Top verts
-                    verts[1].Add(quad[2]);
-                    verts[1].Add(quad[3]);
-                    // Right verts
-                    verts[2].Add(quad[3]);
-                    verts[2].Add(quad[1]);
-                    // Bottom verts
-                    verts[3].Add(quad[1]);
-                    verts[3].Add(quad[0]);
-
-                    // Left normals
-                    faceNormals[0].Add(-sideDir);
-                    faceNormals[0].Add(-sideDir);
-                    // Top normals
-                    faceNormals[1].Add(upDir);
-                    faceNormals[1].Add(upDir);
-                    // Right normals
-                    faceNormals[2].Add(sideDir);
-                    faceNormals[2].Add(sideDir);
-                    // Bottom normals
-                    faceNormals[3].Add(-upDir);
-                    faceNormals[3].Add(-upDir);
+                    roadBuilder.BuildVerts(point, upDir, sideDir, Vector2.zero, true);
+                    rightBarrier.BuildVerts(point, upDir, sideDir, new Vector2(trackWidth/2 - barrierWidth/2, trackHeight), false);
+                    leftBarrier.BuildVerts(point, upDir, sideDir, new Vector2(-trackWidth/2 + barrierWidth/2, trackHeight), false);
                 }
 
                 // Reduce the counter to avoid repeated tris
@@ -396,61 +361,149 @@ public class TrackPiece
                 {
                     int triIndex = pointIndex + currentPoints;
 
-                    // Left side
-                    List<int> curLeftTris = new()
-                    {
-                        (triIndex - 1) * 2,
-                        triIndex * 2,
-                        (triIndex - 1) * 2 + 1,
-                        triIndex * 2,
-                        triIndex * 2 + 1,
-                        (triIndex - 1) * 2 + 1,
-                    };
-
-                    // Top side
-                    List<int> curTopTris = new()
-                    {
-                        (triIndex - 1) * 2,
-                        triIndex * 2,
-                        (triIndex - 1) * 2 + 1,
-                        triIndex * 2,
-                        triIndex * 2 + 1,
-                        (triIndex - 1) * 2 + 1,
-                    };
-
-                    // Right side
-                    List<int> curRightTris = new()
-                    {
-                        triIndex * 2 + 1,
-                        (triIndex - 1) * 2 + 1,
-                        triIndex * 2,
-                        (triIndex - 1) * 2 + 1,
-                        (triIndex - 1) * 2,
-                        triIndex * 2,
-                    };
-
-                    // Bottom side
-                    List<int> curBottomTris = new()
-                    {
-                        (triIndex - 1) * 2 + 1,
-                        triIndex * 2,
-                        triIndex * 2 + 1,
-                        (triIndex - 1) * 2 + 1,
-                        (triIndex - 1) * 2,
-                        triIndex * 2,
-                    };
-
-                    tris[0].AddRange(curLeftTris);
-                    tris[1].AddRange(curTopTris);
-                    tris[2].AddRange(curRightTris);
-                    tris[3].AddRange(curBottomTris);
+                    roadBuilder.BuildTris(triIndex);
                 }
             }
 
             currentPoints += curvePoints.Count;
         }
 
-        for (int i = 0; i < meshes.Length; i++)
+        rightBarrier.faceNormals = roadBuilder.faceNormals;
+        rightBarrier.tris = roadBuilder.tris;
+        leftBarrier.faceNormals = roadBuilder.faceNormals;
+        leftBarrier.tris = roadBuilder.tris;
+
+        List<Mesh> allMeshes = new();
+        allMeshes.AddRange(roadBuilder.FinishMesh());
+        allMeshes.AddRange(rightBarrier.FinishMesh());
+        allMeshes.AddRange(leftBarrier.FinishMesh());
+
+        return allMeshes;
+    }
+}
+
+public class MeshBuilder
+{
+    public float width;
+    public float height;
+
+    private List<Mesh> meshes = new();
+    public List<List<Vector3>> verts = new();
+    public List<List<Vector3>> faceNormals = new();
+    public List<List<int>> tris = new();
+
+    public MeshBuilder(float _width, float _height)
+    {
+        width = _width;
+        height = _height;
+
+        for (int i = 0; i < 4; i++)
+        {
+            meshes.Add(new Mesh() { name = i.ToString() });
+            verts.Add(new List<Vector3>());
+            faceNormals.Add(new List<Vector3>());
+            tris.Add(new List<int>());
+        }
+    }
+
+    public void BuildVerts(Vector3 point, Vector3 upDir, Vector3 sideDir, Vector2 offset, bool alsoBuildNormals)
+    {
+        Vector3 centreOffset = sideDir * offset.x + upDir * offset.y;
+
+        List<Vector3> quad = new()
+        {
+            (point - sideDir * width/2.0f) + centreOffset,
+            (point + sideDir * width/2.0f) + centreOffset,
+            (point - sideDir * width/2.0f + upDir * height) + centreOffset,
+            (point + sideDir * width/2.0f + upDir * height) + centreOffset,
+        };
+
+        // Left verts
+        verts[0].Add(quad[0]);
+        verts[0].Add(quad[2]);
+        // Top verts
+        verts[1].Add(quad[2]);
+        verts[1].Add(quad[3]);
+        // Right verts
+        verts[2].Add(quad[3]);
+        verts[2].Add(quad[1]);
+        // Bottom verts
+        verts[3].Add(quad[1]);
+        verts[3].Add(quad[0]);
+
+        if (alsoBuildNormals) BuildNormals(upDir, sideDir);
+    }
+
+    public void BuildNormals(Vector3 upDir, Vector3 sideDir)
+    {
+        // Left normals
+        faceNormals[0].Add(-sideDir);
+        faceNormals[0].Add(-sideDir);
+        // Top normals
+        faceNormals[1].Add(upDir);
+        faceNormals[1].Add(upDir);
+        // Right normals
+        faceNormals[2].Add(sideDir);
+        faceNormals[2].Add(sideDir);
+        // Bottom normals
+        faceNormals[3].Add(-upDir);
+        faceNormals[3].Add(-upDir);
+    }
+
+    public void BuildTris(int triIndex)
+    {
+        List<int> curLeftTris = new()
+        {
+            (triIndex - 1) * 2,
+            triIndex * 2,
+            (triIndex - 1) * 2 + 1,
+            triIndex * 2,
+            triIndex * 2 + 1,
+            (triIndex - 1) * 2 + 1,
+        };
+
+        // Top side
+        List<int> curTopTris = new()
+        {
+            (triIndex - 1) * 2,
+            triIndex * 2,
+            (triIndex - 1) * 2 + 1,
+            triIndex * 2,
+            triIndex * 2 + 1,
+            (triIndex - 1) * 2 + 1,
+        };
+
+        // Right side
+        List<int> curRightTris = new()
+        {
+            triIndex * 2 + 1,
+            (triIndex - 1) * 2 + 1,
+            triIndex * 2,
+            (triIndex - 1) * 2 + 1,
+            (triIndex - 1) * 2,
+            triIndex * 2,
+        };
+
+        // Bottom side
+        List<int> curBottomTris = new()
+        {
+            (triIndex - 1) * 2 + 1,
+            triIndex * 2,
+            triIndex * 2 + 1,
+            (triIndex - 1) * 2 + 1,
+            (triIndex - 1) * 2,
+            triIndex * 2,
+        };
+
+        tris[0].AddRange(curLeftTris);
+        tris[1].AddRange(curTopTris);
+        tris[2].AddRange(curRightTris);
+        tris[3].AddRange(curBottomTris);
+    }
+
+    public List<Mesh> FinishMesh()
+    {
+        for (int i = 0; i < 4; i++)
         {
             meshes[i].vertices = verts[i].ToArray();
             meshes[i].triangles = tris[i].ToArray();
