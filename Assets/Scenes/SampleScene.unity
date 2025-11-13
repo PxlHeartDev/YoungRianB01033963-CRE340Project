@@ -7514,7 +7514,7 @@ Transform:
   m_GameObject: {fileID: 1219495807}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 414, y: 0.3, z: 186.9}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -7534,9 +7534,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   pieces: []
   texture: {fileID: 0}
-  precision: 30
-  trackScale: 50
-  defaultTrackWidth: 1
+  precision: 10
+  trackScale: 100
+  defaultTrackWidth: 30
+  defaultTrackHeight: 2
+  roadMaterial: {fileID: 2100000, guid: 31321ba15b8f8eb4c954353edc038b1d, type: 2}
 --- !u!1001 &1225007265
 PrefabInstance:
   m_ObjectHideFlags: 0

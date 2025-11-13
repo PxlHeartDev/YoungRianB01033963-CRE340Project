@@ -1,7 +1,5 @@
 using System.Collections.Generic;
 using System.Linq;
-using System.Net.NetworkInformation;
-using Unity.VisualScripting;
 using UnityEngine;
 
 public class TrackGenerator : MonoBehaviour
@@ -11,14 +9,28 @@ public class TrackGenerator : MonoBehaviour
     public Texture2D texture;
 
     // Bezier parameters
-    public int precision = 30;
-    public float trackScale = 100.0f;
+    public int precision = 10;
+    public float trackScale = 50.0f;
 
     // Mesh parameters
-    public float defaultTrackWidth = 0.1f;
+    public float defaultTrackWidth = 0.5f;
+    public float defaultTrackHeight = 0.1f;
+
+    private GameObject[] meshChildren = new GameObject[4];
+
+    public Material roadMaterial;
 
     private void Awake()
     {
+        for (int i = 0; i < meshChildren.Length; i++)
+        {
+            meshChildren[i] = new GameObject();
+            meshChildren[i].transform.parent = transform;
+            meshChildren[i].AddComponent<MeshRenderer>().material = roadMaterial;
+            meshChildren[i].AddComponent<MeshFilter>();
+            meshChildren[i].AddComponent<MeshCollider>();
+        }
+
         CreateInitialPiece();
     }
 
@@ -26,24 +38,24 @@ public class TrackGenerator : MonoBehaviour
     {
         foreach (TrackPiece piece in pieces)
         {
-            for (int i = 0; i < piece.NumSegments; i += 1)
+            for (int segmentIndex = 0; segmentIndex < piece.NumSegments; segmentIndex += 1)
             {
-                Point[] points = piece.GetPointsInSegment(i);
+                Point[] points = piece.GetPointsInSegment(segmentIndex);
 
                 foreach (Point point in points)
                 {
                     Debug.DrawLine(point.pos, point.pos + point.upDir * 2.0f, Color.purple);
                 }
 
-                Vector3[] vertexPoints = BezHelper.GeneratePoints(points[0].pos, points[1].pos, points[2].pos, points[3].pos, precision);
+                int newPrecision = piece.GetAutoPrecisionOfSegment(segmentIndex);
+
+                Vector3[] vertexPoints = BezHelper.GeneratePoints(points[0].pos, points[1].pos, points[2].pos, points[3].pos, newPrecision);
 
                 Debug.DrawLine(points[0].pos, points[1].pos, Color.red);
                 Debug.DrawLine(points[2].pos, points[3].pos, Color.red);
 
-                for (int j = 0; j < precision; j++)
-                {
+                for (int j = 0; j < newPrecision; j++)
                     Debug.DrawLine(vertexPoints[j], vertexPoints[j + 1]);
-                }
             }
 
             foreach (Temp temp in piece.temps)
@@ -58,7 +70,8 @@ public class TrackGenerator : MonoBehaviour
     public void CreateInitialPiece()
     {
         pieces.Add(new TrackPiece(transform.position, trackScale));
-        pieces[0].curveWidth = defaultTrackWidth;
+        pieces[0].trackWidth = defaultTrackWidth;
+        pieces[0].trackHeight = defaultTrackHeight;
         pieces[0].precision = precision;
         pieces[0].AddSegment(new Vector3(0.1f, 0.5f, 0.5f), Vector3.back);
         pieces[0].AddSegment(new Vector3(0.1f, 0.5f, -0.5f), Vector3.down);
@@ -68,11 +81,14 @@ public class TrackGenerator : MonoBehaviour
         pieces[0].AddSegment(new Vector3(1, 0, 1), Vector3.up);
         pieces[0].AddSegment(new Vector3(1, 0, 0), Vector3.up);
         pieces[0].AddSegment(new Vector3(1, 0, -1), Vector3.up);
+        pieces[0].AddSegment(new Vector3(10, 0, -10), Vector3.up);
 
-        List<GameObject> cubes = pieces[0].GenerateMesh();
-        foreach(GameObject cube in cubes)
+        Mesh[] meshes = pieces[0].GenerateMesh();
+
+        for (int i = 0; i < meshChildren.Length; i++)
         {
-            cube.transform.parent = transform;
+            meshChildren[i].GetComponent<MeshFilter>().sharedMesh = meshes[i];
+            meshChildren[i].AddComponent<MeshCollider>().sharedMesh = meshes[i];
         }
     }
 }
@@ -117,9 +133,10 @@ public struct BezHelper
 public class TrackPiece
 {
     public List<Point> points = new List<Point>();
-    public float scale = 100.0f;
-    public float curveWidth = 1.0f;
-    public int precision = 30;
+    public float scale = 50.0f;
+    public float trackWidth = 1.0f;
+    public float trackHeight = 1.0f;
+    public int precision = 10;
 
     public List<Temp> temps = new();
 
@@ -140,11 +157,11 @@ public class TrackPiece
     #region Management
     public void AddSegment(Vector3 deltaPos, Vector3? upDir = null)
     {
-        Vector3 anchorPos = points[points.Count - 1].pos/scale + deltaPos;
+        Vector3 anchorPos = points[points.Count - 1].pos + deltaPos * scale;
 
         points.Add(new Point(points[points.Count - 1].pos * 2.0f - points[points.Count - 2].pos, upDir));
-        points.Add(new Point((points[points.Count - 1].pos + anchorPos * scale) * 0.5f, upDir));
-        points.Add(new Point(anchorPos * scale, upDir));
+        points.Add(new Point((points[points.Count - 1].pos + anchorPos) * 0.5f, upDir));
+        points.Add(new Point(anchorPos, upDir));
 
         AutoSetAffectedControlPoints(points.Count - 1);
     }
@@ -244,6 +261,11 @@ public class TrackPiece
         get { return (points.Count-1)/3; }
     }
 
+    public Point LastPoint
+    {
+        get { return points[points.Count - 1]; }
+    }
+
     public Point[] GetPointsInSegment(int i)
     {
         return new Point[] { points[i * 3], points[i * 3 + 1], points[i * 3 + 2], points[i * 3 + 3] };
@@ -253,20 +275,46 @@ public class TrackPiece
     {
         return (i + points.Count) % points.Count;
     }
+
+    public int GetAutoPrecisionOfSegment(int i)
+    {
+        return (int)(Vector3.Distance(points[i * 3].pos, points[i * 3 + 3].pos) * precision / scale);
+    }
     #endregion
 
     #region MeshGeneration
 
-    public List<GameObject> GenerateMesh()
+    // Generate the mesh of the track piece
+    public Mesh[] GenerateMesh()
     {
-        List<GameObject> cubes = new();
+        // Left, Top, Right, Bottom
+        Mesh[] meshes = new Mesh[4];
+        List<int>[] tris = new List<int>[4];
+        List<Vector3>[] verts = new List<Vector3>[4];
+        List<Vector3>[] faceNormals = new List<Vector3>[4];
+
+        for (int i = 0 ; i < 4; i++)
+        {
+            meshes[i] = new Mesh();
+            tris[i] = new List<int>();
+            verts[i] = new List<Vector3>();
+            faceNormals[i] = new List<Vector3>();
+        }
+
+        // Precalculate the list of precisions
+        List<int> precisions = new() { };
+        for (int segmentIndex = 0; segmentIndex < NumSegments; segmentIndex ++)
+            precisions.Add(GetAutoPrecisionOfSegment(segmentIndex));
+
+        int currentPoints = 0;
+
 
         for (int segmentIndex = 0; segmentIndex < NumSegments; segmentIndex++)
         {
             Point[] segmentPoints = GetPointsInSegment(segmentIndex);
 
             // Get the points that make up the part of the curve
-            List<Vector3> curvePoints = BezHelper.GeneratePoints(segmentPoints[0].pos, segmentPoints[1].pos, segmentPoints[2].pos, segmentPoints[3].pos, precision).ToList();
+            List<Vector3> curvePoints = BezHelper.GeneratePoints(segmentPoints[0].pos, segmentPoints[1].pos, segmentPoints[2].pos, segmentPoints[3].pos, precisions[segmentIndex]).ToList();
 
             // Track previous forward vector
             Vector3 previousForwardDir = Vector3.zero;
@@ -274,48 +322,147 @@ public class TrackPiece
             // For every point
             for (int pointIndex = 0; pointIndex < curvePoints.Count; pointIndex++)
             {
+
+                Vector3 point = curvePoints[pointIndex];
+
+                Vector3 upDir = Vector3.up;
+                Vector3 forwardDir = Vector3.forward;
+                Vector3 sideDir = Vector3.right;
+
                 // Don't loop over the first point of every non-first segment. Avoids repeats
-                if (segmentIndex != 0 && pointIndex == 0) continue;
-
-                // Default the up direction according to the control ups
-                Vector3 upDir = Vector3.Lerp(segmentPoints[0].upDir, segmentPoints[3].upDir, (float)(pointIndex) / (float)(curvePoints.Count));
-
-                // Set the forward direction
-                Vector3 forwardDir;
-                if (pointIndex < curvePoints.Count - 1) forwardDir = (curvePoints[pointIndex + 1] - curvePoints[pointIndex]).normalized;
-                else forwardDir = previousForwardDir;
-
-                // Set the tracker
-                previousForwardDir = forwardDir;
-
-                // Calculate the new up direction as the rotational difference between the previous and current forward direction
-                upDir += forwardDir - previousForwardDir;
-                upDir.Normalize();
-
-                // Calculate the side direction
-                Vector3 sideDir = Vector3.Cross(upDir, forwardDir);
-                sideDir.Normalize();
-
-                // Recalcualte upDir using forward and side
-                upDir = Vector3.Cross(forwardDir, sideDir);
-
-                // Debug list
-                temps.Add(new Temp(curvePoints[pointIndex], upDir, forwardDir, sideDir));
-
-                if (pointIndex == 0 && segmentIndex == 0)
+                if (segmentIndex == 0 || pointIndex > 0)
                 {
-                    // Close caps
+                    // Default the up direction according to the control ups
+                    upDir = Vector3.Lerp(segmentPoints[0].upDir, segmentPoints[3].upDir, (float)(pointIndex) / (float)(curvePoints.Count));
+
+                    // Set the forward direction
+                    if (pointIndex < curvePoints.Count - 1)
+                        forwardDir = (curvePoints[pointIndex + 1] - point).normalized;
+                    else forwardDir = previousForwardDir;
+
+                    // Set the tracker
+                    previousForwardDir = forwardDir;
+
+                    // Calculate the side direction
+                    sideDir = Vector3.Cross(upDir, forwardDir);
+                    sideDir.Normalize();
+
+                    // Debug list
+                    temps.Add(new Temp(point, upDir, forwardDir, sideDir));
+
+
+                    List<Vector3> quad = new()
+                    {
+                        (point - sideDir * trackWidth/2.0f),
+                        (point + sideDir * trackWidth/2.0f),
+                        (point - sideDir * trackWidth/2.0f + upDir * trackHeight),
+                        (point + sideDir * trackWidth/2.0f + upDir * trackHeight),
+                    };
+
+                    // Left verts
+                    verts[0].Add(quad[0]);
+                    verts[0].Add(quad[2]);
+                    // Top verts
+                    verts[1].Add(quad[2]);
+                    verts[1].Add(quad[3]);
+                    // Right verts
+                    verts[2].Add(quad[3]);
+                    verts[2].Add(quad[1]);
+                    // Bottom verts
+                    verts[3].Add(quad[1]);
+                    verts[3].Add(quad[0]);
+
+                    // Left normals
+                    faceNormals[0].Add(-sideDir);
+                    faceNormals[0].Add(-sideDir);
+                    // Top normals
+                    faceNormals[1].Add(upDir);
+                    faceNormals[1].Add(upDir);
+                    // Right normals
+                    faceNormals[2].Add(sideDir);
+                    faceNormals[2].Add(sideDir);
+                    // Bottom normals
+                    faceNormals[3].Add(-upDir);
+                    faceNormals[3].Add(-upDir);
                 }
 
+                // Reduce the counter to avoid repeated tris
+                if (segmentIndex > 0 && pointIndex == 0)
+                    currentPoints -= 1;
+
+
+                // Stitch mesh vertices into triangles
+                if (segmentIndex > 0 || (segmentIndex == 0 && pointIndex > 0))
+                {
+                    int triIndex = pointIndex + currentPoints;
+
+                    // Left side
+                    List<int> curLeftTris = new()
+                    {
+                        (triIndex - 1) * 2,
+                        triIndex * 2,
+                        (triIndex - 1) * 2 + 1,
+                        triIndex * 2,
+                        triIndex * 2 + 1,
+                        (triIndex - 1) * 2 + 1,
+                    };
+
+                    // Top side
+                    List<int> curTopTris = new()
+                    {
+                        (triIndex - 1) * 2,
+                        triIndex * 2,
+                        (triIndex - 1) * 2 + 1,
+                        triIndex * 2,
+                        triIndex * 2 + 1,
+                        (triIndex - 1) * 2 + 1,
+                    };
+
+                    // Right side
+                    List<int> curRightTris = new()
+                    {
+                        triIndex * 2 + 1,
+                        (triIndex - 1) * 2 + 1,
+                        triIndex * 2,
+                        (triIndex - 1) * 2 + 1,
+                        (triIndex - 1) * 2,
+                        triIndex * 2,
+                    };
+
+                    // Bottom side
+                    List<int> curBottomTris = new()
+                    {
+                        (triIndex - 1) * 2 + 1,
+                        triIndex * 2,
+                        triIndex * 2 + 1,
+                        (triIndex - 1) * 2 + 1,
+                        (triIndex - 1) * 2,
+                        triIndex * 2,
+                    };
+
+                    tris[0].AddRange(curLeftTris);
+                    tris[1].AddRange(curTopTris);
+                    tris[2].AddRange(curRightTris);
+                    tris[3].AddRange(curBottomTris);
+                }
             }
+
+            currentPoints += curvePoints.Count;
         }
 
-        return cubes;
-    }
+        for (int i = 0; i < meshes.Length; i++)
+        {
+            meshes[i].vertices = verts[i].ToArray();
+            meshes[i].triangles = tris[i].ToArray();
+            meshes[i].normals = faceNormals[i].ToArray();
+            meshes[i].RecalculateBounds();
+        }
 
-    #endregion
+        return meshes;
+    }
 }
 
+#endregion
 public class Point
 {
     public Vector3 pos;
@@ -326,6 +473,7 @@ public class Point
         pos = _pos;
         if (_upDir == null) upDir = Vector3.up;
         else upDir = (Vector3)(_upDir);
+        upDir.Normalize();
     }
 }
 

@@ -86,7 +86,7 @@ public class CustomCamera : MonoBehaviour
         else
         {
             // Switch the camera if needed
-            flipped = player.IsReversing();
+            flipped = player.IsReversing() && Vector3.Dot(player.rb.linearVelocity.normalized, player.rb.transform.right) < -0.1f;
             cameraTarget = flipped ? reverseTarget : forwardTarget;
 
             // Update tracker
