@@ -88,7 +88,7 @@ public class TrackGenerator : MonoBehaviour
 
     IEnumerator<WaitForSeconds> SlowGenPieces()
     {
-        yield return new WaitForSeconds(2.0f);
+        yield return new WaitForSeconds(1.0f);
         for (int i = 0; i < 5; i++)
         {
             yield return new WaitForSeconds(1.0f);
@@ -366,8 +366,10 @@ public class TrackPiece
 
         Point[] segmentPoints = GetPointsInSegment(segmentIndex);
 
+        int segmentPrecision = GetAutoPrecisionOfSegment(segmentIndex);
+
         // Get the points that make up the part of the curve
-        List<Vector3> curvePoints = BezHelper.GeneratePoints(segmentPoints[0].pos, segmentPoints[1].pos, segmentPoints[2].pos, segmentPoints[3].pos, GetAutoPrecisionOfSegment(segmentIndex)).ToList();
+        List<Vector3> curvePoints = BezHelper.GeneratePoints(segmentPoints[0].pos, segmentPoints[1].pos, segmentPoints[2].pos, segmentPoints[3].pos, segmentPrecision).ToList();
 
         // Track previous forward vector
         Vector3 previousForwardDir = Vector3.zero;
@@ -453,7 +455,7 @@ public class RoadMeshBuilder
     public float height;
 
     private List<Mesh> meshes = new();
-    public List<List<Vector3>> verts = new();
+    private List<List<Vector3>> verts = new();
     public List<List<Vector3>> faceNormals = new();
     public List<List<int>> tris = new();
 
@@ -601,6 +603,56 @@ public class RoadMeshBuilder
         }
 
         return meshes;
+    }
+}
+
+public class MountainMeshBuilder
+{
+    public float roadWidth;
+    public float transitionLength;
+
+    // Number of vertices to expand left/right
+    public int verticesFromCentreCount = 0;
+    public float squareLength = 1.0f;
+
+
+    private Mesh mesh = new();
+    private List<Vector3> verts = new();
+    public List<int> tris = new();
+
+
+    public List<Vector3> lastLine;
+
+    public MountainMeshBuilder(float _roadWidth)
+    {
+        roadWidth = _roadWidth;
+    }
+
+    public void BuildVerts(Vector3 point, Vector3 upDir, Vector3 sideDir)
+    {
+
+        List<Vector3> line = new();
+        
+        for (int i = -verticesFromCentreCount; i < verticesFromCentreCount; i++)
+        {
+            float distanceFromCurve = i * squareLength;
+
+            line.Add(sideDir * distanceFromCurve);
+        }
+
+        verts.AddRange(line);
+
+        lastLine = line;
+    }
+
+    public void BuildVerts(List<Vector3> previousLine)
+    {
+        verts.AddRange(previousLine);
+    }
+
+    public void BuildTris()
+    {
+
     }
 }
 
