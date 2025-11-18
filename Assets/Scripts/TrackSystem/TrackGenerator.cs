@@ -91,21 +91,21 @@ public class TrackGenerator : MonoBehaviour
             yield return new WaitForSeconds(1.0f);
             pieces[0].AddSegment(new Vector3(UnityEngine.Random.Range(-3.0f, 3.0f), UnityEngine.Random.Range(-0.5f, 0.5f), UnityEngine.Random.Range(2.0f, 2.5f)), Vector3.up);
         }
-        for (int i = 0; i < 5; i++)
-        {
-            yield return new WaitForSeconds(1.0f);
-            pieces[0].DeleteSegment(0);
-        }
+        //for (int i = 0; i < 5; i++)
+        //{
+        //    yield return new WaitForSeconds(1.0f);
+        //    pieces[0].DeleteSegment(0);
+        //}
         for (int i = 0; i < 3; i++)
         {
             yield return new WaitForSeconds(1.0f);
             pieces[0].AddSegment(new Vector3(UnityEngine.Random.Range(-3.0f, 3.0f), UnityEngine.Random.Range(-0.5f, 0.5f), UnityEngine.Random.Range(2.0f, 2.5f)), Vector3.up);
         }
-        for (int i = 0; i < 3; i++)
-        {
-            yield return new WaitForSeconds(1.0f);
-            pieces[0].DeleteSegment(0);
-        }
+        //for (int i = 0; i < 3; i++)
+        //{
+        //    yield return new WaitForSeconds(1.0f);
+        //    pieces[0].DeleteSegment(0);
+        //}
     }
 
     public void RoadMeshPieceGenerated(List<Mesh> meshes)
@@ -648,7 +648,7 @@ public class MountainMeshBuilder
     public float transitionLength;
 
     // Number of vertices to expand left/right
-    public int verticesFromCentreCount = 16;
+    public int verticesFromCentreCount = 20;
     public float tileWidth = 12.0f;
     public float mountainXZScale = 0.01f;
     public float mountainHeight = 100.0f;
@@ -658,7 +658,7 @@ public class MountainMeshBuilder
     private Mesh mesh = new();
     private List<Vector3> verts = new();
     public List<int> tris = new();
-
+    private List<Vector2> uvs = new();
 
     public List<Vector3> lastLine;
 
@@ -667,7 +667,7 @@ public class MountainMeshBuilder
         roadWidth = _roadWidth;
     }
 
-    public void BuildVerts(Vector3 point, Vector3 sideDir)
+    public void BuildVerts(Vector3 point, Vector3 sideDir, bool isSecondOfSegment = false)
     {
 
         List<Vector3> line = new();
@@ -680,7 +680,15 @@ public class MountainMeshBuilder
 
             float distanceFromEdge = Mathf.Abs(distanceFromCurve) - roadWidth - 0.5f;
 
-            float relief = baseLevel + Mathf.Clamp(distanceFromEdge * 0.03f, 0, 2) * (Mathf.PerlinNoise(vertexPos.x * mountainXZScale, vertexPos.z * mountainXZScale)) * mountainHeight ;
+            float relief = baseLevel + Mathf.Clamp(distanceFromEdge * 0.03f, 0, 2) * (Mathf.PerlinNoise(vertexPos.x * mountainXZScale, vertexPos.z * mountainXZScale)) * mountainHeight;
+
+            if (isSecondOfSegment)
+            {
+                uvs.Add(new Vector2(Mathf.Clamp01(relief / 100.0f), 0.5f));
+            }
+
+            uvs.Add(new Vector2(Mathf.Clamp01(relief/100.0f), 0.5f));
+
             line.Add(vertexPos + Vector3.up * relief);
         }
 
@@ -720,6 +728,7 @@ public class MountainMeshBuilder
     {
         mesh.vertices = verts.ToArray();
         mesh.triangles = tris.ToArray();
+        mesh.uv = uvs.ToArray();
         mesh.RecalculateBounds();
         mesh.RecalculateNormals();
 
