@@ -667,7 +667,7 @@ public class MountainMeshBuilder
         roadWidth = _roadWidth;
     }
 
-    public void BuildVerts(Vector3 point, Vector3 sideDir, bool isSecondOfSegment = false)
+    public void BuildVerts(Vector3 point, Vector3 sideDir)
     {
 
         List<Vector3> line = new();
@@ -682,11 +682,6 @@ public class MountainMeshBuilder
 
             float relief = baseLevel + Mathf.Clamp(distanceFromEdge * 0.03f, 0, 2) * (Mathf.PerlinNoise(vertexPos.x * mountainXZScale, vertexPos.z * mountainXZScale)) * mountainHeight;
 
-            if (isSecondOfSegment)
-            {
-                uvs.Add(new Vector2(Mathf.Clamp01(relief / 100.0f), 0.5f));
-            }
-
             uvs.Add(new Vector2(Mathf.Clamp01(relief/100.0f), 0.5f));
 
             line.Add(vertexPos + Vector3.up * relief);
@@ -699,6 +694,19 @@ public class MountainMeshBuilder
 
     public void BuildVerts(List<Vector3> previousLine)
     {
+        for (int i = -verticesFromCentreCount; i <= verticesFromCentreCount; i++)
+        {
+            float distanceFromCurve = i * tileWidth;
+
+            Vector3 vertexPos = previousLine[i + verticesFromCentreCount];
+
+            float distanceFromEdge = Mathf.Abs(distanceFromCurve) - roadWidth - 0.5f;
+
+            float relief = baseLevel + Mathf.Clamp(distanceFromEdge * 0.03f, 0, 2) * (Mathf.PerlinNoise(vertexPos.x * mountainXZScale, vertexPos.z * mountainXZScale)) * mountainHeight;
+
+            uvs.Add(new Vector2(Mathf.Clamp01(relief / 100.0f), 0.5f));
+        }
+
         verts.AddRange(previousLine);
     }
 
