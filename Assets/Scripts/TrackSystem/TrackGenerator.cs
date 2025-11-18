@@ -1,6 +1,6 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using NUnit.Framework.Constraints;
 using UnityEngine;
 
 public class TrackGenerator : MonoBehaviour
@@ -10,17 +10,19 @@ public class TrackGenerator : MonoBehaviour
     public Texture2D texture;
 
     // Bezier parameters
-    public int precision = 10;
-    public float trackScale = 50.0f;
+    public int precision = 15;
+    public float trackScale = 100.0f;
 
     // Mesh parameters
-    public float defaultTrackWidth = 0.5f;
+    public float defaultTrackWidth = 80.0f;
     public float defaultTrackHeight = 0.1f;
     public float defaultBarrierWidth = 2.0f;
-    public float defaultBarrierHeight = 10.0f;
+    public float defaultBarrierHeight = 8.0f;
     public bool doBarriers = true;
 
-    private List<GameObject> meshChildren = new();
+    [SerializeField] private List<GameObject> meshChildren = new();
+
+    private int meshChildrenCount = 0;
 
     public Material roadMaterial;
 
@@ -61,58 +63,81 @@ public class TrackGenerator : MonoBehaviour
                 for (int j = 0; j < newPrecision; j++)
                     Debug.DrawLine(vertexPoints[j], vertexPoints[j + 1]);
             }
-
-            foreach (Temp temp in piece.temps)
-            {
-                Debug.DrawRay(temp.pos, temp.forward, Color.blue);
-                Debug.DrawRay(temp.pos, temp.side, Color.red);
-                Debug.DrawRay(temp.pos, temp.up, Color.green);
-            }
         }
         
     }
     public void CreateInitialPiece()
     {
-        pieces.Add(new TrackPiece(transform.position, trackScale));
+        pieces.Add(new TrackPiece(trackScale));
         pieces[0].trackWidth = defaultTrackWidth;
         pieces[0].trackHeight = defaultTrackHeight;
         pieces[0].precision = precision;
         pieces[0].barrierWidth = defaultBarrierWidth;
         pieces[0].barrierHeight = defaultBarrierHeight;
         pieces[0].doBarriers = doBarriers;
-        for (int i = 0; i < 10; i++)
+
+        pieces[0].roadMeshPieceGenerated += RoadMeshPieceGenerated;
+        pieces[0].roadSegmentDeleted += RoadSegmentDeleted;
+
+        pieces[0].InitSegment(transform.position);
+
+        pieces[0].AddSegment(new Vector3(0.0f, 0.0f, 1.0f), Vector3.up);
+
+        StartCoroutine(SlowGenPieces());
+    }
+
+    IEnumerator<WaitForSeconds> SlowGenPieces()
+    {
+        yield return new WaitForSeconds(2.0f);
+        for (int i = 0; i < 5; i++)
         {
-            pieces[0].AddSegment(new Vector3(Random.Range(-2.0f, 2.0f), Random.Range(-2.0f, 2.0f), Random.Range(1.0f, 2.0f)), Vector3.up);
+            yield return new WaitForSeconds(1.0f);
+            pieces[0].AddSegment(new Vector3(UnityEngine.Random.Range(-3.0f, 3.0f), UnityEngine.Random.Range(-0.5f, 0.5f), UnityEngine.Random.Range(2.0f, 2.5f)), Vector3.up);
         }
-
-        pieces[0].AddSegment(new Vector3(0.1f, 0.3f, 0.6f), new Vector3(0, 1, -1));
-        pieces[0].AddSegment(new Vector3(0.1f, 0.6f, 0.3f), Vector3.back);
-        pieces[0].AddSegment(new Vector3(0.1f, 0.6f, -0.3f), new Vector3(0, -1, -1));
-        pieces[0].AddSegment(new Vector3(0.1f, 0.3f, -0.6f), Vector3.down);
-        pieces[0].AddSegment(new Vector3(0.1f, -0.3f, -0.6f), new Vector3(0, -1, 1));
-        pieces[0].AddSegment(new Vector3(0.1f, -0.6f, -0.3f), Vector3.forward);
-        pieces[0].AddSegment(new Vector3(0.1f, -0.6f, 0.3f), new Vector3(0, 1, 1));
-        pieces[0].AddSegment(new Vector3(0.1f, -0.3f, 0.6f), Vector3.up);
-
-        pieces[0].AddSegment(new Vector3(0.1f, 0, 1), Vector3.up);
-
-        for (int i = 0; i < 10; i++)
+        for (int i = 0; i < 5; i++)
         {
-            pieces[0].AddSegment(new Vector3(Random.Range(-2.0f, 2.0f), Random.Range(-2.0f, 2.0f), Random.Range(1.0f, 2.0f)), Vector3.up);
+            yield return new WaitForSeconds(1.0f);
+            pieces[0].DeleteSegment(0);
         }
+        for (int i = 0; i < 3; i++)
+        {
+            yield return new WaitForSeconds(1.0f);
+            pieces[0].AddSegment(new Vector3(UnityEngine.Random.Range(-3.0f, 3.0f), UnityEngine.Random.Range(-0.5f, 0.5f), UnityEngine.Random.Range(2.0f, 2.5f)), Vector3.up);
+        }
+        for (int i = 0; i < 3; i++)
+        {
+            yield return new WaitForSeconds(1.0f);
+            pieces[0].DeleteSegment(0);
+        }
+    }
 
-        List<Mesh> meshes = pieces[0].GenerateMesh();
+    public void RoadMeshPieceGenerated(List<Mesh> meshes)
+    {
+        String[] pieceNames = { "Road", "BarrierR", "BarrierL"};
+        String[] sides = { "Left", "Top", "Right", "Bottom"};
 
-        for (int i = 0; i < meshes.Count; i++)
+        for (int i = meshChildrenCount; i < meshes.Count + meshChildrenCount; i++)
         {
             meshChildren.Add(new GameObject());
             meshChildren[i].transform.parent = transform;
             meshChildren[i].AddComponent<MeshRenderer>().material = roadMaterial;
             meshChildren[i].AddComponent<MeshFilter>();
             meshChildren[i].AddComponent<MeshCollider>();
-            meshChildren[i].GetComponent<MeshFilter>().sharedMesh = meshes[i];
-            meshChildren[i].AddComponent<MeshCollider>().sharedMesh = meshes[i];
+            meshChildren[i].GetComponent<MeshFilter>().sharedMesh = meshes[i - meshChildrenCount];
+            meshChildren[i].AddComponent<MeshCollider>().sharedMesh = meshes[i - meshChildrenCount];
+            meshChildren[i].name = "Seg" + pieces[0].totalSegmentTracker + "/" + sides[(i - meshChildrenCount) %4] + pieceNames[(i - meshChildrenCount) /4];
         }
+        meshChildrenCount += meshes.Count;
+    }
+
+    public void RoadSegmentDeleted(int segmentIndex)
+    {
+        for (int i = segmentIndex * 12; i < ((segmentIndex + 1) * 12); i++)
+        {
+            Destroy(meshChildren[i]);
+            meshChildrenCount -= 1;
+        }
+        meshChildren.RemoveRange(segmentIndex * 12, 12);
     }
 }
 
@@ -155,7 +180,7 @@ public struct BezHelper
 [System.Serializable]
 public class TrackPiece
 {
-    public List<Point> points = new List<Point>();
+    public List<Point> points = new();
     public float scale = 50.0f;
     public float trackWidth = 1.0f;
     public float trackHeight = 1.0f;
@@ -165,18 +190,28 @@ public class TrackPiece
 
     public bool doBarriers = true;
 
-    public List<Temp> temps = new();
+    private List<Vector3> lastRoadQuadOfLastSegment;
+    private List<Vector3> lastRightBarrierQuadOfLastSegment;
+    private List<Vector3> lastLeftBarrierQuadOfLastSegment;
 
+    public System.Action<List<Mesh>> roadMeshPieceGenerated;
+    public System.Action<int> roadSegmentDeleted;
 
-    public TrackPiece(Vector3 centre, float _scale)
+    public int totalSegmentTracker = 0;
+
+    public TrackPiece(float _scale)
     {
         scale = _scale;
+    }
+
+    public void InitSegment(Vector3 centre)
+    {
         points = new List<Point>
         {
-            new Point(centre),
-            new Point(centre + 1.0f * scale * Vector3.forward),
-            new Point(centre + 2.0f * scale * Vector3.forward),
-            new Point(centre + 3.0f * scale * Vector3.forward),
+            new(centre),
+            new(centre + 0.5f * scale * Vector3.forward),
+            new(centre + 1.5f * scale * Vector3.forward),
+            new(centre + 2.0f * scale * Vector3.forward),
         };
     }
 
@@ -184,30 +219,41 @@ public class TrackPiece
     #region Management
     public void AddSegment(Vector3 deltaPos, Vector3? upDir = null)
     {
-        Vector3 anchorPos = points[points.Count - 1].pos + deltaPos * scale;
+        Vector3 anchorPos = points[^1].pos + deltaPos * scale;
 
-        points.Add(new Point(points[points.Count - 1].pos * 2.0f - points[points.Count - 2].pos, upDir));
-        points.Add(new Point((points[points.Count - 1].pos + anchorPos) * 0.5f, upDir));
+        points.Add(new Point(points[^1].pos * 2.0f - points[^2].pos, upDir));
+        points.Add(new Point((points[^1].pos + anchorPos) * 0.5f, upDir));
         points.Add(new Point(anchorPos, upDir));
 
         AutoSetAffectedControlPoints(points.Count - 1);
+
+        // Generate the mesh of the *previous* segment
+        // Allows controls to update the mesh edges to line up better
+        GenerateRoadMesh(NumSegments - 2);
+
+        totalSegmentTracker++;
     }
 
-    public void DeleteSegment(int anchorIndex)
+    public void DeleteSegment(int segmentIndex)
     {
         if (NumSegments <= 1) return;
-        if (anchorIndex == 0)
+        if (segmentIndex == 0)
         {
             points.RemoveRange(0, 3);
         }
-        else if (anchorIndex == points.Count - 1)
+        else if (segmentIndex == points.Count - 1)
         {
-            points.RemoveRange(anchorIndex - 2, 3);
+            points.RemoveRange(segmentIndex - 2, 3);
         }
         else
         {
-            points.RemoveRange(anchorIndex - 1, 3);
+            points.RemoveRange(segmentIndex - 1, 3);
         }
+
+        // Doesn't technically need to be called for the purposes of this game
+        //AutoSetAffectedControlPoints(segmentIndex);
+
+        roadSegmentDeleted?.Invoke(segmentIndex);
     }
 
     #endregion
@@ -260,7 +306,7 @@ public class TrackPiece
             int controlIndex = anchorIndex + i * 2 - 1;
             if (controlIndex >= 0 & controlIndex < points.Count)
             {
-                points[LoopIndex(controlIndex)].pos = anchorPos + dir * neighbourDistances[i] * 0.5f;
+                points[LoopIndex(controlIndex)].pos = anchorPos + 0.5f * neighbourDistances[i] * dir;
             }
         }
     }
@@ -268,7 +314,7 @@ public class TrackPiece
     void AutoSetStartAndEndControls()
     {
         points[1].pos = (points[0].pos + points[2].pos) * 0.5f;
-        points[points.Count - 2].pos = (points[points.Count - 1].pos + points[points.Count - 3].pos) * 0.5f;
+        points[^2].pos = (points[^1].pos + points[^3].pos) * 0.5f;
     }
     #endregion
 
@@ -290,7 +336,7 @@ public class TrackPiece
 
     public Point LastPoint
     {
-        get { return points[points.Count - 1]; }
+        get { return points[^1]; }
     }
 
     public Point[] GetPointsInSegment(int i)
@@ -312,86 +358,73 @@ public class TrackPiece
     #region MeshGeneration
 
     // Generate the mesh of the track piece
-    public List<Mesh> GenerateMesh()
+    public void GenerateRoadMesh(int segmentIndex)
     {
-        // Precalculate the list of precisions
-        List<int> precisions = new() { };
-        for (int segmentIndex = 0; segmentIndex < NumSegments; segmentIndex ++)
-            precisions.Add(GetAutoPrecisionOfSegment(segmentIndex));
+        RoadMeshBuilder roadBuilder = new(trackWidth, trackHeight);
+        RoadMeshBuilder rightBarrier = new(barrierWidth, barrierHeight);
+        RoadMeshBuilder leftBarrier = new(barrierWidth, barrierHeight);
 
-        int currentPoints = 0;
+        Point[] segmentPoints = GetPointsInSegment(segmentIndex);
 
-        MeshBuilder roadBuilder = new MeshBuilder(trackWidth, trackHeight);
-        MeshBuilder rightBarrier = new MeshBuilder(barrierWidth, barrierHeight);
-        MeshBuilder leftBarrier = new MeshBuilder(barrierWidth, barrierHeight);
+        // Get the points that make up the part of the curve
+        List<Vector3> curvePoints = BezHelper.GeneratePoints(segmentPoints[0].pos, segmentPoints[1].pos, segmentPoints[2].pos, segmentPoints[3].pos, GetAutoPrecisionOfSegment(segmentIndex)).ToList();
 
-        for (int segmentIndex = 0; segmentIndex < NumSegments; segmentIndex++)
+        // Track previous forward vector
+        Vector3 previousForwardDir = Vector3.zero;
+
+        // For every point
+        for (int pointIndex = 0; pointIndex < curvePoints.Count; pointIndex++)
         {
-            Point[] segmentPoints = GetPointsInSegment(segmentIndex);
+            Vector3 point = curvePoints[pointIndex];
 
-            // Get the points that make up the part of the curve
-            List<Vector3> curvePoints = BezHelper.GeneratePoints(segmentPoints[0].pos, segmentPoints[1].pos, segmentPoints[2].pos, segmentPoints[3].pos, precisions[segmentIndex]).ToList();
+            // Default the up direction according to the control ups
+            Vector3 upDir = Vector3.Lerp(segmentPoints[0].upDir, segmentPoints[3].upDir, (float)(pointIndex) / (float)(curvePoints.Count));
 
-            // Track previous forward vector
-            Vector3 previousForwardDir = Vector3.zero;
+            // Set the forward direction
+            Vector3 forwardDir;
+            if (pointIndex < curvePoints.Count - 1)
+                forwardDir = (curvePoints[pointIndex + 1] - point).normalized;
+            else forwardDir = previousForwardDir;
 
-            // For every point
-            for (int pointIndex = 0; pointIndex < curvePoints.Count; pointIndex++)
+            // Set the tracker
+            previousForwardDir = forwardDir;
+
+            // Calculate the side direction
+            Vector3 sideDir = Vector3.Cross(upDir, forwardDir);
+            sideDir.Normalize();
+
+            upDir = Vector3.Cross(forwardDir, sideDir).normalized;
+
+            if (segmentIndex > 0 && pointIndex == 0)
+                roadBuilder.BuildVerts(lastRoadQuadOfLastSegment, upDir, sideDir);
+            else
+                roadBuilder.BuildVerts(point, upDir, sideDir, Vector2.zero, true);
+
+            if (doBarriers)
             {
-
-                Vector3 point = curvePoints[pointIndex];
-
-                Vector3 upDir = Vector3.up;
-                Vector3 forwardDir = Vector3.forward;
-                Vector3 sideDir = Vector3.right;
-
-                // Don't loop over the first point of every non-first segment. Avoids repeats
-                if (segmentIndex == 0 || pointIndex > 0)
-                {
-                    // Default the up direction according to the control ups
-                    upDir = Vector3.Lerp(segmentPoints[0].upDir, segmentPoints[3].upDir, (float)(pointIndex) / (float)(curvePoints.Count));
-
-                    // Set the forward direction
-                    if (pointIndex < curvePoints.Count - 1)
-                        forwardDir = (curvePoints[pointIndex + 1] - point).normalized;
-                    else forwardDir = previousForwardDir;
-
-                    // Set the tracker
-                    previousForwardDir = forwardDir;
-
-                    // Calculate the side direction
-                    sideDir = Vector3.Cross(upDir, forwardDir);
-                    sideDir.Normalize();
-
-                    upDir = Vector3.Cross(forwardDir, sideDir).normalized;
-
-                    // Debug list
-                    temps.Add(new Temp(point, upDir, forwardDir, sideDir));
-
-                    roadBuilder.BuildVerts(point, upDir, sideDir, Vector2.zero, true);
-
-                    if (doBarriers)
-                    {
-                        rightBarrier.BuildVerts(point, upDir, sideDir, new Vector2(trackWidth / 2 - barrierWidth / 2, trackHeight), false);
-                        leftBarrier.BuildVerts(point, upDir, sideDir, new Vector2(-trackWidth / 2 + barrierWidth / 2, trackHeight), false);
-                    }
-                }
-
-                // Reduce the counter to avoid repeated tris
                 if (segmentIndex > 0 && pointIndex == 0)
-                    currentPoints -= 1;
-
-
-                // Stitch mesh vertices into triangles
-                if (segmentIndex > 0 || (segmentIndex == 0 && pointIndex > 0))
                 {
-                    int triIndex = pointIndex + currentPoints;
-
-                    roadBuilder.BuildTris(triIndex);
+                    rightBarrier.BuildVerts(lastRightBarrierQuadOfLastSegment, upDir, sideDir);
+                    leftBarrier.BuildVerts(lastLeftBarrierQuadOfLastSegment, upDir, sideDir);
+                }
+                else
+                {
+                    rightBarrier.BuildVerts(point, upDir, sideDir, new Vector2(trackWidth / 2 - barrierWidth / 2, trackHeight), false);
+                    leftBarrier.BuildVerts(point, upDir, sideDir, new Vector2(-trackWidth / 2 + barrierWidth / 2, trackHeight), false);
                 }
             }
 
-            currentPoints += curvePoints.Count;
+            // Stitch mesh vertices into triangles
+            if (pointIndex > 0)
+                roadBuilder.BuildTris(pointIndex);
+
+            if (pointIndex == curvePoints.Count - 1)
+            {
+                lastRoadQuadOfLastSegment = roadBuilder.lastQuad;
+                lastRightBarrierQuadOfLastSegment = rightBarrier.lastQuad;
+                lastLeftBarrierQuadOfLastSegment= leftBarrier.lastQuad;
+            }
+           
         }
 
         List<Mesh> allMeshes = new();
@@ -408,11 +441,13 @@ public class TrackPiece
             allMeshes.AddRange(leftBarrier.FinishMesh());
         }
 
-        return allMeshes;
+        roadMeshPieceGenerated?.Invoke(allMeshes);
     }
+
+    #endregion
 }
 
-public class MeshBuilder
+public class RoadMeshBuilder
 {
     public float width;
     public float height;
@@ -422,7 +457,9 @@ public class MeshBuilder
     public List<List<Vector3>> faceNormals = new();
     public List<List<int>> tris = new();
 
-    public MeshBuilder(float _width, float _height)
+    public List<Vector3> lastQuad;
+
+    public RoadMeshBuilder(float _width, float _height)
     {
         width = _width;
         height = _height;
@@ -436,6 +473,7 @@ public class MeshBuilder
         }
     }
 
+    // Build new vertices
     public void BuildVerts(Vector3 point, Vector3 upDir, Vector3 sideDir, Vector2 offset, bool alsoBuildNormals)
     {
         Vector3 centreOffset = sideDir * offset.x + upDir * offset.y;
@@ -447,6 +485,8 @@ public class MeshBuilder
             (point - sideDir * width/2.0f + upDir * height) + centreOffset,
             (point + sideDir * width/2.0f + upDir * height) + centreOffset,
         };
+        
+        lastQuad = quad;
 
         // Left verts
         verts[0].Add(quad[0]);
@@ -462,6 +502,25 @@ public class MeshBuilder
         verts[3].Add(quad[0]);
 
         if (alsoBuildNormals) BuildNormals(upDir, sideDir);
+    }
+
+    // Build from last quad of last segment
+    public void BuildVerts(List<Vector3> previousQuad, Vector3 upDir, Vector3 sideDir)
+    {
+        // Left verts
+        verts[0].Add(previousQuad[0]);
+        verts[0].Add(previousQuad[2]);
+        // Top verts
+        verts[1].Add(previousQuad[2]);
+        verts[1].Add(previousQuad[3]);
+        // Right verts
+        verts[2].Add(previousQuad[3]);
+        verts[2].Add(previousQuad[1]);
+        // Bottom verts
+        verts[3].Add(previousQuad[1]);
+        verts[3].Add(previousQuad[0]);
+
+        BuildNormals(upDir, sideDir);
     }
 
     public void BuildNormals(Vector3 upDir, Vector3 sideDir)
@@ -545,7 +604,6 @@ public class MeshBuilder
     }
 }
 
-#endregion
 public class Point
 {
     public Vector3 pos;
@@ -557,21 +615,5 @@ public class Point
         if (_upDir == null) upDir = Vector3.up;
         else upDir = (Vector3)(_upDir);
         upDir.Normalize();
-    }
-}
-
-public class Temp
-{
-    public Vector3 pos;
-    public Vector3 up;
-    public Vector3 forward;
-    public Vector3 side;
-
-    public Temp(Vector3 pos, Vector3 up, Vector3 forward, Vector3 side)
-    {
-        this.pos = pos;
-        this.up = up;
-        this.forward = forward;
-        this.side = side;
     }
 }
