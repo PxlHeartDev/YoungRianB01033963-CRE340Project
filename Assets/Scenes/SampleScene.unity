@@ -7534,7 +7534,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   pieces: []
   texture: {fileID: 0}
-  precision: 15
+  precision: 12
   trackScale: 100
   defaultTrackWidth: 80
   defaultTrackHeight: 2

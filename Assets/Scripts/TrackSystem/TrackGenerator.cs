@@ -10,7 +10,7 @@ public class TrackGenerator : MonoBehaviour
     public Texture2D texture;
 
     // Bezier parameters
-    public int precision = 15;
+    public int precision = 12;
     public float trackScale = 100.0f;
 
     // Mesh parameters
@@ -58,6 +58,11 @@ public class TrackGenerator : MonoBehaviour
                     Debug.DrawLine(vertexPoints[j], vertexPoints[j + 1]);
             }
         }
+
+        foreach (Point point in pieces[0].debugPoints)
+        {
+            Debug.DrawRay(point.pos, point.upDir, Color.red);
+        }
         
     }
     public void CreateInitialPiece()
@@ -86,26 +91,15 @@ public class TrackGenerator : MonoBehaviour
     IEnumerator<WaitForSeconds> SlowGenPieces()
     {
         yield return new WaitForSeconds(1.0f);
-        for (int i = 0; i < 5; i++)
+
+        pieces[0].AddSegment(new Vector3(-3.0f, 0.0f, 3.0f), Vector3.up);
+        pieces[0].AddSegment(new Vector3(3.0f, 0.0f, 3.0f), Vector3.up);
+
+        for (int i = 0; i < 10; i++)
         {
-            yield return new WaitForSeconds(1.0f);
+            yield return new WaitForSeconds(0.5f);
             pieces[0].AddSegment(new Vector3(UnityEngine.Random.Range(-3.0f, 3.0f), UnityEngine.Random.Range(-0.5f, 0.5f), UnityEngine.Random.Range(2.0f, 2.5f)), Vector3.up);
         }
-        //for (int i = 0; i < 5; i++)
-        //{
-        //    yield return new WaitForSeconds(1.0f);
-        //    pieces[0].DeleteSegment(0);
-        //}
-        for (int i = 0; i < 3; i++)
-        {
-            yield return new WaitForSeconds(1.0f);
-            pieces[0].AddSegment(new Vector3(UnityEngine.Random.Range(-3.0f, 3.0f), UnityEngine.Random.Range(-0.5f, 0.5f), UnityEngine.Random.Range(2.0f, 2.5f)), Vector3.up);
-        }
-        //for (int i = 0; i < 3; i++)
-        //{
-        //    yield return new WaitForSeconds(1.0f);
-        //    pieces[0].DeleteSegment(0);
-        //}
     }
 
     public void RoadMeshPieceGenerated(List<Mesh> meshes)
@@ -202,7 +196,7 @@ public class TrackPiece
     public float trackHeight = 1.0f;
     public float barrierWidth = 2.0f;
     public float barrierHeight = 10.0f;
-    public int precision = 10;
+    public int precision = 12;
 
     public bool doBarriers = true;
 
@@ -210,6 +204,7 @@ public class TrackPiece
     private List<Vector3> lastRightBarrierQuadOfLastSegment;
     private List<Vector3> lastLeftBarrierQuadOfLastSegment;
     private List<Vector3> lastMountainLineOfLastSegment;
+    private List<Vector2> lastMountainLineUVs;
 
     public System.Action<List<Mesh>> roadMeshPieceGenerated;
     public System.Action<int> roadSegmentDeleted;
@@ -218,6 +213,16 @@ public class TrackPiece
     public System.Action<int> mountainSegmentDeleted;
 
     public int totalSegmentTracker = 0;
+
+    private List<Vector3> previousCurvePoints;
+    private List<Vector3> previousSideDirs;
+
+    public List<Point> debugPoints = new();
+
+    private float[] xPosHist;
+    private int xPosHistLength = 100;
+    private int xPosHistIndex = 0;
+    private int xPosHistPollingInterval = 2;
 
     public TrackPiece(float _scale)
     {
@@ -233,6 +238,13 @@ public class TrackPiece
             new(centre + 1.5f * scale * Vector3.forward),
             new(centre + 2.0f * scale * Vector3.forward),
         };
+
+        xPosHist = new float[xPosHistLength];
+
+        for (int i = 0; i < xPosHistLength; i++)
+        {
+            xPosHist[i] = 0.0f;
+        }
     }
 
 
@@ -247,9 +259,13 @@ public class TrackPiece
 
         AutoSetAffectedControlPoints(points.Count - 1);
 
-        // Generate the mesh of the *previous* segment
+        // Generate the road mesh of the *previous* segment
         // Allows controls to update the mesh edges to line up better
         GenerateRoadMesh(NumSegments - 2);
+        // Generate the mountain mesh of the *previous previous* segment
+        // Allows for better smoothing of the mountain side dirs
+        if (NumSegments >= 2)
+            GenerateMountainMesh(NumSegments - 3);
 
         totalSegmentTracker++;
     }
@@ -385,8 +401,6 @@ public class TrackPiece
         RoadMeshBuilder rightBarrier = new(barrierWidth, barrierHeight);
         RoadMeshBuilder leftBarrier = new(barrierWidth, barrierHeight);
 
-        MountainMeshBuilder mountainBuilder = new(trackWidth);
-
         Point[] segmentPoints = GetPointsInSegment(segmentIndex);
 
         int segmentPrecision = GetAutoPrecisionOfSegment(segmentIndex);
@@ -396,6 +410,8 @@ public class TrackPiece
 
         // Track previous forward vector
         Vector3 previousForwardDir = Vector3.zero;
+
+        List<Vector3> holdSideDirs = new();
 
         // For every point
         for (int pointIndex = 0; pointIndex < curvePoints.Count; pointIndex++)
@@ -421,15 +437,9 @@ public class TrackPiece
             upDir = Vector3.Cross(forwardDir, sideDir).normalized;
 
             if (segmentIndex > 0 && pointIndex == 0)
-            {
                 roadBuilder.BuildVerts(lastRoadQuadOfLastSegment, upDir, sideDir);
-                mountainBuilder.BuildVerts(lastMountainLineOfLastSegment);
-            }
             else
-            {
                 roadBuilder.BuildVerts(point, upDir, sideDir, Vector2.zero, true);
-                mountainBuilder.BuildVerts(point, sideDir);
-            }
 
             if (doBarriers)
             {
@@ -447,25 +457,21 @@ public class TrackPiece
 
             // Stitch mesh vertices into triangles
             if (pointIndex > 0)
-            {
                 roadBuilder.BuildTris(pointIndex);
-                mountainBuilder.BuildTris(pointIndex);
-            }
 
             if (pointIndex == curvePoints.Count - 1)
             {
                 lastRoadQuadOfLastSegment = roadBuilder.lastQuad;
                 lastRightBarrierQuadOfLastSegment = rightBarrier.lastQuad;
                 lastLeftBarrierQuadOfLastSegment = leftBarrier.lastQuad;
-                lastMountainLineOfLastSegment = mountainBuilder.lastLine;
             }
-           
+
+            holdSideDirs.Add(sideDir);
         }
 
         List<Mesh> allRoadMeshes = new();
         allRoadMeshes.AddRange(roadBuilder.FinishMesh());
 
-        Mesh mountainMesh = mountainBuilder.FinishMesh();
 
         if (doBarriers)
         {
@@ -479,6 +485,61 @@ public class TrackPiece
         }
 
         roadMeshPieceGenerated?.Invoke(allRoadMeshes);
+
+        previousCurvePoints = curvePoints;
+        previousSideDirs = holdSideDirs;
+    }
+
+    public void GenerateMountainMesh(int segmentIndex)
+    {
+        float minZDelta = 10.0f;
+        float curZDelta = 0.0f;
+        int builtPoints = 0;
+        MountainMeshBuilder mountainBuilder = new();
+
+        for (int pointIndex = 0; pointIndex < previousCurvePoints.Count; pointIndex++)
+        {
+            if (pointIndex % xPosHistPollingInterval == 0 || pointIndex == previousCurvePoints.Count - 1)
+            {
+                xPosHist[xPosHistIndex] = previousCurvePoints[pointIndex].x;
+                xPosHistIndex++;
+            }
+
+            if (pointIndex > 0)
+                curZDelta += previousCurvePoints[pointIndex].z - previousCurvePoints[pointIndex - 1].z;
+
+            if (xPosHistIndex == xPosHistLength) xPosHistIndex = 0;
+
+            float minX = (Mathf.Min(xPosHist) + previousCurvePoints[pointIndex].x * 10.0f) / 11.0f;
+            float maxX = (Mathf.Max(xPosHist) + previousCurvePoints[pointIndex].x * 10.0f) / 11.0f;
+
+            if (segmentIndex > 0 && pointIndex == 0)
+                mountainBuilder.BuildVerts(lastMountainLineOfLastSegment, lastMountainLineUVs);
+            else if (pointIndex == 0)
+                mountainBuilder.BuildVerts(previousCurvePoints[pointIndex], Vector3.right, minX, maxX);
+            else if (curZDelta > minZDelta)
+            {
+                debugPoints.Add(new Point(previousCurvePoints[pointIndex] + Vector3.up * 10.0f, Vector3.right));
+
+                mountainBuilder.BuildVerts(previousCurvePoints[pointIndex], Vector3.right, minX, maxX);
+                curZDelta = 0.0f;
+
+                builtPoints++;
+
+                mountainBuilder.BuildTris(builtPoints);
+
+            }
+            
+            if (pointIndex == previousCurvePoints.Count - 1)
+            {
+                lastMountainLineOfLastSegment = mountainBuilder.lastLine;
+                lastMountainLineUVs = mountainBuilder.lastUVs;
+            }
+
+        }
+
+        Mesh mountainMesh = mountainBuilder.FinishMesh();
+
         mountainMeshGenerated?.Invoke(mountainMesh);
     }
 
@@ -644,16 +705,14 @@ public class RoadMeshBuilder
 
 public class MountainMeshBuilder
 {
-    public float roadWidth;
-    public float transitionLength;
+    public float roadWidth = 200.0f;
 
     // Number of vertices to expand left/right
-    public int verticesFromCentreCount = 20;
-    public float tileWidth = 12.0f;
+    public int verticesFromCentreCount = 16;
+    public float extraSideDistance = 550.0f;
     public float mountainXZScale = 0.01f;
-    public float mountainHeight = 100.0f;
-    public float baseLevel = -3.0f;
-
+    public float mountainHeight = 120.0f;
+    public float baseLevel = -6.0f;
 
     private Mesh mesh = new();
     private List<Vector3> verts = new();
@@ -661,52 +720,49 @@ public class MountainMeshBuilder
     private List<Vector2> uvs = new();
 
     public List<Vector3> lastLine;
+    public List<Vector2> lastUVs;
 
-    public MountainMeshBuilder(float _roadWidth)
+    public MountainMeshBuilder()
     {
-        roadWidth = _roadWidth;
     }
 
-    public void BuildVerts(Vector3 point, Vector3 sideDir)
+    public void BuildVerts(Vector3 point, Vector3 sideDir, float minX, float maxX)
     {
-
         List<Vector3> line = new();
+        List<Vector2> curUVs = new();
+
+        Vector3 leftPoint = point - sideDir * ((point.x - minX) + extraSideDistance);
+        Vector3 rightPoint = point + sideDir * ((maxX - point.x) + extraSideDistance);
         
-        for (int i = -verticesFromCentreCount; i <= verticesFromCentreCount; i++)
+        for (int i = 0; i <= (verticesFromCentreCount * 2); i++)
         {
-            float distanceFromCurve = i * tileWidth;
+            Vector3 vertexPos = Vector3.Lerp(leftPoint, rightPoint, (float)i / ((float)verticesFromCentreCount * 2.0f));
 
-            Vector3 vertexPos = point + sideDir * distanceFromCurve;
+            float relief = baseLevel;
 
-            float distanceFromEdge = Mathf.Abs(distanceFromCurve) - roadWidth - 0.5f;
+            Vector3 minPoint = new(minX, point.y, point.z);
+            Vector3 maxPoint = new(maxX, point.y, point.z);
 
-            float relief = baseLevel + Mathf.Clamp(distanceFromEdge * 0.03f, 0, 2) * (Mathf.PerlinNoise(vertexPos.x * mountainXZScale, vertexPos.z * mountainXZScale)) * mountainHeight;
+            if (Vector3.Distance(vertexPos, (minPoint + maxPoint)/2.0f) > roadWidth)
+                relief += (Mathf.PerlinNoise(vertexPos.x * mountainXZScale, vertexPos.z * mountainXZScale)) * mountainHeight;
 
-            uvs.Add(new Vector2(Mathf.Clamp01(relief/100.0f), 0.5f));
+            float randomness = UnityEngine.Random.Range(-0.06f, 0.06f);
+
+            curUVs.Add(new Vector2(Mathf.Clamp01(relief/100.0f + randomness), 0.5f));
 
             line.Add(vertexPos + Vector3.up * relief);
         }
 
         verts.AddRange(line);
+        uvs.AddRange(curUVs);
 
         lastLine = line;
+        lastUVs = curUVs;
     }
 
-    public void BuildVerts(List<Vector3> previousLine)
+    public void BuildVerts(List<Vector3> previousLine, List<Vector2> previousUVs)
     {
-        for (int i = -verticesFromCentreCount; i <= verticesFromCentreCount; i++)
-        {
-            float distanceFromCurve = i * tileWidth;
-
-            Vector3 vertexPos = previousLine[i + verticesFromCentreCount];
-
-            float distanceFromEdge = Mathf.Abs(distanceFromCurve) - roadWidth - 0.5f;
-
-            float relief = baseLevel + Mathf.Clamp(distanceFromEdge * 0.03f, 0, 2) * (Mathf.PerlinNoise(vertexPos.x * mountainXZScale, vertexPos.z * mountainXZScale)) * mountainHeight;
-
-            uvs.Add(new Vector2(Mathf.Clamp01(relief / 100.0f), 0.5f));
-        }
-
+        uvs.AddRange(previousUVs);
         verts.AddRange(previousLine);
     }
 
