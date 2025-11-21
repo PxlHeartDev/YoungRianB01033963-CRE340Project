@@ -104,8 +104,8 @@ public class TrackGenerator : MonoBehaviour
 
     public void RoadMeshPieceGenerated(List<Mesh> meshes)
     {
-        String[] pieceNames = { "Road", "BarrierR", "BarrierL"};
-        String[] sides = { "Left", "Top", "Right", "Bottom"};
+        string[] pieceNames = { "Road", "BarrierR", "BarrierL"};
+        string[] sides = { "Left", "Top", "Right", "Bottom"};
 
         for (int i = roadMeshChildrenCount; i < meshes.Count + roadMeshChildrenCount; i++)
         {
@@ -136,9 +136,7 @@ public class TrackGenerator : MonoBehaviour
         mountainMeshChildren.Add(new GameObject());
         mountainMeshChildren[^1].transform.parent = transform;
         mountainMeshChildren[^1].AddComponent<MeshRenderer>().material = mountainMaterial;
-        mountainMeshChildren[^1].AddComponent<MeshFilter>();
-        mountainMeshChildren[^1].AddComponent<MeshCollider>();
-        mountainMeshChildren[^1].GetComponent<MeshFilter>().sharedMesh = mesh;
+        mountainMeshChildren[^1].AddComponent<MeshFilter>().sharedMesh = mesh;
         mountainMeshChildren[^1].AddComponent<MeshCollider>().sharedMesh = mesh;
         mountainMeshChildren[^1].name = "Seg" + pieces[0].totalSegmentTracker;
     }
@@ -397,9 +395,9 @@ public class TrackPiece
     // Generate the mesh of the track piece
     public void GenerateRoadMesh(int segmentIndex)
     {
-        RoadMeshBuilder roadBuilder = new(trackWidth, trackHeight);
-        RoadMeshBuilder rightBarrier = new(barrierWidth, barrierHeight);
-        RoadMeshBuilder leftBarrier = new(barrierWidth, barrierHeight);
+        RoadMeshBuilder roadBuilder = new(trackWidth, trackHeight, false, true, false, false);
+        RoadMeshBuilder rightBarrier = new(barrierWidth, barrierHeight, true, true, true, false);
+        RoadMeshBuilder leftBarrier = new(barrierWidth, barrierHeight, true, true, true, false);
 
         Point[] segmentPoints = GetPointsInSegment(segmentIndex);
 
@@ -450,20 +448,30 @@ public class TrackPiece
                 }
                 else
                 {
-                    rightBarrier.BuildVerts(point, upDir, sideDir, new Vector2(trackWidth / 2 - barrierWidth / 2, trackHeight), false);
-                    leftBarrier.BuildVerts(point, upDir, sideDir, new Vector2(-trackWidth / 2 + barrierWidth / 2, trackHeight), false);
+                    rightBarrier.BuildVerts(point, upDir, sideDir, new Vector2(trackWidth / 2 - barrierWidth / 2, trackHeight), true);
+                    leftBarrier.BuildVerts(point, upDir, sideDir, new Vector2(-trackWidth / 2 + barrierWidth / 2, trackHeight), true);
                 }
             }
 
             // Stitch mesh vertices into triangles
             if (pointIndex > 0)
+            {
                 roadBuilder.BuildTris(pointIndex);
+                if (doBarriers)
+                {
+                    rightBarrier.BuildTris(pointIndex);
+                    leftBarrier.BuildTris(pointIndex);
+                }
+            }
 
             if (pointIndex == curvePoints.Count - 1)
             {
                 lastRoadQuadOfLastSegment = roadBuilder.lastQuad;
-                lastRightBarrierQuadOfLastSegment = rightBarrier.lastQuad;
-                lastLeftBarrierQuadOfLastSegment = leftBarrier.lastQuad;
+                if (doBarriers)
+                {
+                    lastRightBarrierQuadOfLastSegment = rightBarrier.lastQuad;
+                    lastLeftBarrierQuadOfLastSegment = leftBarrier.lastQuad;
+                }
             }
 
             holdSideDirs.Add(sideDir);
@@ -475,11 +483,6 @@ public class TrackPiece
 
         if (doBarriers)
         {
-            rightBarrier.faceNormals = roadBuilder.faceNormals;
-            rightBarrier.tris = roadBuilder.tris;
-            leftBarrier.faceNormals = roadBuilder.faceNormals;
-            leftBarrier.tris = roadBuilder.tris;
-
             allRoadMeshes.AddRange(rightBarrier.FinishMesh());
             allRoadMeshes.AddRange(leftBarrier.FinishMesh());
         }
@@ -551,24 +554,44 @@ public class RoadMeshBuilder
     public float width;
     public float height;
 
-    private List<Mesh> meshes = new();
-    private List<List<Vector3>> verts = new();
-    public List<List<Vector3>> faceNormals = new();
-    public List<List<int>> tris = new();
+    private Dictionary<string, Mesh> meshes = new();
+    private Dictionary<string, List<Vector3>> verts = new();
+    public Dictionary<string, List<Vector3>> faceNormals = new();
+    public Dictionary<string, List<int>> tris = new();
 
     public List<Vector3> lastQuad;
 
-    public RoadMeshBuilder(float _width, float _height)
+    private bool doLeft = false;
+    private bool doTop = false;
+    private bool doRight = false;
+    private bool doBottom = false;
+    private List<string> sideKeys = new();
+
+    public RoadMeshBuilder(float _width, float _height, bool _doLeft, bool _doTop, bool _doRight, bool _doBottom)
     {
         width = _width;
         height = _height;
+        
+        doLeft = _doLeft;
+        doTop = _doTop;
+        doRight = _doRight;
+        doBottom = _doBottom;
 
-        for (int i = 0; i < 4; i++)
+        if (doLeft)
+            sideKeys.Add("Left");
+        if (doTop)
+            sideKeys.Add("Top");
+        if (doRight)
+            sideKeys.Add("Right");
+        if (doBottom)
+            sideKeys.Add("Bottom");
+
+        foreach (string side in sideKeys)
         {
-            meshes.Add(new Mesh() { name = i.ToString() });
-            verts.Add(new List<Vector3>());
-            faceNormals.Add(new List<Vector3>());
-            tris.Add(new List<int>());
+            meshes.Add(side, new Mesh() { name = side });
+            verts.Add(side, new List<Vector3>());
+            faceNormals.Add(side, new List<Vector3>());
+            tris.Add(side, new List<int>());
         }
     }
 
@@ -584,21 +607,33 @@ public class RoadMeshBuilder
             (point - sideDir * width/2.0f + upDir * height) + centreOffset,
             (point + sideDir * width/2.0f + upDir * height) + centreOffset,
         };
-        
+
         lastQuad = quad;
 
         // Left verts
-        verts[0].Add(quad[0]);
-        verts[0].Add(quad[2]);
+        if (doLeft)
+        {
+            verts["Left"].Add(quad[0]);
+            verts["Left"].Add(quad[2]);
+        }
         // Top verts
-        verts[1].Add(quad[2]);
-        verts[1].Add(quad[3]);
+        if (doTop)
+        {
+            verts["Top"].Add(quad[2]);
+            verts["Top"].Add(quad[3]);
+        }
         // Right verts
-        verts[2].Add(quad[3]);
-        verts[2].Add(quad[1]);
+        if (doRight)
+        {
+            verts["Right"].Add(quad[3]);
+            verts["Right"].Add(quad[1]);
+        }
         // Bottom verts
-        verts[3].Add(quad[1]);
-        verts[3].Add(quad[0]);
+        if (doBottom)
+        {
+            verts["Bottom"].Add(quad[1]);
+            verts["Bottom"].Add(quad[0]);
+        }
 
         if (alsoBuildNormals) BuildNormals(upDir, sideDir);
     }
@@ -607,17 +642,29 @@ public class RoadMeshBuilder
     public void BuildVerts(List<Vector3> previousQuad, Vector3 upDir, Vector3 sideDir)
     {
         // Left verts
-        verts[0].Add(previousQuad[0]);
-        verts[0].Add(previousQuad[2]);
+        if (doLeft)
+        {
+            verts["Left"].Add(previousQuad[0]);
+            verts["Left"].Add(previousQuad[2]);
+        }
         // Top verts
-        verts[1].Add(previousQuad[2]);
-        verts[1].Add(previousQuad[3]);
+        if (doTop)
+        {
+            verts["Top"].Add(previousQuad[2]);
+            verts["Top"].Add(previousQuad[3]);
+        }
         // Right verts
-        verts[2].Add(previousQuad[3]);
-        verts[2].Add(previousQuad[1]);
+        if (doRight)
+        {
+            verts["Right"].Add(previousQuad[3]);
+            verts["Right"].Add(previousQuad[1]);
+        }
         // Bottom verts
-        verts[3].Add(previousQuad[1]);
-        verts[3].Add(previousQuad[0]);
+        if (doBottom)
+        {
+            verts["Bottom"].Add(previousQuad[1]);
+            verts["Bottom"].Add(previousQuad[0]);
+        }
 
         BuildNormals(upDir, sideDir);
     }
@@ -625,94 +672,123 @@ public class RoadMeshBuilder
     public void BuildNormals(Vector3 upDir, Vector3 sideDir)
     {
         // Left normals
-        faceNormals[0].Add(-sideDir);
-        faceNormals[0].Add(-sideDir);
+        if (doLeft)
+        {
+            faceNormals["Left"].Add(-sideDir);
+            faceNormals["Left"].Add(-sideDir);
+        }
         // Top normals
-        faceNormals[1].Add(upDir);
-        faceNormals[1].Add(upDir);
+        if (doTop)
+        {
+            faceNormals["Top"].Add(upDir);
+            faceNormals["Top"].Add(upDir);
+        }
         // Right normals
-        faceNormals[2].Add(sideDir);
-        faceNormals[2].Add(sideDir);
+        if (doRight)
+        {
+            faceNormals["Right"].Add(sideDir);
+            faceNormals["Right"].Add(sideDir);
+        }
         // Bottom normals
-        faceNormals[3].Add(-upDir);
-        faceNormals[3].Add(-upDir);
+        if (doBottom)
+        {
+            faceNormals["Bottom"].Add(-upDir);
+            faceNormals["Bottom"].Add(-upDir);
+        }
     }
 
     public void BuildTris(int pointIndex)
     {
-        List<int> curLeftTris = new()
+        // Left side
+        if (doLeft)
         {
-            (pointIndex - 1) * 2,
-            pointIndex * 2,
-            (pointIndex - 1) * 2 + 1,
-            pointIndex * 2,
-            pointIndex * 2 + 1,
-            (pointIndex - 1) * 2 + 1,
-        };
+            List<int> curLeftTris = new()
+            {
+                (pointIndex - 1) * 2,
+                pointIndex * 2,
+                (pointIndex - 1) * 2 + 1,
+                pointIndex * 2,
+                pointIndex * 2 + 1,
+                (pointIndex - 1) * 2 + 1,
+            };
+            tris["Left"].AddRange(curLeftTris);
+        }
 
         // Top side
-        List<int> curTopTris = new()
+        if (doTop)
         {
-            (pointIndex - 1) * 2,
-            pointIndex * 2,
-            (pointIndex - 1) * 2 + 1,
-            pointIndex * 2,
-            pointIndex * 2 + 1,
-            (pointIndex - 1) * 2 + 1,
-        };
+            List<int> curTopTris = new()
+            {
+                (pointIndex - 1) * 2,
+                pointIndex * 2,
+                (pointIndex - 1) * 2 + 1,
+                pointIndex * 2,
+                pointIndex * 2 + 1,
+                (pointIndex - 1) * 2 + 1,
+            };
+            tris["Top"].AddRange(curTopTris);
+        }
 
         // Right side
-        List<int> curRightTris = new()
+        if (doRight)
         {
-            pointIndex * 2 + 1,
-            (pointIndex - 1) * 2 + 1,
-            pointIndex * 2,
-            (pointIndex - 1) * 2 + 1,
-            (pointIndex - 1) * 2,
-            pointIndex * 2,
-        };
+            List<int> curRightTris = new()
+            {
+                pointIndex * 2 + 1,
+                (pointIndex - 1) * 2 + 1,
+                pointIndex * 2,
+                (pointIndex - 1) * 2 + 1,
+                (pointIndex - 1) * 2,
+                pointIndex * 2,
+            };
+            tris["Right"].AddRange(curRightTris);
+        }
 
         // Bottom side
-        List<int> curBottomTris = new()
+        if (doBottom)
         {
-            (pointIndex - 1) * 2 + 1,
-            pointIndex * 2,
-            pointIndex * 2 + 1,
-            (pointIndex - 1) * 2 + 1,
-            (pointIndex - 1) * 2,
-            pointIndex * 2,
-        };
+            List<int> curBottomTris = new()
+            {
+                (pointIndex - 1) * 2 + 1,
+                pointIndex * 2,
+                pointIndex * 2 + 1,
+                (pointIndex - 1) * 2 + 1,
+                (pointIndex - 1) * 2,
+                pointIndex * 2,
+            };
+            tris["Bottom"].AddRange(curBottomTris);
+        }
 
-        tris[0].AddRange(curLeftTris);
-        tris[1].AddRange(curTopTris);
-        tris[2].AddRange(curRightTris);
-        tris[3].AddRange(curBottomTris);
     }
 
     public List<Mesh> FinishMesh()
     {
-        for (int i = 0; i < 4; i++)
+        foreach (string side in sideKeys)
         {
-            meshes[i].vertices = verts[i].ToArray();
-            meshes[i].triangles = tris[i].ToArray();
-            meshes[i].normals = faceNormals[i].ToArray();
-            meshes[i].RecalculateBounds();
+            meshes[side].vertices = verts[side].ToArray();
+            meshes[side].triangles = tris[side].ToArray();
+            meshes[side].normals = faceNormals[side].ToArray();
+            meshes[side].RecalculateBounds();
         }
 
-        return meshes;
+        List<Mesh> allMeshes = new();
+
+        allMeshes.AddRange(meshes.Values);
+
+        return allMeshes;
     }
 }
 
 public class MountainMeshBuilder
 {
-    public float roadWidth = 200.0f;
+    public float roadWidth = 150.0f;
 
     // Number of vertices to expand left/right
-    public int verticesFromCentreCount = 16;
-    public float extraSideDistance = 550.0f;
+    public int verticesFromCentreCount = 18;
+    public float extraSideDistance = 400.0f;
     public float mountainXZScale = 0.01f;
-    public float mountainHeight = 120.0f;
-    public float baseLevel = -6.0f;
+    public float mountainHeight = 250.0f;
+    public float baseLevel = -5.0f;
 
     private Mesh mesh = new();
     private List<Vector3> verts = new();
@@ -724,6 +800,7 @@ public class MountainMeshBuilder
 
     public MountainMeshBuilder()
     {
+
     }
 
     public void BuildVerts(Vector3 point, Vector3 sideDir, float minX, float maxX)
@@ -731,8 +808,8 @@ public class MountainMeshBuilder
         List<Vector3> line = new();
         List<Vector2> curUVs = new();
 
-        Vector3 leftPoint = point - sideDir * ((point.x - minX) + extraSideDistance);
-        Vector3 rightPoint = point + sideDir * ((maxX - point.x) + extraSideDistance);
+        Vector3 leftPoint = point - sideDir * ((point.x - minX) + extraSideDistance) - Vector3.up * 5.0f;
+        Vector3 rightPoint = point + sideDir * ((maxX - point.x) + extraSideDistance) - Vector3.up * 5.0f;
         
         for (int i = 0; i <= (verticesFromCentreCount * 2); i++)
         {
@@ -743,8 +820,15 @@ public class MountainMeshBuilder
             Vector3 minPoint = new(minX, point.y, point.z);
             Vector3 maxPoint = new(maxX, point.y, point.z);
 
-            if (Vector3.Distance(vertexPos, (minPoint + maxPoint)/2.0f) > roadWidth)
-                relief += (Mathf.PerlinNoise(vertexPos.x * mountainXZScale, vertexPos.z * mountainXZScale)) * mountainHeight;
+            float dist = Vector3.Distance(vertexPos, (minPoint + maxPoint) / 2.0f);
+
+            float noise = (Mathf.PerlinNoise(vertexPos.x * mountainXZScale, vertexPos.z * mountainXZScale));
+
+            float v = (dist - roadWidth) / roadWidth;
+
+            //float sigmoid = 1 - 3 * (v * v) + 2 * (v * v * v);
+
+            relief += Mathf.Lerp(baseLevel, noise * mountainHeight, Mathf.Clamp01(v));
 
             float randomness = UnityEngine.Random.Range(-0.06f, 0.06f);
 
