@@ -202,7 +202,6 @@ public class TrackPiece
     private List<Vector3> lastRightBarrierQuadOfLastSegment;
     private List<Vector3> lastLeftBarrierQuadOfLastSegment;
     private List<Vector3> lastMountainLineOfLastSegment;
-    private List<Vector2> lastMountainLineUVs;
 
     public System.Action<List<Mesh>> roadMeshPieceGenerated;
     public System.Action<int> roadSegmentDeleted;
@@ -213,7 +212,6 @@ public class TrackPiece
     public int totalSegmentTracker = 0;
 
     private List<Vector3> previousCurvePoints;
-    private List<Vector3> previousSideDirs;
 
     public List<Point> debugPoints = new();
 
@@ -490,7 +488,6 @@ public class TrackPiece
         roadMeshPieceGenerated?.Invoke(allRoadMeshes);
 
         previousCurvePoints = curvePoints;
-        previousSideDirs = holdSideDirs;
     }
 
     public void GenerateMountainMesh(int segmentIndex)
@@ -517,7 +514,7 @@ public class TrackPiece
             float maxX = (Mathf.Max(xPosHist) + previousCurvePoints[pointIndex].x * 10.0f) / 11.0f;
 
             if (segmentIndex > 0 && pointIndex == 0)
-                mountainBuilder.BuildVerts(lastMountainLineOfLastSegment, lastMountainLineUVs);
+                mountainBuilder.BuildVerts(lastMountainLineOfLastSegment);
             else if (pointIndex == 0)
                 mountainBuilder.BuildVerts(previousCurvePoints[pointIndex], Vector3.right, minX, maxX);
             else if (curZDelta > minZDelta)
@@ -536,7 +533,6 @@ public class TrackPiece
             if (pointIndex == previousCurvePoints.Count - 1)
             {
                 lastMountainLineOfLastSegment = mountainBuilder.lastLine;
-                lastMountainLineUVs = mountainBuilder.lastUVs;
             }
 
         }
@@ -793,10 +789,8 @@ public class MountainMeshBuilder
     private Mesh mesh = new();
     private List<Vector3> verts = new();
     public List<int> tris = new();
-    private List<Vector2> uvs = new();
 
     public List<Vector3> lastLine;
-    public List<Vector2> lastUVs;
 
     public MountainMeshBuilder()
     {
@@ -806,7 +800,6 @@ public class MountainMeshBuilder
     public void BuildVerts(Vector3 point, Vector3 sideDir, float minX, float maxX)
     {
         List<Vector3> line = new();
-        List<Vector2> curUVs = new();
 
         Vector3 leftPoint = point - sideDir * ((point.x - minX) + extraSideDistance) - Vector3.up * 5.0f;
         Vector3 rightPoint = point + sideDir * ((maxX - point.x) + extraSideDistance) - Vector3.up * 5.0f;
@@ -815,7 +808,7 @@ public class MountainMeshBuilder
         {
             Vector3 vertexPos = Vector3.Lerp(leftPoint, rightPoint, (float)i / ((float)verticesFromCentreCount * 2.0f));
 
-            float relief = baseLevel;
+            //float relief = baseLevel;
 
             Vector3 minPoint = new(minX, point.y, point.z);
             Vector3 maxPoint = new(maxX, point.y, point.z);
@@ -826,27 +819,18 @@ public class MountainMeshBuilder
 
             float v = (dist - roadWidth) / roadWidth;
 
-            //float sigmoid = 1 - 3 * (v * v) + 2 * (v * v * v);
-
-            relief += Mathf.Lerp(baseLevel, noise * mountainHeight, Mathf.Clamp01(v));
-
-            float randomness = UnityEngine.Random.Range(-0.06f, 0.06f);
-
-            curUVs.Add(new Vector2(Mathf.Clamp01(relief/100.0f + randomness), 0.5f));
+            float relief = Mathf.Lerp(baseLevel, noise * mountainHeight, Mathf.Clamp01(v));
 
             line.Add(vertexPos + Vector3.up * relief);
         }
 
         verts.AddRange(line);
-        uvs.AddRange(curUVs);
 
         lastLine = line;
-        lastUVs = curUVs;
     }
 
-    public void BuildVerts(List<Vector3> previousLine, List<Vector2> previousUVs)
+    public void BuildVerts(List<Vector3> previousLine)
     {
-        uvs.AddRange(previousUVs);
         verts.AddRange(previousLine);
     }
 
@@ -876,7 +860,6 @@ public class MountainMeshBuilder
     {
         mesh.vertices = verts.ToArray();
         mesh.triangles = tris.ToArray();
-        mesh.uv = uvs.ToArray();
         mesh.RecalculateBounds();
         mesh.RecalculateNormals();
 
