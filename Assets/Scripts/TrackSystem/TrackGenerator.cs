@@ -27,6 +27,8 @@ public class TrackGenerator : MonoBehaviour
     private int mountainMeshChildrenCount = 0;
 
     public Material roadMaterial;
+    public Material barrierTopMaterial;
+    public Material barrierSideMaterial;
     public Material mountainMaterial;
 
     private void Awake()
@@ -58,12 +60,6 @@ public class TrackGenerator : MonoBehaviour
                     Debug.DrawLine(vertexPoints[j], vertexPoints[j + 1]);
             }
         }
-
-        foreach (Point point in pieces[0].debugPoints)
-        {
-            Debug.DrawRay(point.pos, point.upDir, Color.red);
-        }
-        
     }
     public void CreateInitialPiece()
     {
@@ -82,9 +78,6 @@ public class TrackGenerator : MonoBehaviour
         pieces[0].mountainSegmentDeleted += MountainSegmentDeleted;
 
         pieces[0].InitSegment(transform.position);
-
-        pieces[0].AddSegment(new Vector3(0.0f, 0.0f, 1.0f), Vector3.up);
-
         StartCoroutine(SlowGenPieces());
     }
 
@@ -92,31 +85,32 @@ public class TrackGenerator : MonoBehaviour
     {
         yield return new WaitForSeconds(1.0f);
 
-        pieces[0].AddSegment(new Vector3(-3.0f, 0.0f, 3.0f), Vector3.up);
-        pieces[0].AddSegment(new Vector3(3.0f, 0.0f, 3.0f), Vector3.up);
+        pieces[0].AddSegment(new Vector3(0.0f, 0.0f, 3.0f), Vector3.up);
 
-        for (int i = 0; i < 10; i++)
+        for (int i = 0; i < 20; i++)
         {
             yield return new WaitForSeconds(0.5f);
-            pieces[0].AddSegment(new Vector3(UnityEngine.Random.Range(-3.0f, 3.0f), UnityEngine.Random.Range(-0.5f, 0.5f), UnityEngine.Random.Range(2.0f, 2.5f)), Vector3.up);
+            pieces[0].AddSegment(new Vector3(UnityEngine.Random.Range(-3.0f, 3.0f), UnityEngine.Random.Range(-1.0f, 1.0f), UnityEngine.Random.Range(2.0f, 2.5f)), Vector3.up);
         }
     }
 
-    public void RoadMeshPieceGenerated(List<Mesh> meshes)
+    public void RoadMeshPieceGenerated(List<Mesh> meshes, bool isBarrier = false)
     {
         string[] pieceNames = { "Road", "BarrierR", "BarrierL"};
         string[] sides = { "Left", "Top", "Right", "Bottom"};
 
         for (int i = roadMeshChildrenCount; i < meshes.Count + roadMeshChildrenCount; i++)
         {
+            bool isSide = meshes[i - roadMeshChildrenCount].name.Contains("Left") || meshes[i - roadMeshChildrenCount].name.Contains("Right");
+
             roadMeshChildren.Add(new GameObject());
             roadMeshChildren[i].transform.parent = transform;
-            roadMeshChildren[i].AddComponent<MeshRenderer>().material = roadMaterial;
+            roadMeshChildren[i].AddComponent<MeshRenderer>().material = isBarrier ? (isSide ? barrierSideMaterial : barrierTopMaterial) : roadMaterial;
             roadMeshChildren[i].AddComponent<MeshFilter>();
             roadMeshChildren[i].AddComponent<MeshCollider>();
             roadMeshChildren[i].GetComponent<MeshFilter>().sharedMesh = meshes[i - roadMeshChildrenCount];
             roadMeshChildren[i].AddComponent<MeshCollider>().sharedMesh = meshes[i - roadMeshChildrenCount];
-            roadMeshChildren[i].name = "Seg" + pieces[0].totalSegmentTracker + "/" + sides[(i - roadMeshChildrenCount) %4] + pieceNames[(i - roadMeshChildrenCount) /4];
+            roadMeshChildren[i].name = "Seg" + pieces[0].totalSegmentTracker + "/" + sides[(i - roadMeshChildrenCount) % 4] + pieceNames[(i - roadMeshChildrenCount) /4];
         }
         roadMeshChildrenCount += meshes.Count;
     }
@@ -203,7 +197,7 @@ public class TrackPiece
     private List<Vector3> lastLeftBarrierQuadOfLastSegment;
     private List<Vector3> lastMountainLineOfLastSegment;
 
-    public System.Action<List<Mesh>> roadMeshPieceGenerated;
+    public System.Action<List<Mesh>, bool> roadMeshPieceGenerated;
     public System.Action<int> roadSegmentDeleted;
 
     public System.Action<Mesh> mountainMeshGenerated;
@@ -213,12 +207,14 @@ public class TrackPiece
 
     private List<Vector3> previousCurvePoints;
 
-    public List<Point> debugPoints = new();
-
     private float[] xPosHist;
-    private int xPosHistLength = 100;
     private int xPosHistIndex = 0;
-    private int xPosHistPollingInterval = 2;
+
+    private float[] yPosHist;
+    private int yPosHistIndex = 0;
+
+    private int posHistLength = 25;
+    private int posHistPollingInterval = 2;
 
     public TrackPiece(float _scale)
     {
@@ -235,9 +231,10 @@ public class TrackPiece
             new(centre + 2.0f * scale * Vector3.forward),
         };
 
-        xPosHist = new float[xPosHistLength];
+        xPosHist = new float[posHistLength];
+        yPosHist = new float[posHistLength];
 
-        for (int i = 0; i < xPosHistLength; i++)
+        for (int i = 0; i < posHistLength; i++)
         {
             xPosHist[i] = 0.0f;
         }
@@ -393,7 +390,7 @@ public class TrackPiece
     // Generate the mesh of the track piece
     public void GenerateRoadMesh(int segmentIndex)
     {
-        RoadMeshBuilder roadBuilder = new(trackWidth, trackHeight, false, true, false, false);
+        RoadMeshBuilder roadBuilder = new(trackWidth, trackHeight, false, true, false, true);
         RoadMeshBuilder rightBarrier = new(barrierWidth, barrierHeight, true, true, true, false);
         RoadMeshBuilder leftBarrier = new(barrierWidth, barrierHeight, true, true, true, false);
 
@@ -446,8 +443,8 @@ public class TrackPiece
                 }
                 else
                 {
-                    rightBarrier.BuildVerts(point, upDir, sideDir, new Vector2(trackWidth / 2 - barrierWidth / 2, trackHeight), true);
-                    leftBarrier.BuildVerts(point, upDir, sideDir, new Vector2(-trackWidth / 2 + barrierWidth / 2, trackHeight), true);
+                    rightBarrier.BuildVerts(point, upDir, sideDir, new Vector2(trackWidth / 2 - barrierWidth / 2, 0.0f), true);
+                    leftBarrier.BuildVerts(point, upDir, sideDir, new Vector2(-trackWidth / 2 + barrierWidth / 2, 0.0f), true);
                 }
             }
 
@@ -475,53 +472,55 @@ public class TrackPiece
             holdSideDirs.Add(sideDir);
         }
 
-        List<Mesh> allRoadMeshes = new();
-        allRoadMeshes.AddRange(roadBuilder.FinishMesh());
-
+        roadMeshPieceGenerated?.Invoke(roadBuilder.FinishMesh(), false);
 
         if (doBarriers)
         {
-            allRoadMeshes.AddRange(rightBarrier.FinishMesh());
-            allRoadMeshes.AddRange(leftBarrier.FinishMesh());
+            List<Mesh> barrierMeshes = new();
+            barrierMeshes.AddRange(rightBarrier.FinishMesh());
+            barrierMeshes.AddRange(leftBarrier.FinishMesh());
+            roadMeshPieceGenerated?.Invoke(barrierMeshes, true);
         }
 
-        roadMeshPieceGenerated?.Invoke(allRoadMeshes);
 
         previousCurvePoints = curvePoints;
     }
 
     public void GenerateMountainMesh(int segmentIndex)
     {
-        float minZDelta = 10.0f;
+        float minZDelta = 8.0f;
         float curZDelta = 0.0f;
         int builtPoints = 0;
         MountainMeshBuilder mountainBuilder = new();
 
         for (int pointIndex = 0; pointIndex < previousCurvePoints.Count; pointIndex++)
         {
-            if (pointIndex % xPosHistPollingInterval == 0 || pointIndex == previousCurvePoints.Count - 1)
+            if (pointIndex % posHistPollingInterval == 0 || pointIndex == previousCurvePoints.Count - 1)
             {
                 xPosHist[xPosHistIndex] = previousCurvePoints[pointIndex].x;
                 xPosHistIndex++;
+                yPosHist[yPosHistIndex] = previousCurvePoints[pointIndex].y;
+                yPosHistIndex++;
             }
 
             if (pointIndex > 0)
                 curZDelta += previousCurvePoints[pointIndex].z - previousCurvePoints[pointIndex - 1].z;
 
-            if (xPosHistIndex == xPosHistLength) xPosHistIndex = 0;
+            if (xPosHistIndex == posHistLength) xPosHistIndex = 0;
+            if (yPosHistIndex == posHistLength) yPosHistIndex = 0;
 
-            float minX = (Mathf.Min(xPosHist) + previousCurvePoints[pointIndex].x * 10.0f) / 11.0f;
-            float maxX = (Mathf.Max(xPosHist) + previousCurvePoints[pointIndex].x * 10.0f) / 11.0f;
+            float minX = (Mathf.Min(xPosHist) + previousCurvePoints[pointIndex].x * 9.0f) / 10.0f;
+            float maxX = (Mathf.Max(xPosHist) + previousCurvePoints[pointIndex].x * 9.0f) / 10.0f;
+
+            float minY = Mathf.Min(yPosHist);
 
             if (segmentIndex > 0 && pointIndex == 0)
                 mountainBuilder.BuildVerts(lastMountainLineOfLastSegment);
             else if (pointIndex == 0)
-                mountainBuilder.BuildVerts(previousCurvePoints[pointIndex], Vector3.right, minX, maxX);
+                mountainBuilder.BuildVerts(previousCurvePoints[pointIndex], Vector3.right, minX, maxX, minY);
             else if (curZDelta > minZDelta)
             {
-                debugPoints.Add(new Point(previousCurvePoints[pointIndex] + Vector3.up * 10.0f, Vector3.right));
-
-                mountainBuilder.BuildVerts(previousCurvePoints[pointIndex], Vector3.right, minX, maxX);
+                mountainBuilder.BuildVerts(previousCurvePoints[pointIndex], Vector3.right, minX, maxX, minY);
                 curZDelta = 0.0f;
 
                 builtPoints++;
@@ -765,6 +764,7 @@ public class RoadMeshBuilder
             meshes[side].triangles = tris[side].ToArray();
             meshes[side].normals = faceNormals[side].ToArray();
             meshes[side].RecalculateBounds();
+            meshes[side].name = side;
         }
 
         List<Mesh> allMeshes = new();
@@ -777,14 +777,14 @@ public class RoadMeshBuilder
 
 public class MountainMeshBuilder
 {
-    public float roadWidth = 150.0f;
+    public float roadWidth = 220.0f;
 
     // Number of vertices to expand left/right
     public int verticesFromCentreCount = 18;
-    public float extraSideDistance = 400.0f;
+    public float extraSideDistance = 700.0f;
     public float mountainXZScale = 0.01f;
-    public float mountainHeight = 250.0f;
-    public float baseLevel = -5.0f;
+    public float mountainHeight = 125.0f;
+    public float baseLevel = -20.0f;
 
     private Mesh mesh = new();
     private List<Vector3> verts = new();
@@ -797,7 +797,7 @@ public class MountainMeshBuilder
 
     }
 
-    public void BuildVerts(Vector3 point, Vector3 sideDir, float minX, float maxX)
+    public void BuildVerts(Vector3 point, Vector3 sideDir, float minX, float maxX, float minY)
     {
         List<Vector3> line = new();
 
@@ -819,7 +819,7 @@ public class MountainMeshBuilder
 
             float v = (dist - roadWidth) / roadWidth;
 
-            float relief = Mathf.Lerp(baseLevel, noise * mountainHeight, Mathf.Clamp01(v));
+            float relief = Mathf.Lerp(baseLevel - (point.y - minY), noise * mountainHeight, Mathf.Clamp(v, 0.0f, 2.0f));
 
             line.Add(vertexPos + Vector3.up * relief);
         }

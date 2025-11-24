@@ -7545,7 +7545,9 @@ MonoBehaviour:
   defaultBarrierWidth: 2
   defaultBarrierHeight: 8
   doBarriers: 1
-  roadMaterial: {fileID: 2100000, guid: 31321ba15b8f8eb4c954353edc038b1d, type: 2}
+  roadMaterial: {fileID: 2100000, guid: b47695db96cd00d44977dcd9dcd70495, type: 2}
+  barrierTopMaterial: {fileID: 2100000, guid: fcb117bc4a36f774ba984eb26c794932, type: 2}
+  barrierSideMaterial: {fileID: 2100000, guid: f9a09bf6788177c428f76422178c5659, type: 2}
   mountainMaterial: {fileID: 2100000, guid: e5bbd95bc19a747419ded67bbf3e595f, type: 2}
 --- !u!1001 &1225007265
 PrefabInstance:
