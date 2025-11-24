@@ -1,5 +1,6 @@
-using UnityEngine;
 using System.Collections.Generic;
+using Unity.VisualScripting;
+using UnityEngine;
 
 public class TrackGenerator : MonoBehaviour
 {
@@ -28,6 +29,11 @@ public class TrackGenerator : MonoBehaviour
     public Material barrierTopMaterial;
     public Material barrierSideMaterial;
     public Material mountainMaterial;
+
+    // How many segments of track should exist behind and ahead
+    private int renderDistance = 8;
+
+    public SegmentBounds segmentBoundPrefab;
 
     private void Awake()
     {
@@ -76,20 +82,25 @@ public class TrackGenerator : MonoBehaviour
         pieces[0].mountainSegmentDeleted += MountainSegmentDeleted;
 
         pieces[0].InitSegment(transform.position);
-        StartCoroutine(SlowGenPieces());
+        GenerateInitialPieces();
     }
 
-    IEnumerator<WaitForSeconds> SlowGenPieces()
+    private void GenerateNextSegment()
     {
-        yield return new WaitForSeconds(1.0f);
+        pieces[0].AddSegment(new Vector3(Random.Range(-3.0f, 3.0f), Random.Range(-1.0f, 1.0f), Random.Range(3.0f, 3.5f)), Vector3.up);
+    }
 
+    private void RemoveFirstSegment()
+    {
+        pieces[0].DeleteSegment(0);
+    }
+
+    private void GenerateInitialPieces()
+    {
         pieces[0].AddSegment(new Vector3(0.0f, 0.0f, 3.0f), Vector3.up);
 
-        for (int i = 0; i < 20; i++)
-        {
-            yield return new WaitForSeconds(0.5f);
-            pieces[0].AddSegment(new Vector3(UnityEngine.Random.Range(-3.0f, 3.0f), UnityEngine.Random.Range(-1.0f, 1.0f), UnityEngine.Random.Range(2.0f, 2.5f)), Vector3.up);
-        }
+        for (int i = 0; i < renderDistance; i++)
+            GenerateNextSegment();
     }
 
     public void RoadMeshPieceGenerated(List<Mesh> meshes, bool isBarrier = false)
@@ -131,18 +142,54 @@ public class TrackGenerator : MonoBehaviour
 
     public void MountainMeshPieceGenerated(Mesh mesh)
     {
+        // Add the mountain mesh to the game world
         mountainMeshChildren.Add(new GameObject());
         mountainMeshChildren[^1].transform.parent = transform;
         mountainMeshChildren[^1].AddComponent<MeshRenderer>().material = mountainMaterial;
         mountainMeshChildren[^1].AddComponent<MeshFilter>().sharedMesh = mesh;
         mountainMeshChildren[^1].AddComponent<MeshCollider>().sharedMesh = mesh;
         mountainMeshChildren[^1].name = "Seg" + pieces[0].totalSegmentTracker + "/Mountain";
+
+        // Create the bounding box collider
+        SegmentBounds bounds = new GameObject().AddComponent<SegmentBounds>();
+        bounds.Setup(mesh.bounds.center, mesh.bounds.size, pieces[0].totalSegmentTracker);
+
+        bounds.transform.parent = mountainMeshChildren[^1].transform;
+
+        // Connect events
+        bounds.playerCollideEnter += PlayerEnterSegment;
+        bounds.playerCollideExit += PlayerExitSegment;
     }
 
     public void MountainSegmentDeleted(int segmentIndex)
     {
+        SegmentBounds bounds = mountainMeshChildren[segmentIndex].transform.GetComponentInChildren<SegmentBounds>();
+
+        // Clear events to clean up memory
+        bounds.playerCollideEnter -= PlayerEnterSegment;
+        bounds.playerCollideExit -= PlayerExitSegment;
+
+        // Destroy the mountain mesh
         Destroy(mountainMeshChildren[segmentIndex]);
         mountainMeshChildrenCount -= 1;
         mountainMeshChildren.RemoveAt(segmentIndex);
+    }
+
+    public void PlayerEnterSegment(int segmentIndex)
+    {
+        if (segmentIndex + renderDistance > pieces[0].totalSegmentTracker)
+        {
+            GenerateNextSegment();
+            Debug.Log("Generated segment " + (segmentIndex + renderDistance));
+        }
+    }
+
+    public void PlayerExitSegment(int segmentIndex)
+    {
+        if (segmentIndex - renderDistance > pieces[0].totalSegmentTracker - pieces[0].NumSegments)
+        {
+            RemoveFirstSegment();
+            Debug.Log("Removed segment " + (segmentIndex - renderDistance));
+        }
     }
 }
