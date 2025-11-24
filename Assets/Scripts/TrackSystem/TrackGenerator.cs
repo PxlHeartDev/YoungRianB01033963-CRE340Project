@@ -108,7 +108,13 @@ public class TrackGenerator : MonoBehaviour
             roadMeshChildren[i].AddComponent<MeshCollider>();
             roadMeshChildren[i].GetComponent<MeshFilter>().sharedMesh = meshes[i - roadMeshChildrenCount];
             roadMeshChildren[i].AddComponent<MeshCollider>().sharedMesh = meshes[i - roadMeshChildrenCount];
-            roadMeshChildren[i].name = "Seg" + pieces[0].totalSegmentTracker + "/" + sides[(i - roadMeshChildrenCount) % 4] + pieceNames[(i - roadMeshChildrenCount) /4];
+
+            roadMeshChildren[i].name = "Seg" + pieces[0].totalSegmentTracker + "/";
+
+            if (isBarrier)
+                roadMeshChildren[i].name += "Barrier/" + sides[(i - roadMeshChildrenCount) % 4];
+            else
+                roadMeshChildren[i].name += "Road/" + (i == 0 ? "Top" : "Bottom");
         }
         roadMeshChildrenCount += meshes.Count;
     }
@@ -130,7 +136,7 @@ public class TrackGenerator : MonoBehaviour
         mountainMeshChildren[^1].AddComponent<MeshRenderer>().material = mountainMaterial;
         mountainMeshChildren[^1].AddComponent<MeshFilter>().sharedMesh = mesh;
         mountainMeshChildren[^1].AddComponent<MeshCollider>().sharedMesh = mesh;
-        mountainMeshChildren[^1].name = "Seg" + pieces[0].totalSegmentTracker;
+        mountainMeshChildren[^1].name = "Seg" + pieces[0].totalSegmentTracker + "/Mountain";
     }
 
     public void MountainSegmentDeleted(int segmentIndex)
