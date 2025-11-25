@@ -17,6 +17,9 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    public Player player;
+    public SunMoon sunMoon;
+
     public static float standardDelta = 0.0f;
 
     public int score = 0;
@@ -40,11 +43,15 @@ public class GameManager : MonoBehaviour
     private void OnEnable()
     {
         EventManager.Collected += ItemCollected;
+        sunMoon.sunsetTrigger += player.TurnOnLights;
+        sunMoon.sunriseTrigger += player.TurnOffLights;
     }
 
     private void OnDisable()
     {
         EventManager.Collected -= ItemCollected;
+        sunMoon.sunsetTrigger -= player.TurnOnLights;
+        sunMoon.sunriseTrigger -= player.TurnOffLights;
     }
 
     private void ItemCollected(ICollectable item, GameObject source)

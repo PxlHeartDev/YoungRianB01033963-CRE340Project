@@ -16,11 +16,11 @@ public class SunMoon : MonoBehaviour
     public System.Action sunsetTrigger;
     public System.Action sunriseTrigger;
 
+    bool sunsetTriggered = false;
+
     private bool isNight;
 
     private Dictionary<string, TimeOfDay> timesOfDay = new();
-
-    float rotCutPoint = 180.0f;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
@@ -49,16 +49,25 @@ public class SunMoon : MonoBehaviour
 
         if (targetRotation.x > rotThreshold1)
         {
+            if (!sunsetTriggered)
+            {
+                sunsetTriggered = true;
+                sunsetTrigger?.Invoke();
+            }
             light.intensity = Mathf.Lerp(light.intensity, 0.0f, (targetRotation.x - rotThreshold1)/(rotThreshold2 - rotThreshold1));
         }
 
         if (targetRotation.x > rotThreshold2)
         {
             if (isNight)
+            {
                 SetToDay();
+                sunriseTrigger?.Invoke();
+            }
             else
                 SetToNight();
             targetRotation.x = (rotThreshold1 - rotThreshold2) * 2.0f;
+            sunsetTriggered = false;
         }
     }
 

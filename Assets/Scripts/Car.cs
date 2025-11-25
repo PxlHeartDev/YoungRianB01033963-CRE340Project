@@ -11,6 +11,10 @@ public class Car : MonoBehaviour, IDamageable
     [SerializeField] private VisualEffect driftLinesVFXPrefab;
     [SerializeField] private Vector2 wheelDistance = new Vector2(1.85f, 0.95f);
 
+    [SerializeField] private Light[] lightList;
+
+    [SerializeField] private float lightIntensity = 600.0f;
+
     // Enables debug gizmos
     public bool debug = false;
 
@@ -40,57 +44,24 @@ public class Car : MonoBehaviour, IDamageable
     // Time spent in continuous drift
     private float driftTime = 0.0f;
 
+    // Y offset for the wheels
+    Vector3 wheelYOffset;
+
     void Awake()
     {
-        // Generate the wheels
-        for (int i = 0; i < 4; i++)
-        {
-            // Create the objects and assign some values
-            wheels[i] = new Wheel();
-            wheels[i].rbCar = rb;
-            wheels[i].wheelTransform = new GameObject($"Wheel {i}");
-            //wheels[i].wheelTransform.transform.SetParent(transform);
-            wheels[i].debug = debug;
+        wheelYOffset = transform.up * 1.3f;
 
-            // Set the initial transforms
-            switch (i) {
-                case (0):
-                    wheels[0].wheelTransform.transform.position = transform.position + transform.right * wheelDistance.x + transform.forward * wheelDistance.y;//front right
-                    break;
-                case (1):
-                    wheels[1].wheelTransform.transform.position = transform.position + transform.right * -wheelDistance.x + transform.forward * wheelDistance.y;//front left
-                    break;
-                case (2):
-                    wheels[2].wheelTransform.transform.position = transform.position + transform.right * wheelDistance.x + transform.forward * -wheelDistance.y;//back right
-                    break;
-                case (3):
-                    wheels[3].wheelTransform.transform.position = transform.position + transform.right * -wheelDistance.x + transform.forward * -wheelDistance.y;//back left
-                    break;
-            }
-
-            // Set front wheels
-            if (i == 0 || i == 2) wheels[i].front = true;
-
-            // Instantiate the visual mesh
-            wheels[i].prefab = Instantiate(wheelPrefab, wheels[i].wheelTransform.transform.position, Quaternion.identity, wheels[i].wheelTransform.transform);
-            wheels[i].prefab.transform.eulerAngles = new Vector3(0.0f, 90.0f, 0.0f);
-
-            wheels[i].wheelRubbleVFX = Instantiate(wheelRubbleVFXPrefab, wheels[i].prefab.transform);
-            wheels[i].driftLinesVFX = Instantiate(driftLinesVFXPrefab, wheels[i].prefab.transform);
-            wheels[i].driftLinesVFX.transform.position += (wheels[i].wheelTransform.transform.up * 0.1f);// + (wheels[i].wheelTransform.transform.forward * -0.3f);
-
-            // Trigger the post-init function
-            wheels[i].PostInitialize();
-        }
+        TurnOffLights();
+        CreateWheels();
     }
 
     void FixedUpdate()
     {
         // Update the transforms every frame to keep them relative to the body's transform
-        wheels[0].wheelTransform.transform.position = transform.position + transform.right * wheelDistance.x + transform.forward * wheelDistance.y; //front right
-        wheels[1].wheelTransform.transform.position = transform.position + transform.right * -wheelDistance.x + transform.forward * wheelDistance.y; //front left
-        wheels[2].wheelTransform.transform.position = transform.position + transform.right * wheelDistance.x + transform.forward * -wheelDistance.y; //back right
-        wheels[3].wheelTransform.transform.position = transform.position + transform.right * -wheelDistance.x + transform.forward * -wheelDistance.y; //back left
+        wheels[0].wheelTransform.transform.position = transform.position + transform.right * wheelDistance.x + transform.forward * wheelDistance.y + wheelYOffset; //front right
+        wheels[1].wheelTransform.transform.position = transform.position + transform.right * -wheelDistance.x + transform.forward * wheelDistance.y + wheelYOffset; //front left
+        wheels[2].wheelTransform.transform.position = transform.position + transform.right * wheelDistance.x + transform.forward * -wheelDistance.y + wheelYOffset; //back right
+        wheels[3].wheelTransform.transform.position = transform.position + transform.right * -wheelDistance.x + transform.forward * -wheelDistance.y + wheelYOffset; //back left
 
         // Dampen rpm
         rpm -= ((rpm * Mathf.PI) + -transform.InverseTransformDirection(rb.linearVelocity).z) * Time.deltaTime * 0.1f;
@@ -120,6 +91,50 @@ public class Car : MonoBehaviour, IDamageable
         else driftTime = 0.0f;
 
         foreach(Wheel wheel in wheels) wheel.steerMult = 1.0f - Mathf.Clamp(driftTime / 10.0f, 0.0f, 0.5f);
+    }
+
+    private void CreateWheels()
+    {
+        for (int i = 0; i < 4; i++)
+        {
+            // Create the objects and assign some values
+            wheels[i] = new Wheel();
+            wheels[i].rbCar = rb;
+            wheels[i].wheelTransform = new GameObject($"Wheel {i}");
+            //wheels[i].wheelTransform.transform.SetParent(transform);
+            wheels[i].debug = debug;
+
+            // Set the initial transforms
+            switch (i)
+            {
+                case (0):
+                    wheels[0].wheelTransform.transform.position = transform.position + transform.right * wheelDistance.x + transform.forward * wheelDistance.y + wheelYOffset;//front right
+                    break;
+                case (1):
+                    wheels[1].wheelTransform.transform.position = transform.position + transform.right * -wheelDistance.x + transform.forward * wheelDistance.y + wheelYOffset;//front left
+                    break;
+                case (2):
+                    wheels[2].wheelTransform.transform.position = transform.position + transform.right * wheelDistance.x + transform.forward * -wheelDistance.y + wheelYOffset;//back right
+                    break;
+                case (3):
+                    wheels[3].wheelTransform.transform.position = transform.position + transform.right * -wheelDistance.x + transform.forward * -wheelDistance.y + wheelYOffset;//back left
+                    break;
+            }
+
+            // Set front wheels
+            if (i == 0 || i == 2) wheels[i].front = true;
+
+            // Instantiate the visual mesh
+            wheels[i].prefab = Instantiate(wheelPrefab, wheels[i].wheelTransform.transform.position, Quaternion.identity, wheels[i].wheelTransform.transform);
+            wheels[i].prefab.transform.eulerAngles = new Vector3(0.0f, 90.0f, 0.0f);
+
+            wheels[i].wheelRubbleVFX = Instantiate(wheelRubbleVFXPrefab, wheels[i].prefab.transform);
+            wheels[i].driftLinesVFX = Instantiate(driftLinesVFXPrefab, wheels[i].prefab.transform);
+            wheels[i].driftLinesVFX.transform.position += (wheels[i].wheelTransform.transform.up * 0.1f);// + (wheels[i].wheelTransform.transform.forward * -0.3f);
+
+            // Trigger the post-init function
+            wheels[i].PostInitialize();
+        }
     }
 
     #region Movement
@@ -187,9 +202,7 @@ public class Car : MonoBehaviour, IDamageable
 
     }
 
-    //
-    // IDamageable
-    //
+    #region IDamageable
 
     // Instantly kill the car
     public void Kill(GameObject source)
@@ -222,6 +235,24 @@ public class Car : MonoBehaviour, IDamageable
             Destroy(wheel.wheelTransform);
         }
     }
+
+    #endregion
+
+    #region Lights
+
+    public void TurnOnLights()
+    {
+        lightList[0].intensity = lightIntensity;
+        lightList[1].intensity = lightIntensity;
+    }
+
+    public void TurnOffLights()
+    {
+        lightList[0].intensity = 0.0f;
+        lightList[1].intensity = 0.0f;
+    }
+
+    #endregion
 }
 
 // Wheel class for storing information and doing physics calculations with
