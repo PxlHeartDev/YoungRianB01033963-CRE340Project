@@ -3,8 +3,8 @@ using UnityEngine.InputSystem;
 
 public class Player : Car
 {
-    // Input action asset to assign in the editor
-    public InputActionAsset actions;
+    [Header("Assets")]
+    public InputActionAsset actions;                        // Input action asset to assign in the editor
 
     // Input actions
     private InputAction m_gasAction;
@@ -12,13 +12,12 @@ public class Player : Car
     private InputAction m_steerAction;
     private InputAction m_jumpAction;
 
-    // Whether the jump action is currently being held
-    private bool jumpHeld = false;
+    private bool jumpHeld = false;                          // Whether the jump action is currently being held
 
-    public int sequentialCoins = 0;
+    public int sequentialCoins { get; private set; } = 0;   // How many coins have been collected in this combo
     private float sequentialCoinCooldown = 0.0f;
 
-    public System.Action<int> CoinComboEnded;
+    public System.Action<int> CoinComboEnded;               // Even for when the coin combo ends
 
     void Start()
     {
