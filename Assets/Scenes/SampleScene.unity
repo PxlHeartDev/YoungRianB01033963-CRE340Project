@@ -16,7 +16,7 @@ RenderSettings:
   serializedVersion: 10
   m_Fog: 0
   m_FogColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
-  m_FogMode: 3
+  m_FogMode: 1
   m_FogDensity: 0.01
   m_LinearFogStart: 0
   m_LinearFogEnd: 300
@@ -26,7 +26,7 @@ RenderSettings:
   m_AmbientIntensity: 1
   m_AmbientMode: 0
   m_SubtractiveShadowColor: {r: 0.42, g: 0.478, b: 0.627, a: 1}
-  m_SkyboxMaterial: {fileID: 10304, guid: 0000000000000000f000000000000000, type: 0}
+  m_SkyboxMaterial: {fileID: 2100000, guid: 1b198b3e5c9dcf0468f402d42a1bbf06, type: 2}
   m_HaloStrength: 0.5
   m_FlareStrength: 1
   m_FlareFadeSpeed: 3
@@ -2728,6 +2728,7 @@ GameObject:
   - component: {fileID: 410087041}
   - component: {fileID: 410087040}
   - component: {fileID: 410087042}
+  - component: {fileID: 410087043}
   m_Layer: 0
   m_Name: Directional Light
   m_TagString: Untagged
@@ -2835,9 +2836,27 @@ MonoBehaviour:
   m_CustomShadowLayers: 0
   m_ShadowLayerMask: 1
   m_ShadowRenderingLayers: 1
-  m_LightCookieSize: {x: 1, y: 1}
+  m_LightCookieSize: {x: 20, y: 20}
   m_LightCookieOffset: {x: 0, y: 0}
   m_SoftShadowQuality: 1
+--- !u!114 &410087043
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 410087039}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cdb9d4dba69ab524d9a5bafd0dc54d78, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  light: {fileID: 410087040}
+  daySkybox: {fileID: 2100000, guid: 1b198b3e5c9dcf0468f402d42a1bbf06, type: 2}
+  nightSkybox: {fileID: 2100000, guid: 742bc56fe2748f843bb4037662289276, type: 2}
+  dayLength: 180
+  rotThreshold1: 200
+  rotThreshold2: 220
 --- !u!1001 &420031333
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -7549,6 +7568,7 @@ MonoBehaviour:
   barrierTopMaterial: {fileID: 2100000, guid: fcb117bc4a36f774ba984eb26c794932, type: 2}
   barrierSideMaterial: {fileID: 2100000, guid: f9a09bf6788177c428f76422178c5659, type: 2}
   mountainMaterial: {fileID: 2100000, guid: e5bbd95bc19a747419ded67bbf3e595f, type: 2}
+  segmentBoundPrefab: {fileID: 0}
 --- !u!1001 &1225007265
 PrefabInstance:
   m_ObjectHideFlags: 0
