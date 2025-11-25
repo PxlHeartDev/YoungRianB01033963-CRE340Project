@@ -5,47 +5,36 @@ using System.Collections;
 public class Car : MonoBehaviour, IDamageable
 {
     // Editor things
-    [SerializeField] public Rigidbody rb;
-    [SerializeField] private GameObject wheelPrefab;
-    [SerializeField] private VisualEffect wheelRubbleVFXPrefab;
-    [SerializeField] private VisualEffect driftLinesVFXPrefab;
-    [SerializeField] private Vector2 wheelDistance = new Vector2(1.85f, 0.95f);
 
-    [SerializeField] private Light[] lightList;
+    [Header("References")]
+    [SerializeField] public Rigidbody rb;                                           // The car's rigid body
+    [SerializeField] private Light[] lightList;                                     // Stores references to the lights
+    private Wheel[] wheels = new Wheel[4];                                          // Stores references to the wheels
 
-    [SerializeField] private float lightIntensity = 600.0f;
+    [Header("Prefabs")]
+    [SerializeField] private GameObject wheelPrefab;                                // Prefab GameObject for the wheel visual
+    [SerializeField] private VisualEffect wheelRubbleVFXPrefab;                     // Prefab for the rubble VFX
+    [SerializeField] private VisualEffect driftLinesVFXPrefab;                      // Prefab for the drift lines VFX
 
-    // Enables debug gizmos
-    public bool debug = false;
+    [Header("Parameters")]
+    [SerializeField] private Vector2 wheelDistance = new Vector2(1.85f, 0.95f);     // How far away from the centre the wheels should generate
+    [SerializeField] private float lightIntensity = 600.0f;                         // Intensity for the rally lights
+    public bool debug = false;                                                      // Enables debug gizmos
+    public float gasStrength = 40.0f;                                               // Forward acceleration strength
+    public float reversePercentage = 0.75f;                                         // Coefficient for how strong reversing is relative to gasStrength
 
-    // Stores references to the wheels
-    private Wheel[] wheels = new Wheel[4];
-
-    // Forward acceleration strength
-    public float gasStrength = 40.0f;
-
-    // Coefficient for how strong reversing is relative to gasStrength
-    public float reversePercentage = 0.75f;
-
-    // Controls the visual wheel spin
-    private float rpm = 0.0f;
-
-    // Tracker for how many wheels are grounded
-    public int groundedWheels { get; private set; } = 0;
-
-    // Health
+    [Header("Health")]
     public int maxHealth { get; private set; } = 10;
     public int health { get; private set; } = 10;
 
-    // Drifting
+    private float rpm = 0.0f;                                                       // Controls the visual wheel spin
 
-    private int driftingWheels = 0;
-    private bool isDrifting = false;
-    // Time spent in continuous drift
-    private float driftTime = 0.0f;
+    private int driftingWheels = 0;                                                 // Number of drifting wheels
+    private bool isDrifting = false;                                                // Is the car counted as in drift
+    private float driftTime = 0.0f;                                                 // Time spent in continuous drift
+    private Vector3 wheelYOffset;                                                   // Y offset for the wheels
 
-    // Y offset for the wheels
-    Vector3 wheelYOffset;
+    [HideInInspector] public int groundedWheels { get; private set; } = 0;          // Tracker for how many wheels are grounded
 
     void Awake()
     {
