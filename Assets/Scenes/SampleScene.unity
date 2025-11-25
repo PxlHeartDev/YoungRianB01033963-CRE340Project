@@ -402,11 +402,6 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 8640687275591118220, guid: 9eced075a5c00ab478647e86189ddba5, type: 3}
   m_PrefabInstance: {fileID: 605135725}
   m_PrefabAsset: {fileID: 0}
---- !u!108 &41269960 stripped
-Light:
-  m_CorrespondingSourceObject: {fileID: 332287060878881005, guid: d914c500708f0e945bf76b9875fd0711, type: 3}
-  m_PrefabInstance: {fileID: 1815813553}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &58774347
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -2864,7 +2859,7 @@ MonoBehaviour:
   light: {fileID: 410087040}
   daySkybox: {fileID: 2100000, guid: 1b198b3e5c9dcf0468f402d42a1bbf06, type: 2}
   nightSkybox: {fileID: 2100000, guid: 742bc56fe2748f843bb4037662289276, type: 2}
-  dayLength: 180
+  dayLength: 360
   rotThreshold1: 200
   rotThreshold2: 220
 --- !u!1001 &420031333
@@ -11495,10 +11490,7 @@ MonoBehaviour:
   lightList:
   - {fileID: 186669218}
   - {fileID: 880587087}
-  - {fileID: 2001019370}
-  - {fileID: 41269960}
   lightIntensity: 1000
-  smallLightMult: 0.6
   debug: 1
   gasStrength: 160
   reversePercentage: 0.75
@@ -12665,11 +12657,6 @@ PrefabInstance:
 Transform:
   m_CorrespondingSourceObject: {fileID: 853699778777804717, guid: c6b3ed008a9efed43ba30085929b334b, type: 3}
   m_PrefabInstance: {fileID: 1784389737}
-  m_PrefabAsset: {fileID: 0}
---- !u!108 &2001019370 stripped
-Light:
-  m_CorrespondingSourceObject: {fileID: 2543541458026598728, guid: d914c500708f0e945bf76b9875fd0711, type: 3}
-  m_PrefabInstance: {fileID: 1815813553}
   m_PrefabAsset: {fileID: 0}
 --- !u!4 &2008826312 stripped
 Transform:
