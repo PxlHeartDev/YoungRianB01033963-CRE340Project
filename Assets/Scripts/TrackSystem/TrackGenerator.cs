@@ -157,7 +157,11 @@ public class TrackGenerator : MonoBehaviour
         // Add the mountain mesh to the game world
         mountainMeshChildren.Add(new GameObject());
         mountainMeshChildren[^1].transform.parent = transform;
-        mountainMeshChildren[^1].AddComponent<MeshRenderer>().material = mountainMaterial;
+
+        MeshRenderer renderer = mountainMeshChildren[^1].AddComponent<MeshRenderer>();
+        renderer.material = mountainMaterial;
+        renderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.TwoSided;
+
         mountainMeshChildren[^1].AddComponent<MeshFilter>().sharedMesh = mesh;
         mountainMeshChildren[^1].AddComponent<MeshCollider>().sharedMesh = mesh;
         mountainMeshChildren[^1].name = "Seg" + pieces[0].totalSegmentTracker + "/Mountain";
