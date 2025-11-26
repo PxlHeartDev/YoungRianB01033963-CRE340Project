@@ -143,12 +143,12 @@ public class TrackGenerator : MonoBehaviour
     // Remove the segment from the world
     public void RoadSegmentDeleted(int segmentIndex)
     {
-        for (int i = segmentIndex * 12; i < ((segmentIndex + 1) * 12); i++)
+        for (int i = segmentIndex * 8; i < ((segmentIndex + 1) * 8); i++)
         {
             Destroy(roadMeshChildren[i]);
             roadMeshChildrenCount -= 1;
         }
-        roadMeshChildren.RemoveRange(segmentIndex * 12, 12);
+        roadMeshChildren.RemoveRange(segmentIndex * 8, 8);
     }
 
     // Add the mountain mesh to the world
