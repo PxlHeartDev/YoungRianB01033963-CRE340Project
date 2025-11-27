@@ -125,6 +125,7 @@ public class TrackGenerator : MonoBehaviour
             // Create the GameObject
             roadMeshChildren.Add(new GameObject());
             roadMeshChildren[i].transform.parent = transform;
+            roadMeshChildren[i].isStatic = true;
             roadMeshChildren[i].AddComponent<MeshRenderer>().material = isBarrier ? (isSide ? barrierSideMaterial : barrierTopMaterial) : roadMaterial;
             roadMeshChildren[i].AddComponent<MeshFilter>().sharedMesh = meshes[i - roadMeshChildrenCount];
             roadMeshChildren[i].AddComponent<MeshCollider>().sharedMesh = meshes[i - roadMeshChildrenCount];
@@ -157,6 +158,7 @@ public class TrackGenerator : MonoBehaviour
         // Add the mountain mesh to the game world
         mountainMeshChildren.Add(new GameObject());
         mountainMeshChildren[^1].transform.parent = transform;
+        mountainMeshChildren[^1].isStatic = true;
 
         MeshRenderer renderer = mountainMeshChildren[^1].AddComponent<MeshRenderer>();
         renderer.material = mountainMaterial;
