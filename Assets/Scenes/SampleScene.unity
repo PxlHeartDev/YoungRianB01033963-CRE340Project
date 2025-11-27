@@ -26,7 +26,7 @@ RenderSettings:
   m_AmbientIntensity: 1
   m_AmbientMode: 0
   m_SubtractiveShadowColor: {r: 0.42, g: 0.478, b: 0.627, a: 1}
-  m_SkyboxMaterial: {fileID: 2100000, guid: 1b198b3e5c9dcf0468f402d42a1bbf06, type: 2}
+  m_SkyboxMaterial: {fileID: 2100000, guid: c03bce64cb3716a4d9f00ff658efc3d0, type: 2}
   m_HaloStrength: 0.5
   m_FlareStrength: 1
   m_FlareFadeSpeed: 3
@@ -1208,13 +1208,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 201747086}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.59176064, y: 0.5917875, z: 0.38705465, w: 0.3870345}
-  m_LocalPosition: {x: -0.0517, y: 0.007, z: 0.0655}
+  m_LocalRotation: {x: -0.54167044, y: -0.54168004, z: -0.45451546, w: -0.45452353}
+  m_LocalPosition: {x: -0.061548084, y: 0.006999999, z: 0.067236476}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 1206814597}
-  m_LocalEulerAnglesHint: {x: -0.003, y: -246.373, z: -270.001}
+  m_LocalEulerAnglesHint: {x: 0, y: 100, z: -270.001}
 --- !u!1001 &206055117
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -2857,11 +2857,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   light: {fileID: 410087040}
-  daySkybox: {fileID: 2100000, guid: 1b198b3e5c9dcf0468f402d42a1bbf06, type: 2}
-  nightSkybox: {fileID: 2100000, guid: 742bc56fe2748f843bb4037662289276, type: 2}
   dayLength: 360
-  rotThreshold1: 200
-  rotThreshold2: 220
+  rotThreshold1: 180
+  rotThreshold2: 360
 --- !u!1001 &420031333
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -11483,19 +11481,18 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   rb: {fileID: 1252258349}
+  lightList:
+  - {fileID: 186669218}
+  - {fileID: 880587087}
   wheelPrefab: {fileID: 348517383835530497, guid: cfc5da07ff5b3af4d93f8e18b1622f75, type: 3}
   wheelRubbleVFXPrefab: {fileID: 7755334627738741327, guid: 6dcfd501ef5813b42984300a6993acfd, type: 3}
   driftLinesVFXPrefab: {fileID: 3169216796927642001, guid: 592424800a040f94eab1b5cee6980810, type: 3}
   wheelDistance: {x: 1.85, y: 1.3}
-  lightList:
-  - {fileID: 186669218}
-  - {fileID: 880587087}
   lightIntensity: 1000
   debug: 1
   gasStrength: 160
   reversePercentage: 0.75
   actions: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}
-  sequentialCoins: 0
 --- !u!4 &1816009593 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 8640687275591118220, guid: 9eced075a5c00ab478647e86189ddba5, type: 3}
@@ -13122,13 +13119,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2073318636}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.59177303, y: -0.5917755, z: -0.38704425, w: 0.3870443}
-  m_LocalPosition: {x: 0.04798, y: -0.001, z: 0.06552}
+  m_LocalRotation: {x: 0.54167527, y: -0.54167527, z: -0.45451948, w: 0.45451948}
+  m_LocalPosition: {x: 0.05782808, y: -0.000999999, z: 0.06725648}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 1206814597}
-  m_LocalEulerAnglesHint: {x: 0, y: -113.627, z: -90}
+  m_LocalEulerAnglesHint: {x: 0, y: -100, z: -90}
 --- !u!1001 &2086187075
 PrefabInstance:
   m_ObjectHideFlags: 0

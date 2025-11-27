@@ -4,11 +4,9 @@ using System.Collections.Generic;
 public class SunMoon : MonoBehaviour
 {
     [SerializeField] new Light light;
-    [SerializeField] Material daySkybox;
-    [SerializeField] Material nightSkybox;
     [SerializeField] private float dayLength;
-    [SerializeField] private float rotThreshold1 = 200.0f;
-    [SerializeField] private float rotThreshold2 = 220.0f;
+    [SerializeField] private float rotThreshold1 = 180.0f;
+    [SerializeField] private float rotThreshold2 = 360.0f;
 
     private Vector3 startingRotation;
     private Vector3 targetRotation;
@@ -42,32 +40,24 @@ public class SunMoon : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-
         transform.rotation = Quaternion.Lerp(Quaternion.Euler(startingRotation), Quaternion.Euler(targetRotation), Time.time);
 
         targetRotation.x += (360.0f/dayLength) * Time.deltaTime;
 
-        if (targetRotation.x > rotThreshold1)
+        if (targetRotation.x > rotThreshold1 && !sunsetTriggered)
         {
-            if (!sunsetTriggered)
-            {
-                sunsetTriggered = true;
-                sunsetTrigger?.Invoke();
-            }
-            light.intensity = Mathf.Lerp(light.intensity, 0.0f, (targetRotation.x - rotThreshold1)/(rotThreshold2 - rotThreshold1));
+            sunsetTriggered = true;
+            SetToNight();
+            sunsetTrigger?.Invoke();
         }
 
-        if (targetRotation.x > rotThreshold2)
+        if (targetRotation.x > rotThreshold2 && isNight)
         {
-            if (isNight)
-            {
-                SetToDay();
-                sunriseTrigger?.Invoke();
-            }
-            else
-                SetToNight();
-            targetRotation.x = (rotThreshold1 - rotThreshold2) * 2.0f;
             sunsetTriggered = false;
+            SetToDay();
+            sunriseTrigger?.Invoke();
+
+            targetRotation.x = 0.0f;
         }
     }
 
@@ -83,7 +73,6 @@ public class SunMoon : MonoBehaviour
         light.color = timesOfDay["Day"].colour;
         light.colorTemperature = timesOfDay["Day"].kelvin;
         light.intensity = timesOfDay["Day"].intensity;
-        RenderSettings.skybox = daySkybox;
     }
 
     void SetToNight()
@@ -92,7 +81,6 @@ public class SunMoon : MonoBehaviour
         light.color = timesOfDay["Night"].colour;
         light.colorTemperature = timesOfDay["Night"].kelvin;
         light.intensity = timesOfDay["Night"].intensity;
-        RenderSettings.skybox = nightSkybox;
     }
 }
 
