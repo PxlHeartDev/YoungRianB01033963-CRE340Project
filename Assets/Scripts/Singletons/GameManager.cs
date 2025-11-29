@@ -31,6 +31,9 @@ public class GameManager : MonoBehaviour
         _instance = this;
         DontDestroyOnLoad(this);
 
+        UIManager.Instance.mainMenu.OnPlay += StartGame;
+        UIManager.Instance.mainMenu.OnExit += QuitGame;
+
         //Application.targetFrameRate = 60;
     }
     
@@ -73,5 +76,15 @@ public class GameManager : MonoBehaviour
             Powerup powerup = item as Powerup;
             // Other powerup logic
         }
+    }
+
+    private void StartGame()
+    {
+        Debug.Log("Starting game");
+    }
+
+    private void QuitGame()
+    {
+        Debug.Log("Quitting game");
     }
 }
