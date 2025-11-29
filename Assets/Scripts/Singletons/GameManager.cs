@@ -31,9 +31,6 @@ public class GameManager : MonoBehaviour
         _instance = this;
         DontDestroyOnLoad(this);
 
-        UIManager.Instance.mainMenu.OnPlay += StartGame;
-        UIManager.Instance.mainMenu.OnExit += QuitGame;
-
         //Application.targetFrameRate = 60;
     }
     
@@ -48,6 +45,9 @@ public class GameManager : MonoBehaviour
         EventManager.Collected += ItemCollected;
         sunMoon.sunsetTrigger += player.TurnOnLights;
         sunMoon.sunriseTrigger += player.TurnOffLights;
+
+        UIManager.Instance.mainMenu.OnPlay += StartGame;
+        UIManager.Instance.mainMenu.OnExit += QuitGame;
     }
 
     private void OnDisable()
@@ -55,6 +55,9 @@ public class GameManager : MonoBehaviour
         EventManager.Collected -= ItemCollected;
         sunMoon.sunsetTrigger -= player.TurnOnLights;
         sunMoon.sunriseTrigger -= player.TurnOffLights;
+
+        UIManager.Instance.mainMenu.OnPlay -= StartGame;
+        UIManager.Instance.mainMenu.OnExit -= QuitGame;
     }
 
     private void ItemCollected(ICollectable item, GameObject source)

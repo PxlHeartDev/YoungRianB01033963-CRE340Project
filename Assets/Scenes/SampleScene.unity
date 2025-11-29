@@ -13438,6 +13438,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: UI
       objectReference: {fileID: 0}
+    - target: {fileID: 5380247464027587952, guid: 9021c1eb87679db4caa36c85d3fe3049, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 5597827414941971890, guid: 9021c1eb87679db4caa36c85d3fe3049, type: 3}
       propertyPath: m_Pivot.x
       value: 0
@@ -13692,5 +13696,5 @@ SceneRoots:
   - {fileID: 7909818}
   - {fileID: 1972770231}
   - {fileID: 842029146}
-  - {fileID: 1234471359}
   - {fileID: 2098702468}
+  - {fileID: 1234471359}

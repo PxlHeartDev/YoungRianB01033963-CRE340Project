@@ -11,7 +11,7 @@ public class UIManager : MonoBehaviour
         {
             if (_instance == null)
             {
-                Debug.LogError("GameManager instance is null");
+                Debug.LogError("UIManager instance is null");
             }
 
             return _instance;
