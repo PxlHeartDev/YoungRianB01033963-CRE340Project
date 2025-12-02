@@ -40,6 +40,7 @@ public class MainMenu : MonoBehaviour
         Debug.Log("Play");
         DisableAllButtons();
         OnPlay?.Invoke();
+        gameObject.SetActive(false);
     }
 
     private void OnExitClicked()

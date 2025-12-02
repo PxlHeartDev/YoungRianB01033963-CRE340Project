@@ -1,4 +1,7 @@
+using System.Collections;
+using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class UIManager : MonoBehaviour
 {
@@ -19,7 +22,8 @@ public class UIManager : MonoBehaviour
     }
 
     public MainMenu mainMenu;
-
+    [SerializeField] private Image fade;
+    [SerializeField] private Animator fadeAnimator;
 
     void Awake()
     {
@@ -29,11 +33,23 @@ public class UIManager : MonoBehaviour
 
     private void Start()
     {
-        
+        FadeShow();
     }
 
     void Update()
     {
-        
+
+    }
+
+    public void FadeHide()
+    {
+        fadeAnimator.ResetTrigger("FadeFromBlack");
+        fadeAnimator.SetTrigger("FadeToBlack");
+    }
+    
+    public void FadeShow()
+    {
+        fadeAnimator.ResetTrigger("FadeToBlack");
+        fadeAnimator.SetTrigger("FadeFromBlack");
     }
 }

@@ -11146,7 +11146,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!111 &1778771052
 Animation:
   m_ObjectHideFlags: 0
@@ -11214,7 +11214,7 @@ AudioListener:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1778771051}
-  m_Enabled: 1
+  m_Enabled: 0
 --- !u!20 &1778771055
 Camera:
   m_ObjectHideFlags: 0
@@ -13585,6 +13585,10 @@ PrefabInstance:
       propertyPath: m_AdditionalShaderChannelsFlag
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 3791079727227565211, guid: 9021c1eb87679db4caa36c85d3fe3049, type: 3}
+      propertyPath: m_Color.a
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 4395217723692733271, guid: 9021c1eb87679db4caa36c85d3fe3049, type: 3}
       propertyPath: m_IsActive
       value: 1
@@ -13676,6 +13680,10 @@ PrefabInstance:
     - target: {fileID: 5597827414941971890, guid: 9021c1eb87679db4caa36c85d3fe3049, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5944383486858294904, guid: 9021c1eb87679db4caa36c85d3fe3049, type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

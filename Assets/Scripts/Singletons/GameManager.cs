@@ -40,7 +40,7 @@ public class GameManager : MonoBehaviour
         time += Time.deltaTime;
     }
 
-    private void OnEnable()
+    private void Start()
     {
         EventManager.Collected += ItemCollected;
         sunMoon.sunsetTrigger += player.TurnOnLights;
@@ -50,7 +50,7 @@ public class GameManager : MonoBehaviour
         UIManager.Instance.mainMenu.OnExit += QuitGame;
     }
 
-    private void OnDisable()
+    private void OnDestroy()
     {
         EventManager.Collected -= ItemCollected;
         sunMoon.sunsetTrigger -= player.TurnOnLights;
