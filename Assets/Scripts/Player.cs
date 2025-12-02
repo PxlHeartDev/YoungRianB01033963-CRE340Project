@@ -19,7 +19,7 @@ public class Player : Car
 
     public System.Action<int> CoinComboEnded;               // Event for when the coin combo ends
 
-    public bool inputLocked = false;
+    public bool inputLocked = true;
 
     void Start()
     {

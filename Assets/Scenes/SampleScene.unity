@@ -11578,7 +11578,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 602917584094054043, guid: d914c500708f0e945bf76b9875fd0711, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 6.5
+      value: 4.75
       objectReference: {fileID: 0}
     - target: {fileID: 602917584094054043, guid: d914c500708f0e945bf76b9875fd0711, type: 3}
       propertyPath: m_LocalPosition.z
@@ -12613,7 +12613,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: -8759185006463227781, guid: 57bfb33367086a9438699b7e064812cc, type: 3}
       propertyPath: startSong
-      value: Game1
+      value: MainMenu
       objectReference: {fileID: 0}
     - target: {fileID: -8759185006463227781, guid: 57bfb33367086a9438699b7e064812cc, type: 3}
       propertyPath: game1Music
