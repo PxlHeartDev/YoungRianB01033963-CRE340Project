@@ -7806,6 +7806,10 @@ PrefabInstance:
       propertyPath: sunMoon
       value: 
       objectReference: {fileID: 410087043}
+    - target: {fileID: 7390987906757761132, guid: 4a761ad97721c274eaa001251b7983dc, type: 3}
+      propertyPath: cutsceneCamera
+      value: 
+      objectReference: {fileID: 1778771055}
     - target: {fileID: 7904332382616583985, guid: 4a761ad97721c274eaa001251b7983dc, type: 3}
       propertyPath: m_LocalPosition.x
       value: -21.84757
@@ -11146,7 +11150,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!111 &1778771052
 Animation:
   m_ObjectHideFlags: 0
@@ -11274,13 +11278,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1778771051}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -1.95, y: 11.52, z: 0}
+  m_LocalRotation: {x: -0, y: 0.43446106, z: -0, w: 0.9006907}
+  m_LocalPosition: {x: -8.26, y: 7.2, z: 5.13}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 51.502, z: 0}
 --- !u!1001 &1784389737
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -11578,7 +11582,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 602917584094054043, guid: d914c500708f0e945bf76b9875fd0711, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 4.75
+      value: 2.86
       objectReference: {fileID: 0}
     - target: {fileID: 602917584094054043, guid: d914c500708f0e945bf76b9875fd0711, type: 3}
       propertyPath: m_LocalPosition.z
@@ -11726,7 +11730,7 @@ MonoBehaviour:
   gasStrength: 160
   reversePercentage: 0.75
   actions: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}
-  inputLocked: 0
+  inputLocked: 1
 --- !u!4 &1816009593 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 8640687275591118220, guid: 9eced075a5c00ab478647e86189ddba5, type: 3}

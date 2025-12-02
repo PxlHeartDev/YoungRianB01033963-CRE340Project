@@ -126,6 +126,12 @@ public class Car : MonoBehaviour, IDamageable
         }
     }
 
+    protected void LockWheels(bool isLocked)
+    {
+        foreach (Wheel wheel in wheels)
+            wheel.isLocked = isLocked;
+    }
+
     #region Movement
 
     // Accelerate the car
@@ -263,15 +269,18 @@ class Wheel
 
     // Actual grip of the wheel
     private float wheelGrip = 0.0f;
+
+    // If the car is locked
+    public bool isLocked = false;
     
     //
     // Wheel parameters
     //
     // Grip and acceleration
     private readonly float maxTraction = 240.0f;
-    private readonly float frictionCoefficient = 1.5f;
-    private readonly float frontGrip = 80.0f;
-    private readonly float rearGrip = 40.0f;
+    private readonly float frictionCoefficient = 1.0f;
+    private readonly float frontGrip = 120.0f;
+    private readonly float rearGrip = 60.0f;
     // Steering
     private readonly float maxSteerDegrees = 15.0f;
     public float steerMult = 1.0f;
@@ -442,7 +451,7 @@ class Wheel
         Vector3 vel = rbCar.GetPointVelocity(wheelTransform.transform.position);
         
         // Negate the velocity by some coefficient of the velocity
-        Vector3 friction = -vel * frictionCoefficient;
+        Vector3 friction = -vel * (isLocked ? 100.0f : frictionCoefficient);
 
         return friction;
     }
@@ -454,7 +463,7 @@ class Wheel
 
         // Get the normalized dot product of the side axis and the velocity
         float steerVelDot = Vector3.Dot(wheelTransform.transform.forward, rbCar.GetPointVelocity(wheelTransform.transform.position).normalized);
-        
+
         // Force to negate the sliding according to the grip
         float negationForce = -steerVelDot * wheelGrip;
 

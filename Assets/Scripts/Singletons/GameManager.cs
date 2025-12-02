@@ -25,6 +25,7 @@ public class GameManager : MonoBehaviour
     public int score = 0;
     public float time = 0.0f;
 
+    public Camera cutsceneCamera;
 
     void Awake()
     {
@@ -83,7 +84,8 @@ public class GameManager : MonoBehaviour
 
     private void StartGame()
     {
-        Debug.Log("Starting game");
+        cutsceneCamera.gameObject.SetActive(false);
+        player.LockInputs(false);
     }
 
     private void QuitGame()

@@ -31,14 +31,27 @@ public class Player : Car
 
         // Enable the action map
         actions.FindActionMap("Player").Enable();
+        
+        // Reset wheels
+        Steer(0.0f);
+
+        LockInputs(inputLocked);
     }
 
     void Update()
     {
+        // Only process inputs if this flag is false
         if (!inputLocked)
             ProcessInputs();
 
         SequentialCoinLogic();
+    }
+
+    public void LockInputs(bool isLocked)
+    {
+        inputLocked = isLocked;
+        LockWheels(isLocked);
+        rb.linearDamping = isLocked ? 100.0f : 0.1f;
     }
 
     public override void ItemCollected(ICollectable item)
