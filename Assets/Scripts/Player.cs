@@ -19,6 +19,8 @@ public class Player : Car
 
     public System.Action<int> CoinComboEnded;               // Event for when the coin combo ends
 
+    public bool inputLocked = false;
+
     void Start()
     {
         // Get the input actions
@@ -33,7 +35,8 @@ public class Player : Car
 
     void Update()
     {
-        ProcessInputs();
+        if (!inputLocked)
+            ProcessInputs();
 
         SequentialCoinLogic();
     }
