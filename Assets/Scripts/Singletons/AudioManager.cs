@@ -39,19 +39,12 @@ public class AudioManager : MonoBehaviour
     private Music currentMusic;
 
     private AudioClip currentClip;
-    private AudioClip loopClip;
-
-    public string startSong = "MainMenu";
 
     // Dictionary containing all music resources
-    private Dictionary<string, Music> musicDict;
+    private Dictionary<string, Music> musicDict;        // Key-value list of musics
+    [SerializeField] private List<Music> musicList;     // Serialized list of music assets
 
-    // Songs
-    [SerializeField] private AudioClip testMusic;
-    [SerializeField] private AudioClip mainMenuMusic;
-    [SerializeField] private AudioClip mainMenuMusicLoop;
-    [SerializeField] private AudioClip game1Music;
-    [SerializeField] private AudioClip game1MusicLoop;
+    public int startSong = 0;                           // Element in musicList to start with
 
     //
     // SFX
@@ -85,13 +78,15 @@ public class AudioManager : MonoBehaviour
             { Source.Combo, comboSource },
         };
 
-        musicDict = new()
+        foreach (AudioSource source in sourceDict.Values)
         {
-            {"Test", new Music("Test", testMusic)},
-            {"MainMenu", new Music("Main Menu", mainMenuMusic, mainMenuMusicLoop) },
-            {"Game1", new Music("Game1", game1Music, game1MusicLoop) },
-        };
+            source.outputAudioMixerGroup = mixer.FindMatchingGroups("Master")[0];
+        }
 
+        musicDict = new();
+
+        foreach (Music music in musicList)
+            musicDict.Add(music.musicName, music);
 
 
         foreach (AudioSource source in sourceDict.Values)
@@ -109,8 +104,7 @@ public class AudioManager : MonoBehaviour
     {
         musicSources = Camera.main.GetComponents<AudioSource>();
 
-        currentMusic = new Music("none", testMusic);
-        PlayMusic(startSong);
+        PlayMusic(musicList[startSong]);
     }
 
     private void Update()
@@ -143,6 +137,7 @@ public class AudioManager : MonoBehaviour
         currentClip = newMusic.clip;
         goalTime = AudioSettings.dspTime + 0.01;
         PlayScheduledMusic();
+
         if (newMusic.loopClip != null)
         {
             goalTime = AudioSettings.dspTime + currentClip.length;
@@ -152,7 +147,28 @@ public class AudioManager : MonoBehaviour
         // Broadcast event
         MusicChanged?.Invoke(newMusicName);
     }
-    
+
+    public void PlayMusic(Music newMusic)
+    {
+        // Reset looping
+        musicSources[0].loop = false;
+        musicSources[1].loop = false;
+
+        // Set the music
+        currentMusic = newMusic;
+        currentClip = newMusic.clip;
+        goalTime = AudioSettings.dspTime + 0.01;
+        PlayScheduledMusic();
+        if (newMusic.loopClip != null)
+        {
+            goalTime = AudioSettings.dspTime + currentClip.length;
+            currentClip = newMusic.loopClip;
+        }
+
+        // Broadcast event
+        MusicChanged?.Invoke(newMusic.musicName);
+    }
+
     // Play the next music clip
     private void PlayScheduledMusic()
     {
@@ -165,9 +181,10 @@ public class AudioManager : MonoBehaviour
         }
         // Play the music
         musicSources[musicToggle].clip = currentClip;
+        musicSources[musicToggle].volume = currentMusic.volume;
         musicSources[musicToggle].PlayScheduled(goalTime);
 
-        goalTime = goalTime + (double)(currentClip.samples / currentClip.frequency);
+        goalTime += (double)(currentClip.samples / currentClip.frequency);
 
         musicToggle = 1 - musicToggle;
     }
@@ -229,23 +246,3 @@ public class AudioManager : MonoBehaviour
     #endregion
 }
 
-public class Music
-{
-    public string name { get; private set; }
-    public AudioClip clip { get; private set; }
-    public AudioClip loopClip { get; private set; }
-
-
-    public Music(string _name, AudioClip _clip)
-    {
-        name = _name;
-        clip = _clip;
-    }
-
-    public Music(string _name, AudioClip _clip, AudioClip _loopClip)
-    {
-        name = _name;
-        clip = _clip;
-        loopClip = _loopClip;
-    } 
-}

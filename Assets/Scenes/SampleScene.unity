@@ -12612,8 +12612,12 @@ PrefabInstance:
     m_TransformParent: {fileID: 0}
     m_Modifications:
     - target: {fileID: -8759185006463227781, guid: 57bfb33367086a9438699b7e064812cc, type: 3}
+      propertyPath: thing
+      value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: -8759185006463227781, guid: 57bfb33367086a9438699b7e064812cc, type: 3}
       propertyPath: startSong
-      value: MainMenu
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: -8759185006463227781, guid: 57bfb33367086a9438699b7e064812cc, type: 3}
       propertyPath: game1Music
@@ -12623,6 +12627,18 @@ PrefabInstance:
       propertyPath: game1MusicLoop
       value: 
       objectReference: {fileID: 8300000, guid: 79a36bf41ff0b4e4fb1e4c797009cceb, type: 3}
+    - target: {fileID: -8759185006463227781, guid: 57bfb33367086a9438699b7e064812cc, type: 3}
+      propertyPath: musicList.Array.size
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: -8759185006463227781, guid: 57bfb33367086a9438699b7e064812cc, type: 3}
+      propertyPath: 'musicList.Array.data[0]'
+      value: 
+      objectReference: {fileID: 11400000, guid: 9e66aa9fed00d8b43a5945919d3dc625, type: 2}
+    - target: {fileID: -8759185006463227781, guid: 57bfb33367086a9438699b7e064812cc, type: 3}
+      propertyPath: 'musicList.Array.data[1]'
+      value: 
+      objectReference: {fileID: 11400000, guid: 964c5e005398f0c4595cb1e030a26f85, type: 2}
     - target: {fileID: 5605923462944663747, guid: 57bfb33367086a9438699b7e064812cc, type: 3}
       propertyPath: m_Name
       value: AudioManager
