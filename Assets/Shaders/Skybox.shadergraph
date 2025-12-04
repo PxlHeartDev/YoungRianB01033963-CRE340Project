@@ -461,6 +461,9 @@
         },
         {
             "m_Id": "bceb498e2b464780a1a60876b86a6527"
+        },
+        {
+            "m_Id": "90245b1f6d8c49ee9439befe7e264753"
         }
     ],
     "m_GroupDatas": [
@@ -581,7 +584,7 @@
             },
             "m_InputSlot": {
                 "m_Node": {
-                    "m_Id": "f446167fd77c4e1385f2163a4c02c51b"
+                    "m_Id": "90245b1f6d8c49ee9439befe7e264753"
                 },
                 "m_SlotId": 0
             }
@@ -1569,6 +1572,20 @@
         {
             "m_OutputSlot": {
                 "m_Node": {
+                    "m_Id": "90245b1f6d8c49ee9439befe7e264753"
+                },
+                "m_SlotId": 3
+            },
+            "m_InputSlot": {
+                "m_Node": {
+                    "m_Id": "f446167fd77c4e1385f2163a4c02c51b"
+                },
+                "m_SlotId": 0
+            }
+        },
+        {
+            "m_OutputSlot": {
+                "m_Node": {
                     "m_Id": "90d9e2f9f7db483fa04e59e1727f0ab8"
                 },
                 "m_SlotId": 2
@@ -2333,7 +2350,7 @@
                 "m_Node": {
                     "m_Id": "2631b93570914753b6c8074590420d28"
                 },
-                "m_SlotId": 1
+                "m_SlotId": 2
             }
         },
         {
@@ -2375,7 +2392,7 @@
                 "m_Node": {
                     "m_Id": "2631b93570914753b6c8074590420d28"
                 },
-                "m_SlotId": 2
+                "m_SlotId": 1
             }
         },
         {
@@ -2957,10 +2974,10 @@
         "m_Expanded": true,
         "m_Position": {
             "serializedVersion": "2",
-            "x": -2050.0,
-            "y": 1916.0,
+            "x": -2273.3330078125,
+            "y": 1953.9998779296875,
             "width": 209.333251953125,
-            "height": 318.0
+            "height": 317.9998779296875
         }
     },
     "m_Slots": [
@@ -3255,6 +3272,29 @@
 }
 
 {
+    "m_SGVersion": 0,
+    "m_Type": "UnityEditor.ShaderGraph.Vector3MaterialSlot",
+    "m_ObjectId": "0b5ab581c410404cbe5cf281a0b9692c",
+    "m_Id": 3,
+    "m_DisplayName": "Out",
+    "m_SlotType": 1,
+    "m_Hidden": false,
+    "m_ShaderOutputName": "Out",
+    "m_StageCapability": 3,
+    "m_Value": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+    },
+    "m_DefaultValue": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+    },
+    "m_Labels": []
+}
+
+{
     "m_SGVersion": 1,
     "m_Type": "UnityEditor.ShaderGraph.Internal.Vector1ShaderProperty",
     "m_ObjectId": "0b92d2984ca84d0fbca4ce200fa8280e",
@@ -3343,9 +3383,9 @@
         "m_Expanded": true,
         "m_Position": {
             "serializedVersion": "2",
-            "x": -1598.666748046875,
-            "y": 2337.33349609375,
-            "width": 162.6666259765625,
+            "x": -1566.6666259765625,
+            "y": 2325.333740234375,
+            "width": 162.66650390625,
             "height": 36.0
         }
     },
@@ -4860,8 +4900,8 @@
         "m_Expanded": true,
         "m_Position": {
             "serializedVersion": "2",
-            "x": -778.666748046875,
-            "y": 1892.0,
+            "x": -737.333251953125,
+            "y": 1878.66650390625,
             "width": 188.0,
             "height": 253.33349609375
         }
@@ -7252,8 +7292,8 @@
     "m_ObjectId": "5b4b13131c68401ebccd9ae90ab3ee7e",
     "m_Title": "Combine All",
     "m_Position": {
-        "x": -160.66650390625,
-        "y": 187.33335876464845
+        "x": -160.666748046875,
+        "y": 187.333251953125
     }
 }
 
@@ -8711,7 +8751,7 @@
     "m_ObjectId": "77bff141bd7b454b95b690d97040fef6",
     "m_Title": "Clouds",
     "m_Position": {
-        "x": -1607.9998779296875,
+        "x": -1608.0,
         "y": 2362.0
     }
 }
@@ -10002,6 +10042,51 @@
 
 {
     "m_SGVersion": 0,
+    "m_Type": "UnityEditor.ShaderGraph.RotateAboutAxisNode",
+    "m_ObjectId": "90245b1f6d8c49ee9439befe7e264753",
+    "m_Group": {
+        "m_Id": ""
+    },
+    "m_Name": "Rotate About Axis",
+    "m_DrawState": {
+        "m_Expanded": true,
+        "m_Position": {
+            "serializedVersion": "2",
+            "x": -1949.3333740234375,
+            "y": 2024.6666259765625,
+            "width": 209.3333740234375,
+            "height": 363.3333740234375
+        }
+    },
+    "m_Slots": [
+        {
+            "m_Id": "e4644e68ea2c43bea0ddc68b18db1bbe"
+        },
+        {
+            "m_Id": "9dedcfe098bb4d7d8b39aac174be946b"
+        },
+        {
+            "m_Id": "be87a018a3cb422fa270a78a5fbaddfb"
+        },
+        {
+            "m_Id": "0b5ab581c410404cbe5cf281a0b9692c"
+        }
+    ],
+    "synonyms": [
+        "pivot"
+    ],
+    "m_Precision": 0,
+    "m_PreviewExpanded": true,
+    "m_DismissedVersion": 0,
+    "m_PreviewMode": 0,
+    "m_CustomColors": {
+        "m_SerializableColors": []
+    },
+    "m_Unit": 1
+}
+
+{
+    "m_SGVersion": 0,
     "m_Type": "UnityEditor.ShaderGraph.DivideNode",
     "m_ObjectId": "90d9e2f9f7db483fa04e59e1727f0ab8",
     "m_Group": {
@@ -10362,8 +10447,8 @@
     "m_ObjectId": "96f8c69c0cdb4a9c867914b89a513280",
     "m_Title": "Moon",
     "m_Position": {
-        "x": -1547.333251953125,
-        "y": 493.9999694824219
+        "x": -1547.3333740234375,
+        "y": 494.00006103515627
     }
 }
 
@@ -10428,6 +10513,29 @@
         "z": 0.0,
         "w": 0.0
     }
+}
+
+{
+    "m_SGVersion": 0,
+    "m_Type": "UnityEditor.ShaderGraph.Vector3MaterialSlot",
+    "m_ObjectId": "9dedcfe098bb4d7d8b39aac174be946b",
+    "m_Id": 1,
+    "m_DisplayName": "Axis",
+    "m_SlotType": 0,
+    "m_Hidden": false,
+    "m_ShaderOutputName": "Axis",
+    "m_StageCapability": 3,
+    "m_Value": {
+        "x": 0.0,
+        "y": 1.0,
+        "z": 0.0
+    },
+    "m_DefaultValue": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+    },
+    "m_Labels": []
 }
 
 {
@@ -10676,8 +10784,8 @@
     "m_ObjectId": "a24236371d134f35bc90b226ae2f81a0",
     "m_Title": "Sun",
     "m_Position": {
-        "x": -1546.66650390625,
-        "y": -86.6666259765625
+        "x": -1546.6666259765625,
+        "y": -86.666748046875
     }
 }
 
@@ -12250,6 +12358,21 @@
 
 {
     "m_SGVersion": 0,
+    "m_Type": "UnityEditor.ShaderGraph.Vector1MaterialSlot",
+    "m_ObjectId": "be87a018a3cb422fa270a78a5fbaddfb",
+    "m_Id": 2,
+    "m_DisplayName": "Rotation",
+    "m_SlotType": 0,
+    "m_Hidden": false,
+    "m_ShaderOutputName": "Rotation",
+    "m_StageCapability": 3,
+    "m_Value": -90.0,
+    "m_DefaultValue": 0.0,
+    "m_Labels": []
+}
+
+{
+    "m_SGVersion": 0,
     "m_Type": "UnityEditor.ShaderGraph.DivideNode",
     "m_ObjectId": "bea04261446e48de9b52d55beb100458",
     "m_Group": {
@@ -13109,7 +13232,7 @@
     "m_ObjectId": "cb6c5a101c424c17b9ae644c578e5343",
     "m_Title": "Moon Crescent",
     "m_Position": {
-        "x": -1611.9998779296875,
+        "x": -1612.0,
         "y": 1073.3333740234375
     }
 }
@@ -13237,8 +13360,8 @@
     "m_ObjectId": "cd676f73f2554ff283d53a796f40e536",
     "m_Title": "Sky Colour",
     "m_Position": {
-        "x": -2214.66650390625,
-        "y": -1036.0
+        "x": -2214.666748046875,
+        "y": -1035.999755859375
     }
 }
 
@@ -13392,8 +13515,8 @@
     "m_ObjectId": "d1617173913848609a01ab111eec4193",
     "m_Title": "Horizon",
     "m_Position": {
-        "x": -2245.3330078125,
-        "y": -1991.33349609375
+        "x": -2245.333251953125,
+        "y": -1991.333740234375
     }
 }
 
@@ -14680,6 +14803,29 @@
     "m_StageCapability": 3,
     "m_Value": 0.0,
     "m_DefaultValue": 0.0,
+    "m_Labels": []
+}
+
+{
+    "m_SGVersion": 0,
+    "m_Type": "UnityEditor.ShaderGraph.Vector3MaterialSlot",
+    "m_ObjectId": "e4644e68ea2c43bea0ddc68b18db1bbe",
+    "m_Id": 0,
+    "m_DisplayName": "In",
+    "m_SlotType": 0,
+    "m_Hidden": false,
+    "m_ShaderOutputName": "In",
+    "m_StageCapability": 3,
+    "m_Value": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+    },
+    "m_DefaultValue": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+    },
     "m_Labels": []
 }
 
