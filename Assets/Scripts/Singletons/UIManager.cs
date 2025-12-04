@@ -2,6 +2,7 @@ using System.Collections;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
+using static UnityEngine.CullingGroup;
 
 public class UIManager : MonoBehaviour
 {
@@ -22,6 +23,7 @@ public class UIManager : MonoBehaviour
     }
 
     public MainMenu mainMenu;
+    public GameUI gameUI;
     [SerializeField] private Image fade;
     [SerializeField] private Animator fadeAnimator;
 
@@ -31,14 +33,43 @@ public class UIManager : MonoBehaviour
         DontDestroyOnLoad(this);
     }
 
-    private void Start()
+    void Start()
     {
         FadeShow();
     }
 
-    void Update()
+    public void GameManagerReady()
     {
+        GameManager.Instance.stateChanged += OnStateChanged;
+    }
 
+    void OnDisable()
+    {
+        GameManager.Instance.stateChanged -= OnStateChanged;
+    }
+
+    private void OnStateChanged(GameManager.State newState)
+    {
+        HideAllUI();
+        switch (newState)
+        {
+            case GameManager.State.MainMenu:
+                mainMenu.gameObject.SetActive(true);
+                break;
+            case GameManager.State.Playing:
+                gameUI.gameObject.SetActive(true);
+                break;
+            case GameManager.State.Paused:
+                break;
+            case GameManager.State.Dead:
+                break;
+        }
+    }
+
+    private void HideAllUI()
+    {
+        mainMenu.gameObject.SetActive(false);
+        gameUI.gameObject.SetActive(false);
     }
 
     public void FadeHide()

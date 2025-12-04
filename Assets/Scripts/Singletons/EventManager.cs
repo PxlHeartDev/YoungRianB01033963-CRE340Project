@@ -23,6 +23,11 @@ public class EventManager : MonoBehaviour
                       // collected,    source
     public static System.Action<ICollectable, GameObject> Collected;
 
+    public static System.Action GameQuit;
+    public static System.Action GameStarted;
+    public static System.Action GamePaused;
+    public static System.Action GameResumed;
+
     void Awake()
     {
         _instance = this;

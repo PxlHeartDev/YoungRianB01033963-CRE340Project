@@ -207,8 +207,8 @@ public class Car : MonoBehaviour, IDamageable
 
     public void Damage(int dmg, GameObject source)
     {
-        EventManager.TookDamage?.Invoke(dmg, gameObject, source);
         health -= dmg;
+        EventManager.TookDamage?.Invoke(dmg, gameObject, source);
 
         //Debug.Log("Took " + dmg + " damage from " + source.ToString() + ", now at " + health);
 
@@ -222,7 +222,6 @@ public class Car : MonoBehaviour, IDamageable
     // Triggered when it actually dies
     private void Died(GameObject source)
     {
-        Debug.Log("Ouchi, I die");
         EventManager.Died?.Invoke(gameObject, source);
         Destroy(gameObject);
         foreach(Wheel wheel in wheels)

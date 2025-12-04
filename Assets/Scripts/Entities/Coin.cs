@@ -20,6 +20,8 @@ public class Coin : MonoBehaviour, ICollectable
         {
             Car car = other.transform.parent.gameObject.GetComponent<Car>();
 
+            //car.Damage(1, gameObject);
+
             Collect(car.gameObject);
         }
     }

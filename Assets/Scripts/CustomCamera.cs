@@ -54,8 +54,11 @@ public class CustomCamera : MonoBehaviour
 
     void FixedUpdate()
     {
-        TransformGizmos.DrawTransformGizmo(forwardTarget.transform);
-        TransformGizmos.DrawTransformGizmo(reverseTarget.transform);
+        if (player != null)
+        {
+            TransformGizmos.DrawTransformGizmo(forwardTarget.transform);
+            TransformGizmos.DrawTransformGizmo(reverseTarget.transform);
+        }
 
         // If the player has died, set the camera to the last remembered transform and skip the rest of the logic
         // This fixes the edge-case of the camera being placed wrong if the player dies mid-shake
@@ -130,7 +133,7 @@ public class CustomCamera : MonoBehaviour
 
             float maxHP = target.GetComponent<Car>().maxHealth;
 
-            damageVignetteVolume.weight = Mathf.Clamp01(2.0f * dmg/maxHP);
+            damageVignetteVolume.weight = Mathf.Clamp01(3.0f * dmg/maxHP);
             globalVolume.weight = 0.0f;
         }
         else

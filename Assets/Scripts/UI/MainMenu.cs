@@ -11,7 +11,7 @@ public class MainMenu : MonoBehaviour
     [SerializeField] private Animator animator;
 
     public System.Action OnPlay;
-    public System.Action OnExit;
+    public System.Action OnQuit;
 
     public float thing;
 
@@ -37,7 +37,6 @@ public class MainMenu : MonoBehaviour
 
     private void OnPlayClicked()
     {
-        Debug.Log("Play");
         DisableAllButtons();
         animator.SetTrigger("StartGame");
         UIManager.Instance?.FadeHide();
@@ -47,7 +46,8 @@ public class MainMenu : MonoBehaviour
     {
         Debug.Log("Exit");
         DisableAllButtons();
-        OnExit?.Invoke();
+        OnQuit?.Invoke();
+        EventManager.GameQuit?.Invoke();
     }
 
     private void DisableAllButtons()
@@ -61,5 +61,6 @@ public class MainMenu : MonoBehaviour
         gameObject.SetActive(false);
         UIManager.Instance?.FadeShow();
         OnPlay?.Invoke();
+        EventManager.GameStarted?.Invoke();
     }
 }

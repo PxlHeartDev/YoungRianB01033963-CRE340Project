@@ -17,15 +17,28 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    [Header ("GameObjects")]
     public Player player;
     public SunMoon sunMoon;
-
-    public static float standardDelta = 0.0f;
-
-    public int score = 0;
-    public float time = 0.0f;
-
     public Camera cutsceneCamera;
+
+    [HideInInspector] public static float standardDelta = 0.0f;
+
+    [HideInInspector] public int score = 0;
+    [HideInInspector] public float time = 0.0f;
+
+
+    public enum State
+    {
+        MainMenu,
+        Playing,
+        Paused,
+        Dead,
+    }
+
+    private State state = State.MainMenu;
+
+    public System.Action<State> stateChanged;
 
     void Awake()
     {
@@ -47,8 +60,10 @@ public class GameManager : MonoBehaviour
         sunMoon.sunsetTrigger += player.TurnOnLights;
         sunMoon.sunriseTrigger += player.TurnOffLights;
 
-        UIManager.Instance.mainMenu.OnPlay += StartGame;
-        UIManager.Instance.mainMenu.OnExit += QuitGame;
+        EventManager.GameStarted += StartGame;
+        EventManager.GameQuit += QuitGame;
+
+        UIManager.Instance.GameManagerReady();
     }
 
     private void OnDestroy()
@@ -57,8 +72,14 @@ public class GameManager : MonoBehaviour
         sunMoon.sunsetTrigger -= player.TurnOnLights;
         sunMoon.sunriseTrigger -= player.TurnOffLights;
 
-        UIManager.Instance.mainMenu.OnPlay -= StartGame;
-        UIManager.Instance.mainMenu.OnExit -= QuitGame;
+        EventManager.GameStarted -= StartGame;
+        EventManager.GameQuit -= QuitGame;
+    }
+
+    private void UpdateState(State newState)
+    {
+        state = newState;
+        stateChanged?.Invoke(state);
     }
 
     private void ItemCollected(ICollectable item, GameObject source)
@@ -86,6 +107,7 @@ public class GameManager : MonoBehaviour
     {
         cutsceneCamera.gameObject.SetActive(false);
         player.LockInputs(false);
+        UpdateState(State.Playing);
     }
 
     private void QuitGame()
