@@ -6,8 +6,8 @@ public class TrackGenerator : MonoBehaviour
 {
     [HideInInspector]
     public List<TrackPiece> pieces;
-    public Texture2D texture;
 
+    [Header ("Parameters")]
     // Bezier parameters
     public int precision = 12;
     public float trackScale = 100.0f;
@@ -23,8 +23,8 @@ public class TrackGenerator : MonoBehaviour
     private int roadMeshChildrenCount = 0;
 
     private List<GameObject> mountainMeshChildren = new();
-    private int mountainMeshChildrenCount = 0;
 
+    [Header ("Materials")]
     public Material roadMaterial;
     public Material barrierTopMaterial;
     public Material barrierSideMaterial;
@@ -33,7 +33,12 @@ public class TrackGenerator : MonoBehaviour
     // How many segments of track should exist behind and ahead
     private int renderDistance = 8;
 
+    [Header ("Prefabs")]
     public SegmentBounds segmentBoundPrefab;
+
+    [Header("Other")]
+    [SerializeField] private int roadLayer;
+    [SerializeField] private int mountainLayer;
 
     private void Awake()
     {
@@ -126,6 +131,7 @@ public class TrackGenerator : MonoBehaviour
             roadMeshChildren.Add(new GameObject());
             roadMeshChildren[i].transform.parent = transform;
             roadMeshChildren[i].isStatic = true;
+            roadMeshChildren[i].layer = roadLayer;
             roadMeshChildren[i].AddComponent<MeshRenderer>().material = isBarrier ? (isSide ? barrierSideMaterial : barrierTopMaterial) : roadMaterial;
             roadMeshChildren[i].AddComponent<MeshFilter>().sharedMesh = meshes[i - roadMeshChildrenCount];
             roadMeshChildren[i].AddComponent<MeshCollider>().sharedMesh = meshes[i - roadMeshChildrenCount];
@@ -159,6 +165,7 @@ public class TrackGenerator : MonoBehaviour
         mountainMeshChildren.Add(new GameObject());
         mountainMeshChildren[^1].transform.parent = transform;
         mountainMeshChildren[^1].isStatic = true;
+        mountainMeshChildren[^1].layer = mountainLayer;
 
         MeshRenderer renderer = mountainMeshChildren[^1].AddComponent<MeshRenderer>();
         renderer.material = mountainMaterial;
@@ -191,7 +198,6 @@ public class TrackGenerator : MonoBehaviour
 
         // Destroy the mountain mesh
         Destroy(mountainMeshChildren[segmentIndex]);
-        mountainMeshChildrenCount -= 1;
         mountainMeshChildren.RemoveAt(segmentIndex);
     }
 

@@ -7609,7 +7609,7 @@ GameObject:
   - component: {fileID: 1219495808}
   - component: {fileID: 1219495809}
   m_Layer: 0
-  m_Name: Bezier
+  m_Name: TrackSystem
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -7643,7 +7643,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   pieces: []
-  texture: {fileID: 0}
   precision: 12
   trackScale: 100
   defaultTrackWidth: 80
@@ -7656,6 +7655,8 @@ MonoBehaviour:
   barrierSideMaterial: {fileID: 2100000, guid: f9a09bf6788177c428f76422178c5659, type: 2}
   mountainMaterial: {fileID: 2100000, guid: e5bbd95bc19a747419ded67bbf3e595f, type: 2}
   segmentBoundPrefab: {fileID: 0}
+  roadLayer: 7
+  mountainLayer: 8
 --- !u!1001 &1225007265
 PrefabInstance:
   m_ObjectHideFlags: 0

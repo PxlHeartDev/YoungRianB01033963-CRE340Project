@@ -414,7 +414,7 @@ class Wheel
             Debug.DrawRay(rayHit.point, rayHit.normal, Color.purple);
         }
         // Do the physics query
-        bool didHit = Physics.Raycast(wheelTransform.transform.position - rbCar.transform.up * 0.3f, -rbCar.transform.up, out rayHit, maxSuspensionLength, 1);
+        bool didHit = Physics.Raycast(wheelTransform.transform.position - rbCar.transform.up * 0.3f, -rbCar.transform.up, out rayHit, maxSuspensionLength, 1 << 7);
         SetIsOnGround(didHit);
     }
 
