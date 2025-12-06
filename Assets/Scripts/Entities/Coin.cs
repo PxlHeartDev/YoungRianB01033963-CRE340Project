@@ -1,8 +1,10 @@
+using System;
 using UnityEngine;
 
 public class Coin : MonoBehaviour, ICollectable, IPoolable
 {
     private ObjectPool pool;
+    private int segmentIndex;
 
     [SerializeField] private CollectableModel model;
     [SerializeField] private AudioClip collectSFX;
@@ -59,6 +61,16 @@ public class Coin : MonoBehaviour, ICollectable, IPoolable
         pool = _pool;
     }
 
+    public int GetSegmentIndex()
+    {
+        return segmentIndex;
+    }
+
+    public void SetSegmentIndex(int _index)
+    {
+        segmentIndex = _index;
+    }
+
     public GameObject GetObj()
     {
         return gameObject;
@@ -67,6 +79,7 @@ public class Coin : MonoBehaviour, ICollectable, IPoolable
     public void Reuse()
     {
         coinCollider.enabled = true;
+        model.meshRenderer.enabled = true;
     }
 
     public void Release()

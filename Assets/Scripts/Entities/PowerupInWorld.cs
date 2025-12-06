@@ -3,6 +3,7 @@ using UnityEngine;
 public class PowerupInWorld : MonoBehaviour, ICollectable, IPoolable
 {
     private ObjectPool pool;
+    private int segmentIndex;
 
     [SerializeField] private CollectableModel model;
     [SerializeField] private AudioClip collectSFX;
@@ -46,6 +47,16 @@ public class PowerupInWorld : MonoBehaviour, ICollectable, IPoolable
         pool = _pool;
     }
 
+    public int GetSegmentIndex()
+    {
+        return segmentIndex;
+    }
+
+    public void SetSegmentIndex(int _index)
+    {
+        segmentIndex = _index;
+    }
+
     public GameObject GetObj()
     {
         return gameObject;
@@ -54,6 +65,7 @@ public class PowerupInWorld : MonoBehaviour, ICollectable, IPoolable
     public void Reuse()
     {
         powerupCollider.enabled = true;
+        model.meshRenderer.enabled = true;
     }
 
     public void Release()

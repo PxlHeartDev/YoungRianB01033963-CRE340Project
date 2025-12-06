@@ -7,12 +7,7 @@ public class CollectableModel : MonoBehaviour
     [SerializeField] private GameObject collectable;
     public VisualEffect VFX;
 
-    private MeshRenderer meshRenderer;
-
-    void Start()
-    {
-        meshRenderer = GetComponent<MeshRenderer>();
-    }
+    public MeshRenderer meshRenderer;
 
     public void Collect()
     {
@@ -27,6 +22,5 @@ public class CollectableModel : MonoBehaviour
         VFX.SetBool("ShouldRender", false);
         yield return new WaitForSeconds(0.9f);
         collectable.GetComponent<IPoolable>().Release();
-        meshRenderer.enabled = true;
     }
 }

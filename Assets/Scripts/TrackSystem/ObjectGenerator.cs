@@ -47,7 +47,8 @@ public class ObjectGenerator : MonoBehaviour
     {
         PoolSegment segment = allCurvePoints[segmentIndex];
         foreach (IPoolable pooledObject in segment.objects)
-            pooledObject.Release();
+            if (pooledObject.GetSegmentIndex() == segmentIndex)
+                pooledObject.Release();
         allCurvePoints.Remove(segmentIndex);
     }
 
@@ -59,7 +60,9 @@ public class ObjectGenerator : MonoBehaviour
             GameObject coin = coinPool.GetObjectFromPool();
             coin.transform.parent = transform;
             coin.transform.position = point.pos + point.upDir * objectYOffset;
-            segment.objects.Add(coin.GetComponent<IPoolable>());
+            IPoolable coinPoolable = coin.GetComponent<IPoolable>();
+            coinPoolable.SetSegmentIndex(segmentIndex);
+            segment.objects.Add(coinPoolable);
         }
     }
 }

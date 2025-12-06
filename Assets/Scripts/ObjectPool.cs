@@ -36,6 +36,7 @@ public class ObjectPool
             GameObject objectFromPool = objectPool.Pop().GetObj();
             objectFromPool.SetActive(true);
             objectFromPool.GetComponent<IPoolable>().Reuse();
+            Debug.Log(objectFromPool.activeInHierarchy);
             return objectFromPool;
         }
     }
