@@ -16,12 +16,14 @@ public class EventManager : MonoBehaviour
         }
     }
 
-                      // dmg, damageTarget, damageSource
+                            // dmg, damageTarget, damageSource
     public static System.Action<int, GameObject, GameObject> TookDamage;
-                      // target,     source
+                            // target,     source
     public static System.Action<GameObject, GameObject> Died;
-                      // collected,    source
+                            // collected,    source
     public static System.Action<ICollectable, GameObject> Collected;
+                            // new score
+    public static System.Action<int> ScoreUpdated;
 
     public static System.Action GameQuit;
     public static System.Action GameStarted;

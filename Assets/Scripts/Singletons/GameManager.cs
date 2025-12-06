@@ -93,13 +93,19 @@ public class GameManager : MonoBehaviour
         if (item is Coin)
         {
             Coin coin = item as Coin;
-            score += coin.scoreValue;
+            SetScore(score + coin.scoreValue);
         }
         else if (item is Powerup)
         {
             Powerup powerup = item as Powerup;
             // Other powerup logic
         }
+    }
+
+    private void SetScore(int value)
+    {
+        score = value;
+        EventManager.ScoreUpdated?.Invoke(score);
     }
 
     private void StartGame()
@@ -113,4 +119,5 @@ public class GameManager : MonoBehaviour
     {
         Debug.Log("Quitting game");
     }
+    
 }

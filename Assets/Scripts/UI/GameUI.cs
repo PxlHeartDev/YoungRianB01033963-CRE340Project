@@ -1,9 +1,12 @@
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class GameUI : MonoBehaviour
 {
+    [Header ("References")]
     [SerializeField] private Slider healthBar;
+    [SerializeField] private TextMeshProUGUI scoreText;
 
     private Player player;
 
@@ -16,14 +19,17 @@ public class GameUI : MonoBehaviour
 
         EventManager.TookDamage += CarTookDamage;
         EventManager.Died += CarDied;
+        EventManager.ScoreUpdated += ScoreUpdated;
     }
 
     void OnDisable()
     {
         EventManager.TookDamage -= CarTookDamage;
         EventManager.Died -= CarDied;
+        EventManager.ScoreUpdated -= ScoreUpdated;
     }
 
+    #region Health
     private void CarTookDamage(int amount, GameObject target, GameObject source)
     {
         if (target == player.gameObject)
@@ -38,4 +44,13 @@ public class GameUI : MonoBehaviour
             healthBar.value = 0;
         }
     }
+    #endregion
+
+    #region Score
+    private void ScoreUpdated(int newScore)
+    {
+        scoreText.text = $"Score: {newScore.ToString()}";
+    }
+    
+    #endregion
 }
