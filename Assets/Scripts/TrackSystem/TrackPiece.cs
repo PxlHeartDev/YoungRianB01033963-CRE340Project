@@ -20,7 +20,7 @@ public class TrackPiece
     private List<Vector3> lastLeftBarrierQuadOfLastSegment;
     private List<Vector3> lastMountainLineOfLastSegment;
 
-    public System.Action<List<Mesh>, bool> roadMeshPieceGenerated;
+    public System.Action<List<Mesh>, bool, List<Point>> roadMeshPieceGenerated;
     public System.Action<int> roadSegmentDeleted;
 
     public System.Action<Mesh> mountainMeshGenerated;
@@ -229,6 +229,8 @@ public class TrackPiece
 
         List<Vector3> holdSideDirs = new();
 
+        List<Point> pointsWithDirs = new();
+
         // For every point
         for (int pointIndex = 0; pointIndex < curvePoints.Count; pointIndex++)
         {
@@ -251,6 +253,8 @@ public class TrackPiece
             sideDir.Normalize();
 
             upDir = Vector3.Cross(forwardDir, sideDir).normalized;
+
+            pointsWithDirs.Add(new(point, upDir, sideDir));
 
             if (segmentIndex > 0 && pointIndex == 0)
                 roadBuilder.BuildVerts(lastRoadQuadOfLastSegment, upDir, sideDir);
@@ -295,14 +299,14 @@ public class TrackPiece
             holdSideDirs.Add(sideDir);
         }
 
-        roadMeshPieceGenerated?.Invoke(roadBuilder.FinishMesh(), false);
+        roadMeshPieceGenerated?.Invoke(roadBuilder.FinishMesh(), false, pointsWithDirs);
 
         if (doBarriers)
         {
             List<Mesh> barrierMeshes = new();
             barrierMeshes.AddRange(rightBarrier.FinishMesh());
             barrierMeshes.AddRange(leftBarrier.FinishMesh());
-            roadMeshPieceGenerated?.Invoke(barrierMeshes, true);
+            roadMeshPieceGenerated?.Invoke(barrierMeshes, true, null);
         }
 
 

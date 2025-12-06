@@ -123,9 +123,6 @@ public class Player : Car
 
     private void OnCoinComboEnded()
     {
-        Debug.Log("Combo ended with " + sequentialCoins + " coins");
-
-
         CoinComboEnded?.Invoke(sequentialCoins);
 
         // To-do Implement in UI for visual combo indicator

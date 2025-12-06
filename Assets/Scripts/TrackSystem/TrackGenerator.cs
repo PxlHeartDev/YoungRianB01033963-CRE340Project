@@ -31,14 +31,15 @@ public class TrackGenerator : MonoBehaviour
     public Material mountainMaterial;
 
     // How many segments of track should exist behind and ahead
-    private int renderDistance = 8;
+    private int renderDistance = 6;
 
-    [Header ("Prefabs")]
-    public SegmentBounds segmentBoundPrefab;
+    [Header ("Object Generator")]
+    [SerializeField] private ObjectGenerator objectGenerator;
 
     [Header("Other")]
     [SerializeField] private int roadLayer;
     [SerializeField] private int mountainLayer;
+    private bool debugRenderer = false;
 
     private void Awake()
     {
@@ -47,6 +48,9 @@ public class TrackGenerator : MonoBehaviour
 
     private void Update()
     {
+        if (!debugRenderer)
+            return;
+
         foreach (TrackPiece piece in pieces)
         {
             for (int segmentIndex = 0; segmentIndex < piece.NumSegments; segmentIndex += 1)
@@ -117,9 +121,12 @@ public class TrackGenerator : MonoBehaviour
     }
 
     // Add the generated meshes to the world
-    public void RoadMeshPieceGenerated(List<Mesh> meshes, bool isBarrier = false)
+    public void RoadMeshPieceGenerated(List<Mesh> meshes, bool isBarrier = false, List<Point> curvePoints = null)
     {
         string[] sides = { "Left", "Top", "Right", "Bottom"};
+
+        if (curvePoints != null)
+            objectGenerator.SegmentCreated(pieces[0].totalSegmentTracker, curvePoints);
 
         // For each mesh
         for (int i = roadMeshChildrenCount; i < meshes.Count + roadMeshChildrenCount; i++)
@@ -207,7 +214,6 @@ public class TrackGenerator : MonoBehaviour
         if (segmentIndex + renderDistance > pieces[0].totalSegmentTracker)
         {
             GenerateNextSegment();
-            Debug.Log("Generated segment " + (segmentIndex + renderDistance));
         }
     }
 
@@ -217,7 +223,7 @@ public class TrackGenerator : MonoBehaviour
         if (segmentIndex - renderDistance > pieces[0].totalSegmentTracker - pieces[0].NumSegments)
         {
             RemoveFirstSegment();
-            Debug.Log("Removed segment " + (segmentIndex - renderDistance));
+            objectGenerator.SegmentDeleted(segmentIndex - renderDistance);
         }
     }
 }

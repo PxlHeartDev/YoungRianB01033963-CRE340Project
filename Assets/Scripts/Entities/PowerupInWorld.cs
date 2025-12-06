@@ -1,11 +1,20 @@
 using UnityEngine;
 
-public class PowerupInWorld : MonoBehaviour, ICollectable
+public class PowerupInWorld : MonoBehaviour, ICollectable, IPoolable
 {
+    private ObjectPool pool;
+
     [SerializeField] private CollectableModel model;
     [SerializeField] private AudioClip collectSFX;
 
+    private Collider powerupCollider;
+
     public Powerup powerup;
+
+    void Awake()
+    {
+        powerupCollider = GetComponent<Collider>();
+    }
 
     void OnTriggerEnter(Collider other)
     {
@@ -18,14 +27,38 @@ public class PowerupInWorld : MonoBehaviour, ICollectable
         }
     }
 
+    #region ICollectable
     public void Collect(GameObject source)
     {
         // Play sound
         AudioManager.Instance?.PlaySFXAtPoint(AudioManager.Source.Collectable, collectSFX, transform.position, 0.3f);
 
         // Do collection logic
-        GetComponent<Collider>().enabled = false;
+        powerupCollider.enabled = false;
         model.Collect();
         EventManager.Collected?.Invoke(this, source);
     }
+    #endregion
+
+    #region IPoolable
+    public void SetPool(ObjectPool _pool)
+    {
+        pool = _pool;
+    }
+
+    public GameObject GetObj()
+    {
+        return gameObject;
+    }
+
+    public void Reuse()
+    {
+        powerupCollider.enabled = true;
+    }
+
+    public void Release()
+    {
+        pool.ReturnToPool(this);
+    }
+    #endregion
 }

@@ -94,7 +94,6 @@ public class GameManager : MonoBehaviour
         {
             Coin coin = item as Coin;
             score += coin.scoreValue;
-            Debug.Log("Collected a coin worth " + coin.scoreValue + " / New score: " + score + " / Combo: " + (car as Player).sequentialCoins);
         }
         else if (item is Powerup)
         {

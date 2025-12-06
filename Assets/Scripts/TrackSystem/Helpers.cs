@@ -41,12 +41,33 @@ public class Point
 {
     public Vector3 pos;
     public Vector3 upDir;
+    public Vector3 sideDir;
 
-    public Point(Vector3 _pos, Vector3? _upDir = null)
+    public Point(Vector3 _pos, Vector3? _upDir = null, Vector3? _sideDir = null)
     {
         pos = _pos;
+
         if (_upDir == null) upDir = Vector3.up;
         else upDir = (Vector3)(_upDir);
+
+        if (_sideDir == null) sideDir = Vector3.right;
+        else sideDir = (Vector3)(_sideDir);
+
         upDir.Normalize();
+        sideDir.Normalize();
+    }
+}
+
+public class PoolSegment
+{
+    public int segmentIndex;
+    public List<Point> curvePoints;
+    public List<IPoolable> objects;
+
+    public PoolSegment(int _segmentIndex, List<Point> _curvePoints)
+    {
+        segmentIndex = _segmentIndex;
+        curvePoints = _curvePoints;
+        objects = new();
     }
 }

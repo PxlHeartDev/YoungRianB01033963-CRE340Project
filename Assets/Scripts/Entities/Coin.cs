@@ -1,9 +1,13 @@
 using UnityEngine;
 
-public class Coin : MonoBehaviour, ICollectable
+public class Coin : MonoBehaviour, ICollectable, IPoolable
 {
+    private ObjectPool pool;
+
     [SerializeField] private CollectableModel model;
     [SerializeField] private AudioClip collectSFX;
+
+    private Collider coinCollider;
 
     public int scoreValue = 1;
 
@@ -11,6 +15,8 @@ public class Coin : MonoBehaviour, ICollectable
     {
         model.VFX.SetInt("ParticleCount", 16);
         model.VFX.SetVector3("Offset", new Vector3(0.0f, 2.0f, 0.0f));
+
+        coinCollider = GetComponent<Collider>();
     }
 
     void OnTriggerEnter(Collider other)
@@ -26,6 +32,7 @@ public class Coin : MonoBehaviour, ICollectable
         }
     }
 
+    #region ICollectable
     public void Collect(GameObject source)
     {
         if (source == null) return;
@@ -39,9 +46,32 @@ public class Coin : MonoBehaviour, ICollectable
             AudioManager.Instance?.PlaySFXAtPoint(AudioManager.Source.Collectable, collectSFX, transform.position, 1.0f, player.GetCoinPitch());
 
             // Do collection logic
-            GetComponent<Collider>().enabled = false;
+            coinCollider.enabled = false;
             model.Collect();
             EventManager.Collected?.Invoke(this, source);
         }
     }
+    #endregion
+
+    #region IPoolable
+    public void SetPool(ObjectPool _pool)
+    {
+        pool = _pool;
+    }
+
+    public GameObject GetObj()
+    {
+        return gameObject;
+    }
+
+    public void Reuse()
+    {
+        coinCollider.enabled = true;
+    }
+
+    public void Release()
+    {
+        pool.ReturnToPool(this);
+    }
+    #endregion
 }
