@@ -21,7 +21,8 @@ public class ObjectPool
         GameObject newObject = Object.Instantiate(objectToPool.GetObj());
         newObject.GetComponent<IPoolable>().SetPool(this);
         newObject.SetActive(startActive);
-        objectPool.Push(newObject.GetComponent<IPoolable>());
+        if (!startActive)
+            objectPool.Push(newObject.GetComponent<IPoolable>());
         return newObject;
     }
 

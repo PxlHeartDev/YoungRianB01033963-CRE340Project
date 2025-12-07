@@ -243,7 +243,8 @@ public class TrackPiece
             Vector3 forwardDir;
             if (pointIndex < curvePoints.Count - 1)
                 forwardDir = (curvePoints[pointIndex + 1] - point).normalized;
-            else forwardDir = previousForwardDir;
+            else
+                forwardDir = previousForwardDir;
 
             // Set the tracker
             previousForwardDir = forwardDir;
