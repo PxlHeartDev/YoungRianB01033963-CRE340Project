@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Audio;
 
@@ -46,6 +47,8 @@ public class AudioManager : MonoBehaviour
 
     public int startSong = 0;                           // Element in musicList to start with
 
+    private Coroutine lastMusicCoroutine;
+
     //
     // SFX
     //
@@ -59,6 +62,33 @@ public class AudioManager : MonoBehaviour
 
     private AudioSource collectableSource;
     private AudioSource comboSource;
+
+    void OnEnable()
+    {
+        GameManager.Instance.stateChanged += OnStateChanged;
+    }
+
+    void OnDisable()
+    {
+        GameManager.Instance.stateChanged -= OnStateChanged;
+    }
+
+    private void OnStateChanged(GameManager.State newState)
+    {
+        switch (newState)
+        {
+            case GameManager.State.MainMenu:
+                PlayMusic("MainMenu");
+                break;
+            case GameManager.State.Playing:
+                PlayMusic("Game1");
+                break;
+            case GameManager.State.Paused:
+                break;
+            case GameManager.State.Dead:
+                break;
+        }
+    }
 
     #region Overhead
 
@@ -132,6 +162,10 @@ public class AudioManager : MonoBehaviour
         musicSources[0].loop = false;
         musicSources[1].loop = false;
 
+        if (lastMusicCoroutine != null)
+            StopCoroutine(lastMusicCoroutine);
+        lastMusicCoroutine = StartCoroutine(FadeMuteMusic(2.0f));
+
         // Set the music
         currentMusic = newMusic;
         currentClip = newMusic.clip;
@@ -153,6 +187,10 @@ public class AudioManager : MonoBehaviour
         // Reset looping
         musicSources[0].loop = false;
         musicSources[1].loop = false;
+
+        if (lastMusicCoroutine != null)
+            StopCoroutine(lastMusicCoroutine);
+        lastMusicCoroutine = StartCoroutine(FadeMuteMusic(2.0f));
 
         // Set the music
         currentMusic = newMusic;
@@ -193,6 +231,22 @@ public class AudioManager : MonoBehaviour
     public void PauseMusic()
     {
         musicSources[1 - musicToggle].Pause();
+    }
+
+    private IEnumerator<WaitForEndOfFrame> FadeMuteMusic(float time)
+    {
+        float curTime = 0.0f;
+        AudioSource source = musicSources[1 - musicToggle];
+
+        while (curTime < time)
+        {
+            yield return new WaitForEndOfFrame();
+            curTime += Time.deltaTime;
+            source.volume = Mathf.Lerp(currentMusic.volume, 0.0f, curTime/time);
+        }
+
+        source.volume = 0.0f;
+        source.Stop();
     }
 
     #endregion
