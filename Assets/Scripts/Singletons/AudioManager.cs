@@ -63,7 +63,7 @@ public class AudioManager : MonoBehaviour
     private AudioSource collectableSource;
     private AudioSource comboSource;
 
-    void OnEnable()
+    public void GameManagerReady()
     {
         GameManager.Instance.stateChanged += OnStateChanged;
     }

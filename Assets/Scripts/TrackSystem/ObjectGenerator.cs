@@ -7,8 +7,8 @@ public class ObjectGenerator : MonoBehaviour
     private float objectYOffset = 2.5f;
     private float objectXOffsetRange = 35.0f;
 
-    private float initialCoinPlaceChance = 0.5f;
-    private float coinSwitchPlacingChance = 0.2f;
+    private float initialCoinPlaceChance = 0.6f;
+    private float coinSwitchPlacingChance = 0.18f;
     private float powerUpPlaceChance = 0.02f;
 
     [SerializeField] private GameObject coinPrefab;
@@ -19,15 +19,11 @@ public class ObjectGenerator : MonoBehaviour
     private ObjectPool powerupPool;
     private ObjectPool spikePool;
 
-    private bool hasBeenSetUp = false;
-
     public void SetupGenerator()
     {
         coinPool = new(coinPrefab.GetComponent<IPoolable>(), 100);
         powerupPool = new(powerupPrefab.GetComponent<IPoolable>(), 10);
         //spikePool = new(spikePrefab.GetComponent<IPoolable>(), 50);
-
-        hasBeenSetUp = true;
     }
 
     public void SegmentCreated(int segmentIndex, List<Point> curvePoints)

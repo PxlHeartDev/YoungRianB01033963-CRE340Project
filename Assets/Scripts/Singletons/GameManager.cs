@@ -64,6 +64,7 @@ public class GameManager : MonoBehaviour
         EventManager.GameQuit += QuitGame;
 
         UIManager.Instance.GameManagerReady();
+        AudioManager.Instance.GameManagerReady();
     }
 
     private void OnDestroy()

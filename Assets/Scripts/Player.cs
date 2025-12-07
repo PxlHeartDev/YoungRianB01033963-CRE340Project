@@ -60,7 +60,7 @@ public class Player : Car
         if (item is Coin)
         {
             sequentialCoins += 1;
-            sequentialCoinCooldown = 1.0f;
+            sequentialCoinCooldown = 2.0f;
         }
     }
 
@@ -135,8 +135,8 @@ public class Player : Car
         AudioClip comboSFX = null;
 
         if (sequentialCoins < 5) return;
-        else if (sequentialCoins <= 20) comboSFX = Resources.Load("SFX/Combo/Combo1") as AudioClip;
-        else if (sequentialCoins <= 40) comboSFX = Resources.Load("SFX/Combo/Combo2") as AudioClip;
+        else if (sequentialCoins < 20) comboSFX = Resources.Load("SFX/Combo/Combo1") as AudioClip;
+        else if (sequentialCoins < 40) comboSFX = Resources.Load("SFX/Combo/Combo2") as AudioClip;
         else comboSFX = Resources.Load("SFX/Combo/Combo3") as AudioClip;
 
         AudioManager.Instance.PlaySFXNonPositional(AudioManager.Source.Combo, comboSFX, 1.0f);
