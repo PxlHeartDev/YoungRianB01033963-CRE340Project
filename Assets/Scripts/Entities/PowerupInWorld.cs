@@ -32,7 +32,7 @@ public class PowerupInWorld : MonoBehaviour, ICollectable, IPoolable
     public void Collect(GameObject source)
     {
         // Play sound
-        AudioManager.Instance?.PlaySFXAtPoint(AudioManager.Source.Collectable, collectSFX, transform.position, 2.0f, Random.Range(0.8f, 2.0f));
+        AudioManager.Instance?.PlaySFXAtPoint(AudioManager.Source.Collectable, collectSFX, transform.position, 1.8f, Random.Range(0.8f, 2.0f));
 
         // Do collection logic
         powerupCollider.enabled = false;

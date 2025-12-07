@@ -21,12 +21,6 @@ public class ObjectGenerator : MonoBehaviour
 
     private bool hasBeenSetUp = false;
 
-    void Awake()
-    {
-        if (!hasBeenSetUp)
-            SetupGenerator();
-    }
-
     public void SetupGenerator()
     {
         coinPool = new(coinPrefab.GetComponent<IPoolable>(), 100);
@@ -38,8 +32,11 @@ public class ObjectGenerator : MonoBehaviour
 
     public void SegmentCreated(int segmentIndex, List<Point> curvePoints)
     {
-        if (!hasBeenSetUp)
+        if (segmentIndex == 0)
+        {
             SetupGenerator();
+            return;
+        }
         allCurvePoints.Add(segmentIndex,
             new PoolSegment(
                 segmentIndex,
@@ -50,6 +47,8 @@ public class ObjectGenerator : MonoBehaviour
 
     public void SegmentDeleted(int segmentIndex)
     {
+        if (segmentIndex == 0)
+            return;
         PoolSegment segment = allCurvePoints[segmentIndex];
         foreach (IPoolable pooledObject in segment.objects)
             if (pooledObject.GetSegmentIndex() == segmentIndex)
