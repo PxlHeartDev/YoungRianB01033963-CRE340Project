@@ -7,8 +7,8 @@ public class ObjectGenerator : MonoBehaviour
     private float objectYOffset = 2.5f;
     private float objectXOffsetRange = 35.0f;
 
-    private float initialCoinPlaceChance = 0.9f;
-    private float coinSwitchPlacingChance = 0.01f;
+    private float initialCoinPlaceChance = 0.5f;
+    private float coinSwitchPlacingChance = 0.2f;
     private float powerUpPlaceChance = 0.02f;
 
     [SerializeField] private GameObject coinPrefab;
