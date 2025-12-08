@@ -65,33 +65,6 @@ public class AudioManager : MonoBehaviour
     private AudioSource comboSource;
     private AudioSource crateSource;
 
-    public void GameManagerReady()
-    {
-        GameManager.Instance.stateChanged += OnStateChanged;
-    }
-
-    void OnDisable()
-    {
-        GameManager.Instance.stateChanged -= OnStateChanged;
-    }
-
-    private void OnStateChanged(GameManager.State newState)
-    {
-        switch (newState)
-        {
-            case GameManager.State.MainMenu:
-                PlayMusic("MainMenu");
-                break;
-            case GameManager.State.Playing:
-                PlayMusic("Game1");
-                break;
-            case GameManager.State.Paused:
-                break;
-            case GameManager.State.Dead:
-                break;
-        }
-    }
-
     #region Overhead
 
     void Awake()
@@ -127,11 +100,6 @@ public class AudioManager : MonoBehaviour
         {
             source.transform.parent = transform;
         }
-
-        //GameObject coinSourceObject = new GameObject();
-        //collectableSource = coinSourceObject.AddComponent<AudioSource>();
-
-        //coinSourceObject.transform.parent = transform;
     }
 
     void Start()
@@ -146,6 +114,33 @@ public class AudioManager : MonoBehaviour
         if(goalTime > 0.0 && AudioSettings.dspTime > goalTime - 1.0f)
         {
             PlayScheduledMusic();
+        }
+    }
+
+    public void GameManagerReady()
+    {
+        GameManager.Instance.stateChanged += OnStateChanged;
+    }
+
+    void OnDisable()
+    {
+        GameManager.Instance.stateChanged -= OnStateChanged;
+    }
+
+    private void OnStateChanged(GameManager.State newState)
+    {
+        switch (newState)
+        {
+            case GameManager.State.MainMenu:
+                PlayMusic("MainMenu");
+                break;
+            case GameManager.State.Playing:
+                PlayMusic("Game1");
+                break;
+            case GameManager.State.Paused:
+                break;
+            case GameManager.State.Dead:
+                break;
         }
     }
 
@@ -298,7 +293,7 @@ public class AudioManager : MonoBehaviour
         for (int i = 1; i <= 22; i++)
         {
             SetLowPass(1000.0f * i);
-            yield return new WaitForSeconds(0.2f);
+            yield return new WaitForSeconds(0.1f);
         }
     }
     #endregion

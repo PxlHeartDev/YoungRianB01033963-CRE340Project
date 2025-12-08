@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 public class Crate : MonoBehaviour, IPoolable
@@ -7,6 +8,9 @@ public class Crate : MonoBehaviour, IPoolable
 
     [SerializeField] private Collider crateCollider;
     [SerializeField] private MeshRenderer meshRenderer;
+
+
+    [SerializeField] private List<AudioClip> crateSFX;
 
     private void OnTriggerEnter(Collider other)
     {
@@ -22,6 +26,7 @@ public class Crate : MonoBehaviour, IPoolable
 
     private void Remove()
     {
+        AudioManager.Instance?.PlaySFXAtPoint(AudioManager.Source.Crate, crateSFX[Random.Range(0, crateSFX.Count)], transform.position);
         crateCollider.enabled = false;
         meshRenderer.enabled = false;
         Release();

@@ -48,6 +48,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   crateCollider: {fileID: 5791950910407309394}
   meshRenderer: {fileID: 5163417729848540860}
+  crateSFX:
+  - {fileID: 8300000, guid: c5e8c669323413844a261c67e963a7f0, type: 3}
+  - {fileID: 8300000, guid: 81d3177d7af7c1742ab950c6e7f19c04, type: 3}
+  - {fileID: 8300000, guid: 327f004536c4a3347960b1847c449922, type: 3}
+  - {fileID: 8300000, guid: eb48cf16a04e9774c9380b3f654d9d7f, type: 3}
 --- !u!65 &5791950910407309394
 BoxCollider:
   m_ObjectHideFlags: 0
