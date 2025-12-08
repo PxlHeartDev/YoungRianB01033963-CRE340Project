@@ -103,16 +103,16 @@ public class Car : MonoBehaviour, IDamageable
             switch (i)
             {
                 case (0):
-                    wheels[0].wheelTransform.transform.position = transform.position + transform.right * wheelDistance.x + transform.forward * wheelDistance.y + wheelYOffset;//front right
+                    wheels[0].wheelTransform.transform.position = transform.position + transform.right * wheelDistance.x + transform.forward * wheelDistance.y + wheelYOffset;// Front right
                     break;
                 case (1):
-                    wheels[1].wheelTransform.transform.position = transform.position + transform.right * -wheelDistance.x + transform.forward * wheelDistance.y + wheelYOffset;//front left
+                    wheels[1].wheelTransform.transform.position = transform.position + transform.right * -wheelDistance.x + transform.forward * wheelDistance.y + wheelYOffset;// Front left
                     break;
                 case (2):
-                    wheels[2].wheelTransform.transform.position = transform.position + transform.right * wheelDistance.x + transform.forward * -wheelDistance.y + wheelYOffset;//back right
+                    wheels[2].wheelTransform.transform.position = transform.position + transform.right * wheelDistance.x + transform.forward * -wheelDistance.y + wheelYOffset;// Back right
                     break;
                 case (3):
-                    wheels[3].wheelTransform.transform.position = transform.position + transform.right * -wheelDistance.x + transform.forward * -wheelDistance.y + wheelYOffset;//back left
+                    wheels[3].wheelTransform.transform.position = transform.position + transform.right * -wheelDistance.x + transform.forward * -wheelDistance.y + wheelYOffset;// Back left
                     break;
             }
 
