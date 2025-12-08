@@ -5,22 +5,33 @@ using UnityEngine;
 public class ObjectGenerator : MonoBehaviour
 {
     Dictionary<int, PoolSegment> allCurvePoints = new();
-    private float coinYOffset = 2.5f;
-    private float crateYOffset = 4.0f;
+
+    // Generic
     private float objectXOffsetRange = 35.0f;
 
+    // Coin
+    private ObjectPool coinPool;
+    private float coinYOffset = 2.5f;
     private float initialCoinPlaceChance = 0.6f;
     private float coinSwitchPlacingChance = 0.18f;
-    private float powerUpPlaceChance = 0.02f;
-    private float cratePlaceChance = 0.05f;
 
+    // Powerup
+    private ObjectPool powerupPool;
+    private float powerUpPlaceChance = 0.02f;
+
+    // Crate
+    private ObjectPool cratePool;
+    private float crateYOffset = 3.5f;
+    private float cratePlaceChance = 0.05f;
+    private float crateHorPadding = 4.0f;
+    private int minCratesInRow = 1;
+    private int maxCratesInRow = 5;
+
+
+    [Header ("Object Prefabs")]
     [SerializeField] private GameObject coinPrefab;
     [SerializeField] private GameObject powerupPrefab;
     [SerializeField] private GameObject cratePrefab;
-
-    private ObjectPool coinPool;
-    private ObjectPool powerupPool;
-    private ObjectPool cratePool;
 
     public void SetupGenerator()
     {
@@ -103,11 +114,11 @@ public class ObjectGenerator : MonoBehaviour
 
         Vector3 pos = point.pos + point.upDir * crateYOffset + point.sideDir * xOffset;
 
-        int numCrates = Random.Range(1, 6);
+        int numCrates = Random.Range(minCratesInRow, maxCratesInRow + 1);
 
         for (int i = 0; i < numCrates; i++)
         {
-            Vector3 placePos = pos + i * point.sideDir * 5.0f * (fromRight ? -1.0f : 1.0f);
+            Vector3 placePos = pos + i * point.sideDir * crateHorPadding * (fromRight ? -1.0f : 1.0f);
             PlaceCrate(segment, placePos, point.upDir);
         }
     }

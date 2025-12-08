@@ -65,9 +65,9 @@ public class GameUI : MonoBehaviour
 
     private void ItemCollected(ICollectable item, GameObject source)
     {
-        if (item is Coin && source.CompareTag("Player"))
+        if (source.CompareTag("Player") && (item is Coin || item is PowerupInWorld))
         {
-            ComboUpdated(GameManager.Instance.player.sequentialCoins);
+            ComboUpdated(GameManager.Instance.player.sequentialCollects);
         }
     }
 

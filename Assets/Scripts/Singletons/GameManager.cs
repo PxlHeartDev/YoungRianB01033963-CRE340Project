@@ -96,9 +96,10 @@ public class GameManager : MonoBehaviour
             Coin coin = item as Coin;
             SetScore(score + coin.scoreValue);
         }
-        else if (item is Powerup)
+        else if (item is PowerupInWorld)
         {
-            Powerup powerup = item as Powerup;
+            PowerupInWorld powerup = item as PowerupInWorld;
+            SetScore(score + powerup.powerup.scoreValue);
             // Other powerup logic
         }
     }

@@ -14,8 +14,8 @@ public class Player : Car
 
     private bool jumpHeld = false;                          // Whether the jump action is currently being held
 
-    public int sequentialCoins { get; private set; } = 0;   // How many coins have been collected in this combo
-    private float sequentialCoinCooldown = 0.0f;
+    public int sequentialCollects { get; private set; } = 0;   // How many coins have been collected in this combo
+    private float sequentialCollectCooldown = 0.0f;
 
     public System.Action<int> CoinComboEnded;               // Event for when the coin combo ends
 
@@ -57,10 +57,10 @@ public class Player : Car
     public override void ItemCollected(ICollectable item)
     {
         base.ItemCollected(item);
-        if (item is Coin)
+        if (item is Coin || item is PowerupInWorld)
         {
-            sequentialCoins += 1;
-            sequentialCoinCooldown = 2.0f;
+            sequentialCollects += 1;
+            sequentialCollectCooldown = 2.0f;
         }
     }
 
@@ -69,11 +69,11 @@ public class Player : Car
         float pitch = 1.0f;
 
         // Calculate pitch
-        if (sequentialCoins <= 20) pitch = 1.0f + 0.025f * sequentialCoins;
-        else if (sequentialCoins <= 40) pitch = 1.5f;
-        else if (sequentialCoins <= 60) pitch = 1.5f + 0.025f * (sequentialCoins - 40);
-        else if (sequentialCoins <= 80) pitch = 2.0f;
-        else if (sequentialCoins <= 100) pitch = 2.0f + 0.025f * (sequentialCoins - 80);
+        if (sequentialCollects <= 20) pitch = 1.0f + 0.025f * sequentialCollects;
+        else if (sequentialCollects <= 40) pitch = 1.5f;
+        else if (sequentialCollects <= 60) pitch = 1.5f + 0.025f * (sequentialCollects - 40);
+        else if (sequentialCollects <= 80) pitch = 2.0f;
+        else if (sequentialCollects <= 100) pitch = 2.0f + 0.025f * (sequentialCollects - 80);
         else pitch = 2.5f;
 
         return pitch;
@@ -110,20 +110,20 @@ public class Player : Car
 
     private void SequentialCoinLogic()
     {
-        if (sequentialCoinCooldown > 0.0f)
+        if (sequentialCollectCooldown > 0.0f)
         {
-            sequentialCoinCooldown -= Time.deltaTime;
+            sequentialCollectCooldown -= Time.deltaTime;
         }
-        else if (sequentialCoins > 0)
+        else if (sequentialCollects > 0)
         {
             OnCoinComboEnded();
-            sequentialCoins = 0;
+            sequentialCollects = 0;
         }
     }
 
     private void OnCoinComboEnded()
     {
-        CoinComboEnded?.Invoke(sequentialCoins);
+        CoinComboEnded?.Invoke(sequentialCollects);
 
         // To-do Implement in UI for visual combo indicator
 
@@ -134,9 +134,9 @@ public class Player : Car
     {
         AudioClip comboSFX = null;
 
-        if (sequentialCoins < 5) return;
-        else if (sequentialCoins < 20) comboSFX = Resources.Load("SFX/Combo/Combo1") as AudioClip;
-        else if (sequentialCoins < 40) comboSFX = Resources.Load("SFX/Combo/Combo2") as AudioClip;
+        if (sequentialCollects < 5) return;
+        else if (sequentialCollects < 20) comboSFX = Resources.Load("SFX/Combo/Combo1") as AudioClip;
+        else if (sequentialCollects < 40) comboSFX = Resources.Load("SFX/Combo/Combo2") as AudioClip;
         else comboSFX = Resources.Load("SFX/Combo/Combo3") as AudioClip;
 
         AudioManager.Instance.PlaySFXNonPositional(AudioManager.Source.Combo, comboSFX, 1.0f);
