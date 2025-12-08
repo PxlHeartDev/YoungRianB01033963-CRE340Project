@@ -57,6 +57,8 @@ public class GameManager : MonoBehaviour
     private void Start()
     {
         EventManager.Collected += ItemCollected;
+        EventManager.TookDamage += CarTookDamage;
+        EventManager.Died += CarDied;
         sunMoon.sunsetTrigger += player.TurnOnLights;
         sunMoon.sunriseTrigger += player.TurnOffLights;
 
@@ -70,6 +72,8 @@ public class GameManager : MonoBehaviour
     private void OnDestroy()
     {
         EventManager.Collected -= ItemCollected;
+        EventManager.TookDamage -= CarTookDamage;
+        EventManager.Died -= CarDied;
         sunMoon.sunsetTrigger -= player.TurnOnLights;
         sunMoon.sunriseTrigger -= player.TurnOffLights;
 
@@ -101,6 +105,24 @@ public class GameManager : MonoBehaviour
             PowerupInWorld powerup = item as PowerupInWorld;
             SetScore(score + powerup.powerup.scoreValue);
             // Other powerup logic
+        }
+    }
+
+    // Any car took damage
+    private void CarTookDamage(int dmg, GameObject target, GameObject source)
+    {
+        // The player took damage
+        if (target == player.gameObject)
+        {
+
+        }
+    }
+
+    private void CarDied(GameObject target, GameObject source)
+    {
+        if (target == player.gameObject)
+        {
+            Time.timeScale = 0.2f;
         }
     }
 

@@ -65,6 +65,8 @@ public class AudioManager : MonoBehaviour
     private AudioSource comboSource;
     private AudioSource crateSource;
 
+    private Coroutine lastDamageCoroutine;
+
     #region Overhead
 
     void Awake()
@@ -282,7 +284,9 @@ public class AudioManager : MonoBehaviour
     // Audio effect for when the player takes damage
     public void PlayerTookDamage()
     {
-        StartCoroutine(DamageCoroutine());
+        if (lastDamageCoroutine != null)
+            StopCoroutine(lastDamageCoroutine);
+        lastDamageCoroutine = StartCoroutine(DamageCoroutine());
     }
 
     // Coroutine to ramp the frequency from 1000 back to 22000

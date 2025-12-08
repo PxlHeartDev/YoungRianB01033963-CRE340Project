@@ -40,35 +40,36 @@ public class CustomCamera : MonoBehaviour
     {
         transformTracker = new GameObject();
         cameraTarget = forwardTarget;
+        ResetEffects();
     }
 
     void OnEnable()
     {
         EventManager.TookDamage += CarTookDamage;
+        EventManager.Died += CarDied;
     }
 
     void OnDisable()
     {
         EventManager.TookDamage -= CarTookDamage;
+        EventManager.Died -= CarDied;
     }
 
     void FixedUpdate()
     {
-        if (player != null)
-        {
-            TransformGizmos.DrawTransformGizmo(forwardTarget.transform);
-            TransformGizmos.DrawTransformGizmo(reverseTarget.transform);
-        }
 
         // If the player has died, set the camera to the last remembered transform and skip the rest of the logic
         // This fixes the edge-case of the camera being placed wrong if the player dies mid-shake
         if (player == null)
         {
-            transform.SetPositionAndRotation(savedPos, savedRot);
+            MoveCamera(true);
             return;
         }
 
-        MoveCamera();
+        TransformGizmos.DrawTransformGizmo(forwardTarget.transform);
+        TransformGizmos.DrawTransformGizmo(reverseTarget.transform);
+
+        MoveCamera(false);
 
         if (shakeTimeElapsed < shakeDuration) DoCameraShake();
 
@@ -101,13 +102,24 @@ public class CustomCamera : MonoBehaviour
     }
 
     // Actually move the camera towards the target
-    private void MoveCamera()
+    private void MoveCamera(bool toSaved)
     {
-        // Set the tracker
-        transformTracker.transform.eulerAngles = new Vector3(0.0f, cameraTarget.transform.eulerAngles.y, 0.0f);
+        if (toSaved)
+        {
+            // Set the tracker
+            transformTracker.transform.eulerAngles = new Vector3(0.0f, savedRot.eulerAngles.y, 0.0f);
 
-        // Move the camera towards the target
-        transform.SetPositionAndRotation(Vector3.Lerp(transform.position, cameraTarget.transform.position, lerpSpeed), Quaternion.Lerp(transform.rotation, cameraTarget.transform.rotation, lerpSpeed));
+            // Move the camera towards the target
+            transform.SetPositionAndRotation(Vector3.Lerp(transform.position, savedPos, lerpSpeed), Quaternion.Lerp(transform.rotation, savedRot, lerpSpeed));
+        }
+        else
+        {
+            // Set the tracker
+            transformTracker.transform.eulerAngles = new Vector3(0.0f, cameraTarget.transform.eulerAngles.y, 0.0f);
+
+            // Move the camera towards the target
+            transform.SetPositionAndRotation(Vector3.Lerp(transform.position, cameraTarget.transform.position, lerpSpeed), Quaternion.Lerp(transform.rotation, cameraTarget.transform.rotation, lerpSpeed));
+        }
     }
 
     // Lock the Z rotation of the camera
@@ -119,7 +131,7 @@ public class CustomCamera : MonoBehaviour
         transform.rotation = Quaternion.Euler(rot.x, rot.y, rot.z);
     }
 
-    #region Events and Effects
+    #region Events
 
     // Any car took damage
     private void CarTookDamage(int dmg, GameObject target, GameObject source)
@@ -133,7 +145,7 @@ public class CustomCamera : MonoBehaviour
 
             float maxHP = target.GetComponent<Car>().maxHealth;
 
-            damageVignetteVolume.weight = Mathf.Clamp01(3.0f * dmg/maxHP);
+            damageVignetteVolume.weight = Mathf.Clamp01(5.0f * dmg/maxHP);
             globalVolume.weight = 0.0f;
         }
         else
@@ -145,6 +157,30 @@ public class CustomCamera : MonoBehaviour
                 CameraShake(0.05f, 0.3f);
             }
         }
+    }
+
+    private void CarDied(GameObject target, GameObject source)
+    {
+        if (target == player.gameObject)
+        {
+            CameraShake(1.0f, 1.0f);
+            damageVignetteVolume.weight = 0.8f;
+            globalVolume.weight = 0.2f;
+        }
+    }
+    #endregion
+
+    #region Effects
+
+    private void ResetEffects()
+    {
+        ResetDamageVignette();
+    }
+
+    private void ResetDamageVignette()
+    {
+        damageVignetteVolume.weight = 0.0f;
+        globalVolume.weight = 1.0f;
     }
 
     private void CameraShake(float strength, float duration)
