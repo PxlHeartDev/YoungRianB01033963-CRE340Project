@@ -236,8 +236,8 @@ public class TrackPiece
         {
             Vector3 point = curvePoints[pointIndex];
 
-            // Default the up direction according to the control ups
-            Vector3 upDir = Vector3.Lerp(segmentPoints[0].upDir, segmentPoints[3].upDir, (float)(pointIndex) / (float)(curvePoints.Count));
+            // Default the up direction
+            Vector3 upDir = Vector3.up;
 
             // Set the forward direction
             Vector3 forwardDir;
