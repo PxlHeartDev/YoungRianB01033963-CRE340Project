@@ -45,6 +45,16 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   mixer: {fileID: 24100000, guid: 51aa59a14a0138840a596dd9e4ab40c7, type: 2}
-  testMusic: {fileID: 8300000, guid: 7f1158a648a66494396da3fce7855e6d, type: 3}
-  mainMenuMusic: {fileID: 8300000, guid: 76b3fd156f352834bbef8d36f18bb227, type: 3}
-  mainMenuMusicLoop: {fileID: 8300000, guid: 18d88e2aaa5e6c344bc3e8820878fc39, type: 3}
+  musicList:
+  - {fileID: 11400000, guid: 9e66aa9fed00d8b43a5945919d3dc625, type: 2}
+  - {fileID: 11400000, guid: 964c5e005398f0c4595cb1e030a26f85, type: 2}
+  startSong: 0
+  crateSFX:
+  - {fileID: 8300000, guid: c5e8c669323413844a261c67e963a7f0, type: 3}
+  - {fileID: 8300000, guid: 81d3177d7af7c1742ab950c6e7f19c04, type: 3}
+  - {fileID: 8300000, guid: 327f004536c4a3347960b1847c449922, type: 3}
+  - {fileID: 8300000, guid: eb48cf16a04e9774c9380b3f654d9d7f, type: 3}
+  explosionSFX:
+  - {fileID: 8300000, guid: b1e3841c65505564f9ae19efa38fb805, type: 3}
+  - {fileID: 8300000, guid: bb4a3cd4cf642da44ade7cc946396560, type: 3}
+  - {fileID: 8300000, guid: 70f5337fe38e82f488e420c0477f6bcc, type: 3}

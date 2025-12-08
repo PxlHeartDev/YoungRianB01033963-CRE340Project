@@ -31,9 +31,6 @@ public class Car : MonoBehaviour, IDamageable
     public int maxHealth { get; private set; } = 10;
     public int health { get; private set; } = 10;
 
-    [Header("SFX")]
-    [SerializeField] private List<AudioClip> explodeSFX;
-
     private float rpm = 0.0f;                                                       // Controls the visual wheel spin
 
     private int driftingWheels = 0;                                                 // Number of drifting wheels
@@ -242,7 +239,7 @@ public class Car : MonoBehaviour, IDamageable
         explosionVFX.SetBool("ShouldRender", true);
         StartCoroutine(HideExplodeVFX());
 
-        AudioManager.Instance?.PlaySFXAtPoint(AudioManager.Source.Generic, explodeSFX, transform.position);
+        AudioManager.Instance?.PlayExplodeSFX(transform.position);
 
         SetActive(false);
 

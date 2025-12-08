@@ -9,16 +9,13 @@ public class Crate : MonoBehaviour, IPoolable
     [SerializeField] private Collider crateCollider;
     [SerializeField] private MeshRenderer meshRenderer;
 
-
-    [SerializeField] private List<AudioClip> crateSFX;
-
     private void OnTriggerEnter(Collider other)
     {
         if (other.CompareTag("Player"))
         {
             Car car = other.transform.parent.gameObject.GetComponent<Car>();
 
-            car.Damage(10, gameObject);
+            car.Damage(1, gameObject);
 
             Remove();
         }
@@ -26,7 +23,7 @@ public class Crate : MonoBehaviour, IPoolable
 
     private void Remove()
     {
-        AudioManager.Instance?.PlaySFXAtPoint(AudioManager.Source.Crate, crateSFX, transform.position);
+        AudioManager.Instance?.PlayCrateSFX(transform.position);
         crateCollider.enabled = false;
         meshRenderer.enabled = false;
         Release();

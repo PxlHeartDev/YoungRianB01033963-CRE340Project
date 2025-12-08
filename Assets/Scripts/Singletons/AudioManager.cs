@@ -69,6 +69,10 @@ public class AudioManager : MonoBehaviour
 
     private Coroutine lastDamageCoroutine;
 
+    [Header("SFX lists")]
+    [SerializeField] private List<AudioClip> crateSFX;
+    [SerializeField] private List<AudioClip> explosionSFX;
+
     #region Overhead
 
     void Awake()
@@ -284,6 +288,16 @@ public class AudioManager : MonoBehaviour
         source.transform.parent = Camera.main.transform;
         source.pitch = pitch;
         source.PlayOneShot(clip, volume);
+    }
+
+    public void PlayCrateSFX(Vector3 position, float volume = 1.0f, float pitch = 1.0f)
+    {
+        PlaySFXAtPoint(Source.Crate, crateSFX, position, volume, pitch);
+    }
+
+    public void PlayExplodeSFX(Vector3 position, float volume = 1.0f, float pitch = 1.0f)
+    {
+        PlaySFXAtPoint(Source.Generic, explosionSFX, position, volume, pitch);
     }
     #endregion
 
