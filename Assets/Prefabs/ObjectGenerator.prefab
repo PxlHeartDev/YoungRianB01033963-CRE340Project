@@ -46,4 +46,4 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   coinPrefab: {fileID: 8890155871065909796, guid: 9eced075a5c00ab478647e86189ddba5, type: 3}
   powerupPrefab: {fileID: 5258938971651594010, guid: e1ef54361f17d9a489d974c4afcd11b9, type: 3}
-  spikePrefab: {fileID: 0}
+  cratePrefab: {fileID: 811444515226727545, guid: 809004f0c5db9df4c954156ef21be495, type: 3}

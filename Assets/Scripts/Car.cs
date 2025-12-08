@@ -212,6 +212,12 @@ public class Car : MonoBehaviour, IDamageable
 
         //Debug.Log("Took " + dmg + " damage from " + source.ToString() + ", now at " + health);
 
+        if (dmg > 0)
+        {
+            rb.linearDamping = 1.0f;
+            StartCoroutine(FadeLinearDamping());
+        }
+
         if (health <= 0)
         {
             health = 0;
@@ -227,6 +233,15 @@ public class Car : MonoBehaviour, IDamageable
         foreach(Wheel wheel in wheels)
         {
             Destroy(wheel.wheelTransform);
+        }
+    }
+
+    private IEnumerator FadeLinearDamping()
+    {
+        for (int i = 10; i >= 1; i--)
+        {
+            rb.linearDamping = i * 0.1f;
+            yield return new WaitForSeconds(0.1f);
         }
     }
 

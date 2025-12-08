@@ -1,29 +1,32 @@
-using UnityEngine;
 using System.Collections.Generic;
+using System.Drawing;
+using UnityEngine;
 
 public class ObjectGenerator : MonoBehaviour
 {
     Dictionary<int, PoolSegment> allCurvePoints = new();
-    private float objectYOffset = 2.5f;
+    private float coinYOffset = 2.5f;
+    private float crateYOffset = 4.0f;
     private float objectXOffsetRange = 35.0f;
 
     private float initialCoinPlaceChance = 0.6f;
     private float coinSwitchPlacingChance = 0.18f;
     private float powerUpPlaceChance = 0.02f;
+    private float cratePlaceChance = 0.05f;
 
     [SerializeField] private GameObject coinPrefab;
     [SerializeField] private GameObject powerupPrefab;
-    [SerializeField] private GameObject spikePrefab;
+    [SerializeField] private GameObject cratePrefab;
 
     private ObjectPool coinPool;
     private ObjectPool powerupPool;
-    private ObjectPool spikePool;
+    private ObjectPool cratePool;
 
     public void SetupGenerator()
     {
         coinPool = new(coinPrefab.GetComponent<IPoolable>(), 100);
         powerupPool = new(powerupPrefab.GetComponent<IPoolable>(), 10);
-        //spikePool = new(spikePrefab.GetComponent<IPoolable>(), 50);
+        cratePool = new(cratePrefab.GetComponent<IPoolable>(), 20);
     }
 
     public void SegmentCreated(int segmentIndex, List<Point> curvePoints)
@@ -64,12 +67,13 @@ public class ObjectGenerator : MonoBehaviour
                 xOffset = Random.Range(-objectXOffsetRange, objectXOffsetRange);
                 isPlacingCoins = !isPlacingCoins;
             }
-            Vector3 placePos = point.pos + point.upDir * objectYOffset + point.sideDir * xOffset;
 
             if (isPlacingCoins)
-                PlaceCoin(segment, placePos);
+                PlaceCoin(segment, point.pos + point.upDir * coinYOffset + point.sideDir * xOffset);
             else if (Random.value < powerUpPlaceChance)
-                PlacePowerup(segment, placePos);
+                PlacePowerup(segment, point.pos + point.upDir * coinYOffset + point.sideDir * xOffset);
+            else if (Random.value < cratePlaceChance)
+                PlaceCrateRow(segment, point, xOffset);
         }
     }
 
@@ -91,5 +95,31 @@ public class ObjectGenerator : MonoBehaviour
         IPoolable powerupPoolable = powerup.GetComponent<IPoolable>();
         powerupPoolable.SetSegmentIndex(segment.segmentIndex);
         segment.objects.Add(powerupPoolable);
+    }
+
+    private void PlaceCrateRow(PoolSegment segment, Point point, float xOffset)
+    {
+        bool fromRight = xOffset > 0.0f;
+
+        Vector3 pos = point.pos + point.upDir * crateYOffset + point.sideDir * xOffset;
+
+        int numCrates = Random.Range(1, 6);
+
+        for (int i = 0; i < numCrates; i++)
+        {
+            Vector3 placePos = pos + i * point.sideDir * 5.0f * (fromRight ? -1.0f : 1.0f);
+            PlaceCrate(segment, placePos, point.upDir);
+        }
+    }
+
+    private void PlaceCrate(PoolSegment segment, Vector3 pos, Vector3 upDir)
+    {
+        GameObject crate = cratePool.GetObjectFromPool();
+        crate.transform.parent = transform;
+        crate.transform.position = pos;
+        crate.transform.rotation = Quaternion.LookRotation(upDir);
+        IPoolable cratePoolable = crate.GetComponent<IPoolable>();
+        cratePoolable.SetSegmentIndex(segment.segmentIndex);
+        segment.objects.Add(cratePoolable);
     }
 }

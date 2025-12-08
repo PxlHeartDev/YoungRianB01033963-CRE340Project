@@ -57,11 +57,13 @@ public class AudioManager : MonoBehaviour
     {
         Collectable,
         Combo,
+        Crate,
     }
     private Dictionary<Source, AudioSource> sourceDict;
 
     private AudioSource collectableSource;
     private AudioSource comboSource;
+    private AudioSource crateSource;
 
     public void GameManagerReady()
     {
@@ -100,12 +102,14 @@ public class AudioManager : MonoBehaviour
 
         collectableSource = new GameObject().AddComponent<AudioSource>();
         comboSource = new GameObject().AddComponent<AudioSource>();
+        crateSource = new GameObject().AddComponent<AudioSource>();
 
         // Populate the dictionaries
         sourceDict = new()
         {
             { Source.Collectable, collectableSource },
             { Source.Combo, comboSource },
+            { Source.Crate, crateSource },
         };
 
         foreach (AudioSource source in sourceDict.Values)
@@ -124,10 +128,10 @@ public class AudioManager : MonoBehaviour
             source.transform.parent = transform;
         }
 
-        GameObject coinSourceObject = new GameObject();
-        collectableSource = coinSourceObject.AddComponent<AudioSource>();
+        //GameObject coinSourceObject = new GameObject();
+        //collectableSource = coinSourceObject.AddComponent<AudioSource>();
 
-        coinSourceObject.transform.parent = transform;
+        //coinSourceObject.transform.parent = transform;
     }
 
     void Start()
