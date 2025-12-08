@@ -227,8 +227,6 @@ public class TrackPiece
         // Track previous forward vector
         Vector3 previousForwardDir = Vector3.zero;
 
-        List<Vector3> holdSideDirs = new();
-
         List<Point> pointsWithDirs = new();
 
         // For every point
@@ -296,8 +294,6 @@ public class TrackPiece
                     lastLeftBarrierQuadOfLastSegment = leftBarrier.lastQuad;
                 }
             }
-
-            holdSideDirs.Add(sideDir);
         }
 
         roadMeshPieceGenerated?.Invoke(roadBuilder.FinishMesh(), false, pointsWithDirs);
