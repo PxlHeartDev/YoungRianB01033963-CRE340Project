@@ -23,7 +23,7 @@ public class GameUI : MonoBehaviour
         EventManager.Died += CarDied;
         EventManager.ScoreUpdated += ScoreUpdated;
         EventManager.Collected += ItemCollected;
-        GameManager.Instance.player.CoinComboEnded += ComboEnded;
+        GameManager.Instance.player.CollectComboEnded += ComboEnded;
     }
 
     void OnDisable()
@@ -32,7 +32,7 @@ public class GameUI : MonoBehaviour
         EventManager.Died -= CarDied;
         EventManager.ScoreUpdated -= ScoreUpdated;
         EventManager.Collected -= ItemCollected;
-        GameManager.Instance.player.CoinComboEnded -= ComboEnded;
+        GameManager.Instance.player.CollectComboEnded -= ComboEnded;
     }
 
     #region Health

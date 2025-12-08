@@ -4,7 +4,7 @@ using UnityEngine.InputSystem;
 public class Player : Car
 {
     [Header("Assets")]
-    public InputActionAsset actions;                        // Input action asset to assign in the editor
+    public InputActionAsset actions;                            // Input action asset to assign in the editor
 
     // Input actions
     private InputAction m_gasAction;
@@ -12,12 +12,12 @@ public class Player : Car
     private InputAction m_steerAction;
     private InputAction m_jumpAction;
 
-    private bool jumpHeld = false;                          // Whether the jump action is currently being held
+    private bool jumpHeld = false;                              // Whether the jump action is currently being held
 
-    public int sequentialCollects { get; private set; } = 0;   // How many coins have been collected in this combo
+    public int sequentialCollects { get; private set; } = 0;    // How many collectables have been collected in this combo
     private float sequentialCollectCooldown = 0.0f;
 
-    public System.Action<int> CoinComboEnded;               // Event for when the coin combo ends
+    public System.Action<int> CollectComboEnded;                   // Event for when the coin combo ends
 
     public bool inputLocked = true;
 
@@ -44,7 +44,7 @@ public class Player : Car
         if (!inputLocked)
             ProcessInputs();
 
-        SequentialCoinLogic();
+        SequentialCollectLogic();
     }
 
     public void LockInputs(bool isLocked)
@@ -108,7 +108,7 @@ public class Player : Car
         }
     }
 
-    private void SequentialCoinLogic()
+    private void SequentialCollectLogic()
     {
         if (sequentialCollectCooldown > 0.0f)
         {
@@ -116,14 +116,14 @@ public class Player : Car
         }
         else if (sequentialCollects > 0)
         {
-            OnCoinComboEnded();
+            OnCollectComboEnded();
             sequentialCollects = 0;
         }
     }
 
-    private void OnCoinComboEnded()
+    private void OnCollectComboEnded()
     {
-        CoinComboEnded?.Invoke(sequentialCollects);
+        CollectComboEnded?.Invoke(sequentialCollects);
 
         // To-do Implement in UI for visual combo indicator
 

@@ -281,7 +281,6 @@ public class Car : MonoBehaviour, IDamageable
     }
     #endregion
 
-
     #region Lights
 
     public void TurnOnLights()
