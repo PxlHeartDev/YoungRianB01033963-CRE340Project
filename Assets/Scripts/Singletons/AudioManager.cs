@@ -77,10 +77,10 @@ public class AudioManager : MonoBehaviour
 
         DontDestroyOnLoad(this);
 
-        genericSource = new GameObject().AddComponent<AudioSource>();
-        collectableSource = new GameObject().AddComponent<AudioSource>();
-        comboSource = new GameObject().AddComponent<AudioSource>();
-        crateSource = new GameObject().AddComponent<AudioSource>();
+        genericSource = new GameObject("Generic Audio Source").AddComponent<AudioSource>();
+        collectableSource = new GameObject("Collectable Audio Source").AddComponent<AudioSource>();
+        comboSource = new GameObject("Combo Audio Source").AddComponent<AudioSource>();
+        crateSource = new GameObject("Crate Audio Source").AddComponent<AudioSource>();
 
         // Populate the dictionaries
         sourceDict = new()
