@@ -1,31 +1,38 @@
 using UnityEngine.VFX;
 using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 
 public class Car : MonoBehaviour, IDamageable
 {
     // Editor things
 
-    [Header("References")]
+    [Header ("References")]
     [SerializeField] public Rigidbody rb;                                           // The car's rigid body
     [SerializeField] private Light[] lightList;                                     // Stores references to the lights
     private Wheel[] wheels = new Wheel[4];                                          // Stores references to the wheels
+    [SerializeField] VisualEffect explosionVFX;                                     // The explosion VFX object
+    [SerializeField] private GameObject body;                                       // GameObject of the body mesh
+    [SerializeField] private GameObject lights;                                     // GameObject of the rally lights
 
-    [Header("Prefabs")]
+    [Header ("Prefabs")]
     [SerializeField] private GameObject wheelPrefab;                                // Prefab GameObject for the wheel visual
     [SerializeField] private VisualEffect wheelRubbleVFXPrefab;                     // Prefab for the rubble VFX
     [SerializeField] private VisualEffect driftLinesVFXPrefab;                      // Prefab for the drift lines VFX
 
-    [Header("Parameters")]
+    [Header ("Parameters")]
     [SerializeField] private Vector2 wheelDistance = new Vector2(1.85f, 0.95f);     // How far away from the centre the wheels should generate
     [SerializeField] private float lightIntensity = 600.0f;                         // Intensity for the rally lights
     public bool debug = false;                                                      // Enables debug gizmos
     public float gasStrength = 40.0f;                                               // Forward acceleration strength
     public float reversePercentage = 0.75f;                                         // Coefficient for how strong reversing is relative to gasStrength
 
-    [Header("Health")]
+    [Header ("Health")]
     public int maxHealth { get; private set; } = 10;
     public int health { get; private set; } = 10;
+
+    [Header("SFX")]
+    [SerializeField] private List<AudioClip> explodeSFX;
 
     private float rpm = 0.0f;                                                       // Controls the visual wheel spin
 
@@ -33,6 +40,8 @@ public class Car : MonoBehaviour, IDamageable
     private bool isDrifting = false;                                                // Is the car counted as in drift
     private float driftTime = 0.0f;                                                 // Time spent in continuous drift
     private Vector3 wheelYOffset;                                                   // Y offset for the wheels
+
+    public bool active = true;                                                      // If the car is active
 
     [HideInInspector] public int groundedWheels { get; private set; } = 0;          // Tracker for how many wheels are grounded
 
@@ -229,11 +238,40 @@ public class Car : MonoBehaviour, IDamageable
     private void Died(GameObject source)
     {
         EventManager.Died?.Invoke(gameObject, source);
-        Destroy(gameObject);
-        foreach(Wheel wheel in wheels)
-        {
-            Destroy(wheel.wheelTransform);
-        }
+
+        explosionVFX.SetBool("ShouldRender", true);
+        StartCoroutine(HideExplodeVFX());
+
+        AudioManager.Instance?.PlaySFXAtPoint(AudioManager.Source.Generic, explodeSFX, transform.position);
+
+        SetActive(false);
+
+        //Destroy(gameObject);
+    }
+
+    #endregion
+
+    #region Other damage things
+    private void SetActive(bool _active)
+    {
+        active = _active;
+
+        body.SetActive(active);
+        lights.SetActive(active);
+        foreach (Wheel wheel in wheels)
+            wheel.SetActive(active);
+
+        if (active)
+            rb.constraints = RigidbodyConstraints.None;
+        else
+            rb.constraints = RigidbodyConstraints.FreezeAll;
+
+    }
+
+    private IEnumerator HideExplodeVFX()
+    {
+        yield return new WaitForSeconds(0.1f);
+        explosionVFX.SetBool("ShouldRender", false);
     }
 
     private IEnumerator FadeLinearDamping()
@@ -244,8 +282,8 @@ public class Car : MonoBehaviour, IDamageable
             yield return new WaitForSeconds(0.1f);
         }
     }
-
     #endregion
+
 
     #region Lights
 
@@ -315,11 +353,20 @@ class Wheel
     // Is the car in a drift
     public bool isDrifting = false;
 
+    // Is the wheel active
+    private bool isActive = true;
+
     //
     // VFX
     //
     public VisualEffect wheelRubbleVFX;
     public VisualEffect driftLinesVFX;
+
+    public void SetActive(bool active)
+    {
+        isActive = active;
+        wheelTransform.SetActive(isActive);
+    }
 
     private void SetIsOnGround(bool _isOnGround)
     {
@@ -345,6 +392,10 @@ class Wheel
     // Called by Car every physics frame
     public void UpdatePhysics()
     {
+        // Don't do the calculations if inactive
+        if (!isActive)
+            return;
+
         // Update the grounded state and hit query
         ShootRay();
 

@@ -1522,6 +1522,21 @@ GameObject:
   m_CorrespondingSourceObject: {fileID: 7593070965675555669, guid: d914c500708f0e945bf76b9875fd0711, type: 3}
   m_PrefabInstance: {fileID: 1815813553}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &1815813555 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 7651770435412151350, guid: d914c500708f0e945bf76b9875fd0711, type: 3}
+  m_PrefabInstance: {fileID: 1815813553}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1 &1815813556 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 6533871400960705961, guid: d914c500708f0e945bf76b9875fd0711, type: 3}
+  m_PrefabInstance: {fileID: 1815813553}
+  m_PrefabAsset: {fileID: 0}
+--- !u!2083052967 &1815813557 stripped
+VisualEffect:
+  m_CorrespondingSourceObject: {fileID: 1008108879347899805, guid: d914c500708f0e945bf76b9875fd0711, type: 3}
+  m_PrefabInstance: {fileID: 1815813553}
+  m_PrefabAsset: {fileID: 0}
 --- !u!114 &1815813559
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1538,6 +1553,9 @@ MonoBehaviour:
   lightList:
   - {fileID: 186669218}
   - {fileID: 880587087}
+  explosionVFX: {fileID: 1815813557}
+  body: {fileID: 1815813556}
+  lights: {fileID: 1815813555}
   wheelPrefab: {fileID: 348517383835530497, guid: cfc5da07ff5b3af4d93f8e18b1622f75, type: 3}
   wheelRubbleVFXPrefab: {fileID: 7755334627738741327, guid: 6dcfd501ef5813b42984300a6993acfd, type: 3}
   driftLinesVFXPrefab: {fileID: 3169216796927642001, guid: 592424800a040f94eab1b5cee6980810, type: 3}
@@ -1546,6 +1564,11 @@ MonoBehaviour:
   debug: 1
   gasStrength: 160
   reversePercentage: 0.75
+  explodeSFX:
+  - {fileID: 8300000, guid: b1e3841c65505564f9ae19efa38fb805, type: 3}
+  - {fileID: 8300000, guid: bb4a3cd4cf642da44ade7cc946396560, type: 3}
+  - {fileID: 8300000, guid: 70f5337fe38e82f488e420c0477f6bcc, type: 3}
+  active: 1
   actions: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}
   inputLocked: 1
 --- !u!1001 &1972770231

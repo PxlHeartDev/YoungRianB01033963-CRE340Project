@@ -55,15 +55,17 @@ public class AudioManager : MonoBehaviour
 
     public enum Source
     {
+        Generic,
         Collectable,
         Combo,
         Crate,
     }
     private Dictionary<Source, AudioSource> sourceDict;
 
-    private AudioSource collectableSource;
-    private AudioSource comboSource;
-    private AudioSource crateSource;
+    private AudioSource genericSource;      // Handy for uncommon sounds that won't suffer from two playing at the same time
+    private AudioSource collectableSource;  // For coins and powerups
+    private AudioSource comboSource;        // For the combo SFX
+    private AudioSource crateSource;        // For the crate breaking SFX
 
     private Coroutine lastDamageCoroutine;
 
@@ -75,6 +77,7 @@ public class AudioManager : MonoBehaviour
 
         DontDestroyOnLoad(this);
 
+        genericSource = new GameObject().AddComponent<AudioSource>();
         collectableSource = new GameObject().AddComponent<AudioSource>();
         comboSource = new GameObject().AddComponent<AudioSource>();
         crateSource = new GameObject().AddComponent<AudioSource>();
@@ -82,6 +85,7 @@ public class AudioManager : MonoBehaviour
         // Populate the dictionaries
         sourceDict = new()
         {
+            { Source.Generic, genericSource },
             { Source.Collectable, collectableSource },
             { Source.Combo, comboSource },
             { Source.Crate, crateSource },
@@ -261,6 +265,16 @@ public class AudioManager : MonoBehaviour
         source.transform.position = position;
         source.pitch = pitch;
         source.PlayOneShot(clip, volume);
+    }
+
+    public void PlaySFXAtPoint(Source sourceToUse, List<AudioClip> clips, Vector3 position, float volume = 1.0f, float pitch = 1.0f)
+    {
+        AudioSource source = sourceDict[sourceToUse];
+
+        source.transform.parent = transform;
+        source.transform.position = position;
+        source.pitch = pitch;
+        source.PlayOneShot(clips[Random.Range(0, clips.Count)], volume);
     }
 
     public void PlaySFXNonPositional(Source sourceToUse, AudioClip clip, float volume = 1.0f, float pitch = 1.0f)

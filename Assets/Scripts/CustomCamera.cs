@@ -57,10 +57,9 @@ public class CustomCamera : MonoBehaviour
 
     void FixedUpdate()
     {
-
         // If the player has died, set the camera to the last remembered transform and skip the rest of the logic
         // This fixes the edge-case of the camera being placed wrong if the player dies mid-shake
-        if (player == null)
+        if (player == null || !player.active)
         {
             MoveCamera(true);
             return;
@@ -70,8 +69,6 @@ public class CustomCamera : MonoBehaviour
         TransformGizmos.DrawTransformGizmo(reverseTarget.transform);
 
         MoveCamera(false);
-
-        if (shakeTimeElapsed < shakeDuration) DoCameraShake();
 
         DoVignetteFade();
 

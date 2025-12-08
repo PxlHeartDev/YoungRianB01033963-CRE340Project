@@ -122,6 +122,8 @@ public class GameManager : MonoBehaviour
     {
         if (target == player.gameObject)
         {
+            state = State.Dead;
+            stateChanged?.Invoke(state);
             Time.timeScale = 0.2f;
         }
     }

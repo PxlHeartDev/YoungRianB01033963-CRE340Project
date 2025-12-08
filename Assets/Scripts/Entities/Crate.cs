@@ -18,7 +18,7 @@ public class Crate : MonoBehaviour, IPoolable
         {
             Car car = other.transform.parent.gameObject.GetComponent<Car>();
 
-            car.Damage(1, gameObject);
+            car.Damage(10, gameObject);
 
             Remove();
         }
@@ -26,7 +26,7 @@ public class Crate : MonoBehaviour, IPoolable
 
     private void Remove()
     {
-        AudioManager.Instance?.PlaySFXAtPoint(AudioManager.Source.Crate, crateSFX[Random.Range(0, crateSFX.Count)], transform.position);
+        AudioManager.Instance?.PlaySFXAtPoint(AudioManager.Source.Crate, crateSFX, transform.position);
         crateCollider.enabled = false;
         meshRenderer.enabled = false;
         Release();
