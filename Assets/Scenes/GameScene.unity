@@ -1445,6 +1445,10 @@ PrefabInstance:
       propertyPath: gasStrength
       value: 50
       objectReference: {fileID: 0}
+    - target: {fileID: 3339971188442875098, guid: d914c500708f0e945bf76b9875fd0711, type: 3}
+      propertyPath: m_CastShadows
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 4732162925756114044, guid: d914c500708f0e945bf76b9875fd0711, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
