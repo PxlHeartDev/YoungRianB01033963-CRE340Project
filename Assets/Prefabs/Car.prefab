@@ -466,10 +466,7 @@ MonoBehaviour:
   debug: 0
   gasStrength: 40
   reversePercentage: 0.75
-  explodeSFX:
-  - {fileID: 8300000, guid: b1e3841c65505564f9ae19efa38fb805, type: 3}
-  - {fileID: 8300000, guid: bb4a3cd4cf642da44ade7cc946396560, type: 3}
-  - {fileID: 8300000, guid: 70f5337fe38e82f488e420c0477f6bcc, type: 3}
+  active: 1
 --- !u!54 &1126575552982460038
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -612,6 +609,14 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: -7511558181221131132, guid: 8548753e84b74404f86ed7f27000b593, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 491d65dd0ae050d41bb3aa2f7445fc7c, type: 2}
+    - target: {fileID: -5754084199372789682, guid: 8548753e84b74404f86ed7f27000b593, type: 3}
+      propertyPath: m_Mesh
+      value: 
+      objectReference: {fileID: 2959467708922500008, guid: ccfbd7735e4e70c498022a1a35946ac8, type: 3}
     - target: {fileID: 919132149155446097, guid: 8548753e84b74404f86ed7f27000b593, type: 3}
       propertyPath: m_Name
       value: Body
