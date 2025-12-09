@@ -1,7 +1,6 @@
 using UnityEngine.VFX;
 using UnityEngine;
 using System.Collections;
-using System.Collections.Generic;
 
 public class Car : MonoBehaviour, IDamageable
 {

@@ -1,4 +1,3 @@
-using Unity.VisualScripting;
 using UnityEngine;
 
 public class SegmentBounds : MonoBehaviour
@@ -11,8 +10,8 @@ public class SegmentBounds : MonoBehaviour
     public void Setup(Vector3 pos, Vector3 size, int _segmentIndex)
     {
         GameObject cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
-        this.AddComponent<BoxCollider>().isTrigger = true;
-        this.AddComponent<MeshFilter>().sharedMesh = cube.GetComponent<MeshFilter>().sharedMesh;
+        gameObject.AddComponent<BoxCollider>().isTrigger = true;
+        gameObject.AddComponent<MeshFilter>().sharedMesh = cube.GetComponent<MeshFilter>().sharedMesh;
 
         Destroy(cube);
         transform.position = pos;
