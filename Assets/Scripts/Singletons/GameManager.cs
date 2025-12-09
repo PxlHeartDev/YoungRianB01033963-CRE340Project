@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 
 public class GameManager : MonoBehaviour
@@ -47,12 +48,6 @@ public class GameManager : MonoBehaviour
 
         //Application.targetFrameRate = 60;
     }
-    
-    void Update()
-    {
-        standardDelta = Mathf.Clamp01(Time.deltaTime) * 60.0f;
-        time += Time.deltaTime;
-    }
 
     private void Start()
     {
@@ -67,6 +62,12 @@ public class GameManager : MonoBehaviour
 
         UIManager.Instance.GameManagerReady();
         AudioManager.Instance.GameManagerReady();
+    }
+
+    void Update()
+    {
+        standardDelta = Mathf.Clamp01(Time.deltaTime) * 60.0f;
+        time += Time.deltaTime;
     }
 
     private void OnDestroy()
@@ -125,6 +126,8 @@ public class GameManager : MonoBehaviour
             state = State.Dead;
             stateChanged?.Invoke(state);
             Time.timeScale = 0.2f;
+
+            StartCoroutine(DiedCoroutine());
         }
     }
 
@@ -144,6 +147,15 @@ public class GameManager : MonoBehaviour
     private void QuitGame()
     {
         Debug.Log("Quitting game");
+    }
+
+    private IEnumerator DiedCoroutine()
+    {
+        for (int i = 4; i < 20; i++)
+        {
+            Time.timeScale = i * 0.05f;
+            yield return new WaitForSeconds(0.1f);
+        }
     }
     
 }

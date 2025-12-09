@@ -150,6 +150,8 @@ public class AudioManager : MonoBehaviour
             case GameManager.State.Paused:
                 break;
             case GameManager.State.Dead:
+                StartCoroutine(FadeMuteMusic(0.2f));
+                PlayerDied();
                 break;
         }
     }
@@ -242,7 +244,7 @@ public class AudioManager : MonoBehaviour
         musicSources[1 - musicToggle].Pause();
     }
 
-    private IEnumerator<WaitForEndOfFrame> FadeMuteMusic(float time)
+    public IEnumerator<WaitForEndOfFrame> FadeMuteMusic(float time)
     {
         float curTime = 0.0f;
         AudioSource source = musicSources[1 - musicToggle];
@@ -317,6 +319,13 @@ public class AudioManager : MonoBehaviour
         lastDamageCoroutine = StartCoroutine(DamageCoroutine());
     }
 
+    public void PlayerDied()
+    {
+        if (lastDamageCoroutine != null)
+            StopCoroutine(lastDamageCoroutine);
+        lastDamageCoroutine = StartCoroutine(DiedCoroutine());
+    }
+
     // Coroutine to ramp the frequency from 1000 back to 22000
     IEnumerator<WaitForSeconds> DamageCoroutine()
     {
@@ -326,6 +335,18 @@ public class AudioManager : MonoBehaviour
         {
             SetLowPass(1000.0f * i);
             yield return new WaitForSeconds(0.1f);
+        }
+    }
+
+    // Coroutine to ramp the frequency from 2000 back to 22000
+    IEnumerator<WaitForSeconds> DiedCoroutine()
+    {
+        SetLowPass(2000.0f);
+        yield return new WaitForSeconds(0.2f);
+        for (int i = 1; i <= 11; i++)
+        {
+            SetLowPass(2000.0f * i);
+            yield return new WaitForSeconds(0.05f);
         }
     }
     #endregion

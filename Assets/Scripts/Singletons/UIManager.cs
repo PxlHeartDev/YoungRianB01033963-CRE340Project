@@ -1,8 +1,6 @@
 using System.Collections;
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
-using static UnityEngine.CullingGroup;
 
 public class UIManager : MonoBehaviour
 {
@@ -62,6 +60,7 @@ public class UIManager : MonoBehaviour
             case GameManager.State.Paused:
                 break;
             case GameManager.State.Dead:
+                StartCoroutine(DiedCoroutine());
                 break;
         }
     }
@@ -82,5 +81,11 @@ public class UIManager : MonoBehaviour
     {
         fadeAnimator.ResetTrigger("FadeToBlack");
         fadeAnimator.SetTrigger("FadeFromBlack");
+    }
+
+    private IEnumerator DiedCoroutine()
+    {
+        yield return new WaitForSeconds(0.8f);
+        FadeHide();
     }
 }
