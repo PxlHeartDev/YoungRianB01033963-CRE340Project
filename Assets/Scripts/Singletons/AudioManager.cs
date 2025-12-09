@@ -150,7 +150,6 @@ public class AudioManager : MonoBehaviour
             case GameManager.State.Paused:
                 break;
             case GameManager.State.Dead:
-                StartCoroutine(FadeMuteMusic(0.2f));
                 PlayerDied();
                 break;
         }
@@ -321,6 +320,7 @@ public class AudioManager : MonoBehaviour
 
     public void PlayerDied()
     {
+        StartCoroutine(FadeMuteMusic(0.2f));
         if (lastDamageCoroutine != null)
             StopCoroutine(lastDamageCoroutine);
         lastDamageCoroutine = StartCoroutine(DiedCoroutine());
@@ -348,6 +348,10 @@ public class AudioManager : MonoBehaviour
             SetLowPass(2000.0f * i);
             yield return new WaitForSeconds(0.05f);
         }
+
+        yield return new WaitForSeconds(0.2f);
+
+        PlayMusic("Death");
     }
     #endregion
 }

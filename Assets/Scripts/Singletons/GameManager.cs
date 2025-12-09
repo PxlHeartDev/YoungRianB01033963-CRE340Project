@@ -37,7 +37,7 @@ public class GameManager : MonoBehaviour
         Dead,
     }
 
-    private State state = State.MainMenu;
+    public State state = State.MainMenu;
 
     public System.Action<State> stateChanged;
 

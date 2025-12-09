@@ -125,13 +125,14 @@ public class Player : Car
     {
         CollectComboEnded?.Invoke(sequentialCollects);
 
-        // To-do Implement in UI for visual combo indicator
-
         PlayComboSound();
     }
 
     private void PlayComboSound()
     {
+        if (GameManager.Instance.state != GameManager.State.Playing)
+            return;
+
         AudioClip comboSFX = null;
 
         if (sequentialCollects < 5) return;

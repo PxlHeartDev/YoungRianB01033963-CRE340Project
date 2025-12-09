@@ -48,6 +48,7 @@ MonoBehaviour:
   musicList:
   - {fileID: 11400000, guid: 9e66aa9fed00d8b43a5945919d3dc625, type: 2}
   - {fileID: 11400000, guid: 964c5e005398f0c4595cb1e030a26f85, type: 2}
+  - {fileID: 11400000, guid: 2bed0a112818b2949bf6a9bef2e4d671, type: 2}
   startSong: 0
   crateSFX:
   - {fileID: 8300000, guid: c5e8c669323413844a261c67e963a7f0, type: 3}
