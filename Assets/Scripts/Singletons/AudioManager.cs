@@ -77,9 +77,12 @@ public class AudioManager : MonoBehaviour
 
     void Awake()
     {
-        _instance = this;
+        Setup();
+    }
 
-        DontDestroyOnLoad(this);
+    public void Setup()
+    {
+        _instance = this;
 
         genericSource = new GameObject("Generic Audio Source").AddComponent<AudioSource>();
         collectableSource = new GameObject("Collectable Audio Source").AddComponent<AudioSource>();
@@ -114,6 +117,14 @@ public class AudioManager : MonoBehaviour
 
     void Start()
     {
+        SetUpMusic();
+    }
+
+    public void SetUpMusic()
+    {
+        if (lastMusicCoroutine != null)
+            StopCoroutine(lastMusicCoroutine);
+        
         musicSources = Camera.main.GetComponents<AudioSource>();
 
         PlayMusic(musicList[startSong]);
@@ -248,15 +259,20 @@ public class AudioManager : MonoBehaviour
         float curTime = 0.0f;
         AudioSource source = musicSources[1 - musicToggle];
 
+
         while (curTime < time)
         {
             yield return new WaitForEndOfFrame();
             curTime += Time.deltaTime;
-            source.volume = Mathf.Lerp(currentMusic.volume, 0.0f, curTime/time);
+            if (source != null)
+                source.volume = Mathf.Lerp(currentMusic.volume, 0.0f, curTime/time);
         }
 
-        source.volume = 0.0f;
-        source.Stop();
+        if (source != null)
+        {
+            source.volume = 0.0f;
+            source.Stop();
+        }
     }
 
     #endregion

@@ -33,6 +33,5 @@ public class EventManager : MonoBehaviour
     void Awake()
     {
         _instance = this;
-        DontDestroyOnLoad(this);
     }
 }

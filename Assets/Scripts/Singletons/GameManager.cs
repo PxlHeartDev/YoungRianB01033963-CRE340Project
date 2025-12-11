@@ -28,6 +28,8 @@ public class GameManager : MonoBehaviour
     [HideInInspector] public int score = 0;
     [HideInInspector] public float time = 0.0f;
 
+    private GameObject playerStartTransform;
+
 
     public enum State
     {
@@ -44,7 +46,9 @@ public class GameManager : MonoBehaviour
     void Awake()
     {
         _instance = this;
-        DontDestroyOnLoad(this);
+
+        playerStartTransform = new GameObject();
+        playerStartTransform.transform.SetPositionAndRotation(player.transform.position, player.transform.rotation);
 
         //Application.targetFrameRate = 60;
     }
@@ -139,8 +143,13 @@ public class GameManager : MonoBehaviour
 
     private void StartGame()
     {
+        SetScore(0);
         cutsceneCamera.gameObject.SetActive(false);
         player.LockInputs(false);
+        if (state == State.Dead)
+        {
+            AudioManager.Instance?.SetUpMusic();
+        }
         UpdateState(State.Playing);
     }
 

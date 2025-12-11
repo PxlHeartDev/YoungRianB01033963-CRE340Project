@@ -22,13 +22,13 @@ public class UIManager : MonoBehaviour
 
     public MainMenu mainMenu;
     public GameUI gameUI;
+    public GameOver gameOver;
     [SerializeField] private Image fade;
     [SerializeField] private Animator fadeAnimator;
 
     void Awake()
     {
         _instance = this;
-        DontDestroyOnLoad(this);
     }
 
     void Start()
@@ -69,6 +69,7 @@ public class UIManager : MonoBehaviour
     {
         mainMenu.gameObject.SetActive(false);
         gameUI.gameObject.SetActive(false);
+        gameOver.gameObject.SetActive(false);
     }
 
     public void FadeHide()
@@ -87,5 +88,8 @@ public class UIManager : MonoBehaviour
     {
         yield return new WaitForSeconds(0.8f);
         FadeHide();
+        yield return new WaitForSeconds(1.0f);
+        FadeShow();
+        gameOver.Show();
     }
 }

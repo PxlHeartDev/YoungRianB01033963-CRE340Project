@@ -248,7 +248,7 @@ public class Car : MonoBehaviour, IDamageable
     #endregion
 
     #region Other damage things
-    private void SetActive(bool _active)
+    public void SetActive(bool _active)
     {
         active = _active;
 
