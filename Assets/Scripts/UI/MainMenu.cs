@@ -44,7 +44,6 @@ public class MainMenu : MonoBehaviour
 
     private void OnExitClicked()
     {
-        Debug.Log("Exit");
         DisableAllButtons();
         OnQuit?.Invoke();
         EventManager.GameQuit?.Invoke();

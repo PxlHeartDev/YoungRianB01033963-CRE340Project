@@ -156,7 +156,11 @@ public class GameManager : MonoBehaviour
     private void QuitGame()
     {
         Debug.Log("Quitting game");
-        Application.Quit();
+        #if UNITY_EDITOR
+            UnityEditor.EditorApplication.isPlaying = false;
+        #else
+            Application.Quit();
+        #endif
     }
 
     private IEnumerator DiedCoroutine()
