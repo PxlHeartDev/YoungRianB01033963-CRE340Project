@@ -22,7 +22,7 @@ public class ObjectGenerator : MonoBehaviour
     // Crate
     private ObjectPool cratePool;
     private float crateYOffset = 3.5f;
-    private float cratePlaceChance = 0.05f;
+    private float cratePlaceChance = 0.08f;
     private float crateHorPadding = 4.0f;
     private int minCratesInRow = 1;
     private int maxCratesInRow = 5;
@@ -53,6 +53,10 @@ public class ObjectGenerator : MonoBehaviour
                 curvePoints)
             );
         GenerateObjects(segmentIndex);
+
+        // Slowly increase odds of crates
+        if (cratePlaceChance < 0.8f)
+            cratePlaceChance += 0.005f;
     }
 
     public void SegmentDeleted(int segmentIndex)
