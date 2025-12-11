@@ -156,6 +156,7 @@ public class GameManager : MonoBehaviour
     private void QuitGame()
     {
         Debug.Log("Quitting game");
+        Application.Quit();
     }
 
     private IEnumerator DiedCoroutine()
