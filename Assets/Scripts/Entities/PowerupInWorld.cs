@@ -27,6 +27,8 @@ public class PowerupInWorld : MonoBehaviour, ICollectable, IPoolable
 
             Collect(car.gameObject);
         }
+
+        powerup.Used(other.gameObject);
     }
 
     #region ICollectable

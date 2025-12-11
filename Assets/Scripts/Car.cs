@@ -295,6 +295,37 @@ public class Car : MonoBehaviour, IDamageable
     }
 
     #endregion
+
+    #region Powerups
+
+    public void Heal()
+    {
+        health += 2;
+        if (health > maxHealth)
+            health = maxHealth;
+        EventManager.CarHealed?.Invoke();
+    }
+
+    public void SpeedBoost()
+    {
+        gasStrength = 240.0f;
+        StartCoroutine(SpeedCoroutine());
+    }
+
+    private IEnumerator SpeedCoroutine()
+    {
+        float curTime = 0.0f;
+        float time = 3.0f;
+
+        while (curTime < time)
+        {
+            yield return new WaitForEndOfFrame();
+            curTime += Time.deltaTime;
+            gasStrength = Mathf.Lerp(240.0f, 160.0f, curTime / time);
+        }
+        gasStrength = 160.0f;
+    }
+    #endregion
 }
 
 // Wheel class for storing information and doing physics calculations with

@@ -20,6 +20,7 @@ public class GameUI : MonoBehaviour
         healthBar.maxValue = player.maxHealth;
 
         EventManager.TookDamage += CarTookDamage;
+        EventManager.CarHealed += CarHealed;
         EventManager.Died += CarDied;
         EventManager.ScoreUpdated += ScoreUpdated;
         EventManager.Collected += ItemCollected;
@@ -29,6 +30,7 @@ public class GameUI : MonoBehaviour
     void OnDisable()
     {
         EventManager.TookDamage -= CarTookDamage;
+        EventManager.CarHealed -= CarHealed;
         EventManager.Died -= CarDied;
         EventManager.ScoreUpdated -= ScoreUpdated;
         EventManager.Collected -= ItemCollected;
@@ -43,6 +45,12 @@ public class GameUI : MonoBehaviour
             healthBar.value = player.health;
         }
     }
+
+    private void CarHealed()
+    {
+        healthBar.value = player.health;
+    }
+
     private void CarDied(GameObject target, GameObject source)
     {
         if (target == player.gameObject)

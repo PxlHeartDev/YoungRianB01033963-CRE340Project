@@ -25,6 +25,8 @@ public class EventManager : MonoBehaviour
                             // new score
     public static System.Action<int> ScoreUpdated;
 
+    public static System.Action CarHealed;
+
     public static System.Action GameQuit;
     public static System.Action GameStarted;
     public static System.Action GamePaused;
